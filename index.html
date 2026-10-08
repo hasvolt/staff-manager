@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Staff Manager | Staff, Attendance &amp; Payments</title>
+    <meta name="description" content="Offline-first Staff & Attendance Manager for small businesses, contractors, shops, and workshops. Track daily attendance, payments, advances, and export statements." />
+    
+    <!-- Open Graph & Social -->
+    <meta property="og:title" content="Staff Manager | Staff, Attendance &amp; Payments" />
+    <meta property="og:description" content="Offline-first Staff & Attendance Manager for small businesses, contractors, shops, and workshops." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512x512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA & Mobile Web App Meta -->
+    <meta name="theme-color" content="#04100C" id="theme-color-meta" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Staff Manager" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+
+    <!-- Pre-paint Theme Script (eliminates flash of unstyled theme) -->
+    <script>
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('staff_manager_theme') || 'emerald-black';
+          document.documentElement.setAttribute('data-theme', savedTheme);
+          var savedDir = localStorage.getItem('staff_manager_dir') || 'ltr';
+          document.documentElement.setAttribute('dir', savedDir);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

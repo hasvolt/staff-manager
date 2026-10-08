@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E6B4B"/>
+      <stop offset="100%" stop-color="#062E22"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <!-- Background with safe rounded rectangle -->
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)"/>
+  <!-- Outer subtle border -->
+  <rect x="8" y="8" width="496" height="496" rx="100" fill="none" stroke="#10B981" stroke-width="6" stroke-opacity="0.3"/>
+  <!-- Central Icon: People/Staff + Attendance Check Badge -->
+  <g transform="translate(64, 64) scale(0.75)" fill="none" stroke="url(#accentGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <!-- User Avatar Silhouette -->
+    <circle cx="256" cy="160" r="72" fill="#10B981" fill-opacity="0.2"/>
+    <path d="M128 384c0-70.69 57.31-128 128-128s128 57.31 128 128" />
+    <!-- Secondary team members in background -->
+    <circle cx="120" cy="180" r="44" stroke-width="20" stroke-opacity="0.6"/>
+    <path d="M40 370c0-44.18 35.82-80 80-80" stroke-width="20" stroke-opacity="0.6"/>
+    <circle cx="392" cy="180" r="44" stroke-width="20" stroke-opacity="0.6"/>
+    <path d="M392 290c44.18 0 80 35.82 80 80" stroke-width="20" stroke-opacity="0.6"/>
+    <!-- Attendance / Verification Checkmark Badge -->
+    <circle cx="370" cy="370" r="64" fill="#04100C" stroke="#34D399" stroke-width="24"/>
+    <path d="M338 370l22 22 44-44" stroke="#34D399" stroke-width="22"/>
+  </g>
+</svg>

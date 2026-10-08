@@ -1,0 +1,6 @@
+{
+  "name": "Staff Manager",
+  "description": "Smart, offline-first Staff & Attendance Manager with multi-user accounts, daily logs, payment calculations, and professional statements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

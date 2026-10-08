@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /app/
+Disallow: /settings/
+Disallow: /payments/
+Disallow: /staff/
+Disallow: /attendance/
+Disallow: /reports/
+Disallow: /trash/
+Allow: /
