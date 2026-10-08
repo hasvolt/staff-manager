@@ -17,6 +17,7 @@ describe('Phase 2: Staff Profiles, Attendance, Work, Sites, & Trash Tests', () =
 
   beforeEach(async () => {
     await localDb.staff.clear();
+    await localDb.staff_compensation.clear();
     await localDb.attendance_entries.clear();
     await localDb.work_entries.clear();
     await localDb.sites.clear();

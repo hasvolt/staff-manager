@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
+import { deleteOrgStorageFiles } from '@/lib/supabase/storage';
 import { syncEngine } from '@/lib/sync/syncEngine';
 import { User, Session } from '@supabase/supabase-js';
 import { localDb } from '@/lib/db/dexie';
@@ -19,7 +20,7 @@ interface AuthContextType {
   updateProfile: (fullName: string, phone?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   signOutAllDevices: () => Promise<void>;
-  deleteAccount: () => Promise<{ error: Error | null }>;
+  deleteAccount: (onProgress?: (status: string) => void) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -162,16 +163,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSession(null);
   };
 
-  const deleteAccount = async () => {
+  const deleteAccount = async (onProgress?: (status: string) => void) => {
     if (!isSupabaseConfigured || !user) {
       return { error: new Error('Not authenticated') };
     }
-    // Call the security definer RPC function from the migration
-    const { error } = await supabase.rpc('delete_my_account');
-    if (!error) {
+
+    try {
+      // 1. Check businesses owned by this user
+      onProgress?.('Inspecting owned businesses...');
+      const { data: ownedOrgs, error: orgErr } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('owner_id', user.id);
+
+      if (orgErr) {
+        return { error: new Error(`Failed to check owned businesses: ${orgErr.message}`) };
+      }
+
+      // 2. Clean up files under each owned business before running RPC
+      if (ownedOrgs && ownedOrgs.length > 0) {
+        for (const org of ownedOrgs) {
+          onProgress?.(`Cleaning up storage files for ${org.name || 'business'}...`);
+          const cleanupRes = await deleteOrgStorageFiles(org.id, onProgress);
+          if (!cleanupRes.success || cleanupRes.error) {
+            return {
+              error: new Error(
+                `Storage cleanup failed for business "${org.name || org.id}": ${cleanupRes.error?.message}. Account deletion aborted.`
+              ),
+            };
+          }
+        }
+      }
+
+      // 3. Only after storage cleanup completes, call security definer RPC
+      onProgress?.('Purging account and business data...');
+      const { error: rpcErr } = await supabase.rpc('delete_my_account');
+      if (rpcErr) {
+        return { error: rpcErr };
+      }
+
       await signOut();
+      return { error: null };
+    } catch (err: any) {
+      return { error: err };
     }
-    return { error };
   };
 
   const isLocalMode = !user && enableLocalMode;

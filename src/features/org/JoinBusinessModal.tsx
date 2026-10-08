@@ -50,16 +50,17 @@ export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({ isOpen, on
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-left">
         <FormField
-          label="6-Character Invite Code"
+          label="12-Character Invite Code"
           required
-          helpText="Ask your business owner or manager for their invite code"
+          helpText="Ask your business owner or manager for their 12-character invite code"
         >
           <Input
             required
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="e.g. A1B2C3"
+            placeholder="e.g. A1B2C3D4E5F6"
             className="uppercase font-mono text-center tracking-widest text-base"
+            maxLength={16}
           />
         </FormField>
 

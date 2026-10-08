@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ROLE_PERMISSIONS, hasPermission, UserRole } from '@/lib/permissions/permissions';
+import { canRoleInviteRole } from '@/lib/permissions/rbac';
 
 describe('Role-Based Access Control (RBAC) & Security Policy Tests', () => {
   it('Owner has full permissions including member management and permanent delete', () => {
@@ -44,5 +45,27 @@ describe('Role-Based Access Control (RBAC) & Security Policy Tests', () => {
     writePermissions.forEach((p) => {
       expect(hasPermission('viewer', p)).toBe(false);
     });
+  });
+
+  it('Enforces invite role restrictions: Owner can invite any role; Manager cannot invite manager', () => {
+    // Owner can invite anyone
+    expect(canRoleInviteRole('owner', 'manager')).toBe(true);
+    expect(canRoleInviteRole('owner', 'supervisor')).toBe(true);
+    expect(canRoleInviteRole('owner', 'accountant')).toBe(true);
+    expect(canRoleInviteRole('owner', 'viewer')).toBe(true);
+
+    // Manager can invite supervisor, accountant, viewer
+    expect(canRoleInviteRole('manager', 'supervisor')).toBe(true);
+    expect(canRoleInviteRole('manager', 'accountant')).toBe(true);
+    expect(canRoleInviteRole('manager', 'viewer')).toBe(true);
+
+    // Manager CANNOT invite manager or owner
+    expect(canRoleInviteRole('manager', 'manager')).toBe(false);
+    expect(canRoleInviteRole('manager', 'owner')).toBe(false);
+
+    // Supervisor, Accountant, Viewer cannot invite anyone
+    expect(canRoleInviteRole('supervisor', 'viewer')).toBe(false);
+    expect(canRoleInviteRole('accountant', 'viewer')).toBe(false);
+    expect(canRoleInviteRole('viewer', 'viewer')).toBe(false);
   });
 });

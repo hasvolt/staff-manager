@@ -7,7 +7,7 @@ import { NumberInput } from '@/components/ui/NumberInput';
 import { Select } from '@/components/ui/Select';
 import { TextArea } from '@/components/ui/TextArea';
 import { FileUpload } from '@/components/ui/FileUpload';
-import { staffRepo, siteRepo, customFieldRepo, generateUUID } from '@/lib/db/repository';
+import { staffRepo, staffCompensationRepo, siteRepo, customFieldRepo, generateUUID } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalSite, LocalCustomFieldDef } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
 import { useToast } from '@/components/ui/Toast';
@@ -132,7 +132,7 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
         setPaymentNote(staffToEdit.payment_note || '');
         setNotes(staffToEdit.notes || '');
         setPaymentType(staffToEdit.payment_type || 'daily');
-        setRate(staffToEdit.rate);
+        setRate(staffToEdit.rate ?? 0);
         setOvertimeRate(staffToEdit.overtime_rate ?? '');
         setHoursPerDay(staffToEdit.hours_per_day ?? '8');
         setUnitName(staffToEdit.unit_name || 'piece');
@@ -249,9 +249,29 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
           custom: customValues,
         });
 
+        // Upsert separate staff_compensation record
+        const existingComp = await localDb.staff_compensation.where('staff_id').equals(staffToEdit.id).first();
+        if (existingComp) {
+          await staffCompensationRepo.update(existingComp.id, {
+            rate: rateNum,
+            overtime_rate: otNum,
+            payment_note: paymentNote.trim() || null,
+            rate_history: updatedHistory,
+          });
+        } else {
+          await staffCompensationRepo.create({
+            org_id: currentOrg.id,
+            staff_id: staffToEdit.id,
+            rate: rateNum,
+            overtime_rate: otNum,
+            payment_note: paymentNote.trim() || null,
+            rate_history: updatedHistory,
+          });
+        }
+
         success(`Updated staff details for "${name}"`);
       } else {
-        await staffRepo.create({
+        const createdStaff = await staffRepo.create({
           org_id: currentOrg.id,
           name: name.trim(),
           staff_code: staffCode.trim() || null,
@@ -282,6 +302,23 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
           ],
           default_site_id: defaultSiteId || null,
           custom: customValues,
+        });
+
+        // Create separate staff_compensation record
+        await staffCompensationRepo.create({
+          org_id: currentOrg.id,
+          staff_id: createdStaff.id,
+          rate: rateNum,
+          overtime_rate: otNum,
+          payment_note: paymentNote.trim() || null,
+          rate_history: [
+            {
+              from: joiningDate,
+              type: paymentType,
+              rate: rateNum,
+              overtime_rate: otNum,
+            },
+          ],
         });
 
         // Clear draft

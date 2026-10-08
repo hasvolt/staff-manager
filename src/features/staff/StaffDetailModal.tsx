@@ -6,6 +6,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { LocalStaff, LocalCustomFieldDef } from '@/lib/db/dexie';
 import { customFieldRepo } from '@/lib/db/repository';
 import { useI18n } from '@/lib/i18n/i18nContext';
+import { useOrg } from '@/features/org/orgContext';
+import { canUserPerformAction } from '@/lib/permissions/rbac';
 import {
   Phone,
   Calendar,
@@ -39,6 +41,8 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
   onDeleteRequest,
 }) => {
   const { t, formatCurrency, formatDate } = useI18n();
+  const { role } = useOrg();
+  const canViewMoney = canUserPerformAction(role as any, 'view_payments');
   const [customFieldDefs, setCustomFieldDefs] = React.useState<LocalCustomFieldDef[]>([]);
 
   React.useEffect(() => {
@@ -99,43 +103,45 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
         </div>
 
         {/* Wage Structure Card */}
-        <div className="p-4 rounded-2xl bg-[var(--surface-2)]/40 border border-[var(--border)] space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-              Payment Terms
-            </span>
-            <span className="text-xs font-bold text-[var(--accent)] capitalize">
-              {staff.payment_type} Basis
-            </span>
+        {canViewMoney && (
+          <div className="p-4 rounded-2xl bg-[var(--surface-2)]/40 border border-[var(--border)] space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                Payment Terms
+              </span>
+              <span className="text-xs font-bold text-[var(--accent)] capitalize">
+                {staff.payment_type} Basis
+              </span>
+            </div>
+
+            <div className="flex items-baseline gap-2 pt-1">
+              <span className="text-2xl font-extrabold text-[var(--text)]">
+                {formatCurrency(staff.rate ?? 0)}
+              </span>
+              <span className="text-xs text-[var(--text-muted)]">
+                {staff.payment_type === 'daily'
+                  ? '/ day'
+                  : staff.payment_type === 'monthly'
+                  ? '/ month'
+                  : staff.payment_type === 'hourly'
+                  ? '/ hour'
+                  : `/ ${staff.unit_name || 'piece'}`}
+              </span>
+            </div>
+
+            {staff.overtime_rate && (
+              <p className="text-xs text-[var(--text-muted)]">
+                Overtime rate: <strong>{formatCurrency(staff.overtime_rate)}/hr</strong>
+              </p>
+            )}
+
+            {staff.hours_per_day && (
+              <p className="text-xs text-[var(--text-muted)]">
+                Standard shift: <strong>{staff.hours_per_day} hours/day</strong>
+              </p>
+            )}
           </div>
-
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-2xl font-extrabold text-[var(--text)]">
-              {formatCurrency(staff.rate)}
-            </span>
-            <span className="text-xs text-[var(--text-muted)]">
-              {staff.payment_type === 'daily'
-                ? '/ day'
-                : staff.payment_type === 'monthly'
-                ? '/ month'
-                : staff.payment_type === 'hourly'
-                ? '/ hour'
-                : `/ ${staff.unit_name || 'piece'}`}
-            </span>
-          </div>
-
-          {staff.overtime_rate && (
-            <p className="text-xs text-[var(--text-muted)]">
-              Overtime rate: <strong>{formatCurrency(staff.overtime_rate)}/hr</strong>
-            </p>
-          )}
-
-          {staff.hours_per_day && (
-            <p className="text-xs text-[var(--text-muted)]">
-              Standard shift: <strong>{staff.hours_per_day} hours/day</strong>
-            </p>
-          )}
-        </div>
+        )}
 
         {/* Personal & Workplace Details */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
@@ -192,7 +198,7 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
         )}
 
         {/* Payment / UPI Notes */}
-        {staff.payment_note && (
+        {canViewMoney && staff.payment_note && (
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/30 border border-[var(--border)] text-xs">
             <span className="text-[var(--text-muted)] block">Payment Note / UPI</span>
             <span className="font-semibold text-[var(--text)] mt-0.5 block">
@@ -202,7 +208,7 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
         )}
 
         {/* Rate History */}
-        {staff.rate_history && staff.rate_history.length > 1 && (
+        {canViewMoney && staff.rate_history && staff.rate_history.length > 1 && (
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/40 border border-[var(--border)] space-y-1.5 text-xs">
             <div className="flex items-center gap-1.5 text-[var(--text)] font-semibold">
               <History className="w-3.5 h-3.5 text-[var(--accent)]" />

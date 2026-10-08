@@ -55,6 +55,14 @@ export interface LocalCustomFieldDef extends SyncedEntity {
   sort_order: number;
 }
 
+export interface LocalStaffCompensation extends SyncedEntity {
+  staff_id: string;
+  rate: number;
+  overtime_rate?: number | null;
+  rate_history: any[];
+  payment_note?: string | null;
+}
+
 export interface LocalStaff extends SyncedEntity {
   name: string;
   staff_code?: string | null;
@@ -67,17 +75,19 @@ export interface LocalStaff extends SyncedEntity {
   address?: string | null;
   emergency_contact?: string | null;
   id_proof_note?: string | null;
-  payment_note?: string | null;
   notes?: string | null;
   payment_type: 'daily' | 'monthly' | 'hourly' | 'piece';
-  rate: number;
-  overtime_rate?: number | null;
   hours_per_day?: number | null;
   unit_name?: string | null;
   weekly_off: number[];
-  rate_history: any[];
   default_site_id?: string | null;
   custom?: Record<string, any>;
+  // Sensitive compensation stored in separate staff_compensation table
+  compensation?: LocalStaffCompensation;
+  rate?: number;
+  overtime_rate?: number | null;
+  rate_history?: any[];
+  payment_note?: string | null;
 }
 
 export interface LocalAttendanceEntry extends SyncedEntity {
@@ -196,6 +206,7 @@ export class StaffManagerDatabase extends Dexie {
   work_types!: Table<LocalWorkType, string>;
   custom_field_defs!: Table<LocalCustomFieldDef, string>;
   staff!: Table<LocalStaff, string>;
+  staff_compensation!: Table<LocalStaffCompensation, string>;
   attendance_entries!: Table<LocalAttendanceEntry, string>;
   work_entries!: Table<LocalWorkEntry, string>;
   payments!: Table<LocalPayment, string>;
@@ -218,6 +229,7 @@ export class StaffManagerDatabase extends Dexie {
       work_types: 'id, org_id, updated_at, deleted_at, syncStatus',
       custom_field_defs: 'id, org_id, entity, updated_at, deleted_at, syncStatus',
       staff: 'id, org_id, name, staff_code, phone, status, payment_type, default_site_id, updated_at, deleted_at, syncStatus',
+      staff_compensation: 'id, org_id, staff_id, updated_at, deleted_at, syncStatus',
       attendance_entries: 'id, org_id, staff_id, work_date, status, updated_at, deleted_at, syncStatus',
       work_entries: 'id, org_id, staff_id, work_date, work_type_id, site_id, updated_at, deleted_at, syncStatus',
       payments: 'id, org_id, staff_id, pay_date, type, mode, updated_at, deleted_at, syncStatus',

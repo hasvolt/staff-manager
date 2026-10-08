@@ -16,6 +16,7 @@ class SyncEngine {
     'work_types',
     'custom_field_defs',
     'staff',
+    'staff_compensation',
     'attendance_entries',
     'work_entries',
     'payments',
@@ -121,7 +122,21 @@ class SyncEngine {
   }
 
   private async pullIncremental(orgId: string) {
+    const membership = await localDb.memberships.where('org_id').equals(orgId).first();
+    const isSupervisor = membership?.role === 'supervisor';
+
+    if (isSupervisor) {
+      // Guarantee no financial or rate data remains locally for a supervisor
+      await localDb.staff_compensation.where('org_id').equals(orgId).delete();
+      await localDb.payments.where('org_id').equals(orgId).delete();
+      await localDb.period_closings.where('org_id').equals(orgId).delete();
+    }
+
     for (const tableName of this.SYNC_TABLES) {
+      if (isSupervisor && ['staff_compensation', 'payments', 'period_closings'].includes(tableName)) {
+        continue;
+      }
+
       const cursor = await localDb.sync_cursors.get(tableName);
       const lastPulledAt = cursor?.last_pulled_at || '1970-01-01T00:00:00Z';
 

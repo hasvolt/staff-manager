@@ -116,12 +116,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
+  const [statusMessage, setStatusMessage] = useState('');
+
   const handleDeleteAccountFinal = async () => {
     setIsLoading(true);
-    const res = await deleteAccount();
+    setStatusMessage('Initiating account deletion...');
+    const res = await deleteAccount((msg) => {
+      setStatusMessage(msg);
+    });
     setIsLoading(false);
     if (res.error) {
       error(res.error.message || 'Cannot delete account.');
+      setStatusMessage('');
     } else {
       success('Your account and associated cloud data have been deleted.');
       setShowDeleteConfirm(false);

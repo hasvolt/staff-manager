@@ -11,9 +11,10 @@ import { StaffFormModal } from './StaffFormModal';
 import { StaffDetailModal } from './StaffDetailModal';
 import { StaffDeleteDialog } from './StaffDeleteDialog';
 import { CustomFieldsModal } from './CustomFieldsModal';
-import { staffRepo, siteRepo } from '@/lib/db/repository';
+import { staffRepo, staffCompensationRepo, siteRepo } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalSite } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
+import { canUserPerformAction } from '@/lib/permissions/rbac';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useToast } from '@/components/ui/Toast';
 import {
@@ -33,7 +34,7 @@ import {
 } from 'lucide-react';
 
 export const StaffPage: React.FC = () => {
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
   const { t, formatCurrency } = useI18n();
   const { showToast, success, error } = useToast();
 
@@ -57,9 +58,36 @@ export const StaffPage: React.FC = () => {
   // Bulk selection mode
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  const canViewMoney = canUserPerformAction(role as any, 'view_payments');
+
   const loadData = async () => {
     if (!currentOrg?.id) return;
     const staff = await staffRepo.list(currentOrg.id, false);
+
+    if (canViewMoney) {
+      const comps = await staffCompensationRepo.list(currentOrg.id, false);
+      const compMap = new Map(comps.map((c) => [c.staff_id, c]));
+      staff.forEach((s) => {
+        const c = compMap.get(s.id);
+        if (c) {
+          s.compensation = c;
+          s.rate = c.rate;
+          s.overtime_rate = c.overtime_rate;
+          s.payment_note = c.payment_note;
+          s.rate_history = c.rate_history;
+        }
+      });
+    } else {
+      // Supervisor or restricted viewer: wipe rate from in-memory objects
+      staff.forEach((s) => {
+        delete s.rate;
+        delete s.overtime_rate;
+        delete s.payment_note;
+        delete s.rate_history;
+        delete s.compensation;
+      });
+    }
+
     setStaffList(staff);
     const loadedSites = await siteRepo.list(currentOrg.id, false);
     setSites(loadedSites);
@@ -97,7 +125,7 @@ export const StaffPage: React.FC = () => {
       })
       .sort((a, b) => {
         if (sortBy === 'name') return a.name.localeCompare(b.name);
-        if (sortBy === 'rate') return b.rate - a.rate;
+        if (sortBy === 'rate') return (b.rate ?? 0) - (a.rate ?? 0);
         if (sortBy === 'joining_date') {
           return (b.joining_date || '').localeCompare(a.joining_date || '');
         }
@@ -452,12 +480,14 @@ export const StaffPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-bold text-[var(--accent)]">
-                        {formatCurrency(staff.rate)}
-                        <span className="text-[10px] text-[var(--text-muted)] font-normal ml-0.5">
-                          /{staff.payment_type[0]}
+                      {canViewMoney && staff.rate !== undefined && (
+                        <span className="text-xs font-bold text-[var(--accent)]">
+                          {formatCurrency(staff.rate)}
+                          <span className="text-[10px] text-[var(--text-muted)] font-normal ml-0.5">
+                            /{staff.payment_type[0]}
+                          </span>
                         </span>
-                      </span>
+                      )}
                       {staff.phone && (
                         <a
                           href={`tel:${staff.phone}`}
@@ -516,12 +546,14 @@ export const StaffPage: React.FC = () => {
                         <p className="text-xs text-[var(--text-muted)] truncate">
                           {staff.role_title || 'Staff'} {staff.staff_code && `• ${staff.staff_code}`}
                         </p>
-                        <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
-                          {formatCurrency(staff.rate)}{' '}
-                          <span className="text-[10px] text-[var(--text-muted)] font-normal">
-                            / {staff.payment_type}
-                          </span>
-                        </p>
+                        {canViewMoney && staff.rate !== undefined && (
+                          <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
+                            {formatCurrency(staff.rate)}{' '}
+                            <span className="text-[10px] text-[var(--text-muted)] font-normal">
+                              / {staff.payment_type}
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
 

@@ -241,6 +241,7 @@ export class LocalRepository<T extends SyncedEntity> implements IRepository<T> {
 // Repositories instances for application usage
 export const orgRepo = new LocalRepository<any>(localDb.organizations, 'organizations');
 export const staffRepo = new LocalRepository<any>(localDb.staff, 'staff');
+export const staffCompensationRepo = new LocalRepository<any>(localDb.staff_compensation, 'staff_compensation');
 export const attendanceRepo = new LocalRepository<any>(localDb.attendance_entries, 'attendance_entries');
 export const workRepo = new LocalRepository<any>(localDb.work_entries, 'work_entries');
 export const paymentRepo = new LocalRepository<any>(localDb.payments, 'payments');

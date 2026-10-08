@@ -10,6 +10,7 @@ describe('Local Database & Repository Tests', () => {
 
   beforeEach(async () => {
     await localDb.staff.clear();
+    await localDb.staff_compensation.clear();
     await localDb.outbox.clear();
   });
 
@@ -92,5 +93,27 @@ describe('Local Database & Repository Tests', () => {
     await staffRepo.restore(created.id);
     const restoredList = await staffRepo.list(orgId, false);
     expect(restoredList.find((s) => s.id === created.id)).toBeDefined();
+  });
+
+  it('stores and syncs staff_compensation in a dedicated isolated table', async () => {
+    const compensationRepo = new LocalRepository<any>(localDb.staff_compensation, 'staff_compensation');
+    const staffId = generateUUID();
+
+    const comp = await compensationRepo.create({
+      org_id: orgId,
+      staff_id: staffId,
+      rate: 1200,
+      overtime_rate: 150,
+      payment_note: 'UPI: worker@upi',
+      rate_history: [],
+    });
+
+    expect(comp.id).toBeDefined();
+    expect(comp.rate).toBe(1200);
+    expect(comp.payment_note).toBe('UPI: worker@upi');
+
+    const outboxItems = await localDb.outbox.where('table_name').equals('staff_compensation').toArray();
+    expect(outboxItems).toHaveLength(1);
+    expect(outboxItems[0].record_id).toBe(comp.id);
   });
 });

@@ -39,5 +39,13 @@ export function canUserPerformAction(role: UserRole, action: RBACAction): boolea
   }
 }
 
+export function canRoleInviteRole(inviterRole: UserRole, targetRole: UserRole): boolean {
+  if (inviterRole === 'owner') return true;
+  if (inviterRole === 'manager') {
+    return ['supervisor', 'accountant', 'viewer'].includes(targetRole);
+  }
+  return false;
+}
+
 export type { UserRole, RolePermissions };
 export { ROLE_PERMISSIONS, hasPermission };

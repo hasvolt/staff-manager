@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { localDb, LocalOrganization } from '@/lib/db/dexie';
 import { orgRepo, generateUUID } from '@/lib/db/repository';
 import { syncEngine } from '@/lib/sync/syncEngine';
+import { deleteOrgStorageFiles } from '@/lib/supabase/storage';
 
 export interface BusinessSettings {
   address?: string;
@@ -26,6 +27,7 @@ interface OrgContextType {
   updateSettings: (updates: Partial<LocalOrganization> & { settings?: BusinessSettings }) => Promise<{ error: Error | null }>;
   reloadOrganizations: () => Promise<void>;
   upgradeLocalToCloud: () => Promise<{ error: Error | null; count?: number }>;
+  deleteBusiness: (orgId: string, onProgress?: (msg: string) => void) => Promise<{ error: Error | null }>;
 }
 
 const OrgContext = createContext<OrgContextType | null>(null);
@@ -318,6 +320,60 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const deleteBusiness = async (orgId: string, onProgress?: (msg: string) => void) => {
+    try {
+      if (user && isSupabaseConfigured) {
+        // 1. Verify ownership
+        const orgToDelete = organizations.find((o) => o.id === orgId);
+        if (orgToDelete && orgToDelete.owner_id !== user.id) {
+          throw new Error('Only the business owner can delete this business.');
+        }
+
+        // 2. Check for other members
+        onProgress?.('Verifying business memberships...');
+        const { data: members, error: memErr } = await supabase
+          .from('memberships')
+          .select('id, user_id')
+          .eq('org_id', orgId);
+
+        if (memErr) throw memErr;
+
+        const otherMembers = (members || []).filter((m) => m.user_id !== user.id);
+        if (otherMembers.length > 0) {
+          throw new Error('Please transfer ownership or remove other members before deleting this business.');
+        }
+
+        // 3. Remove all files under {orgId}/ first!
+        onProgress?.('Cleaning up business files from storage...');
+        const cleanupRes = await deleteOrgStorageFiles(orgId, onProgress);
+        if (!cleanupRes.success || cleanupRes.error) {
+          throw new Error(`File cleanup failed: ${cleanupRes.error?.message}. Business deletion cancelled.`);
+        }
+
+        // 4. Delete organization
+        onProgress?.('Deleting business record...');
+        const { error: delErr } = await supabase.from('organizations').delete().eq('id', orgId);
+        if (delErr) throw delErr;
+
+        // Clean audit log
+        await supabase.from('audit_log').delete().eq('org_id', orgId);
+      }
+
+      // Remove from local database
+      await localDb.organizations.delete(orgId);
+      await localDb.staff.where('org_id').equals(orgId).delete();
+      await localDb.staff_compensation.where('org_id').equals(orgId).delete();
+      await localDb.attendance_entries.where('org_id').equals(orgId).delete();
+      await localDb.work_entries.where('org_id').equals(orgId).delete();
+      await localDb.payments.where('org_id').equals(orgId).delete();
+
+      await reloadOrganizations();
+      return { error: null };
+    } catch (err: any) {
+      return { error: err };
+    }
+  };
+
   return (
     <OrgContext.Provider
       value={{
@@ -331,6 +387,7 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateSettings,
         reloadOrganizations,
         upgradeLocalToCloud,
+        deleteBusiness,
       }}
     >
       {children}
