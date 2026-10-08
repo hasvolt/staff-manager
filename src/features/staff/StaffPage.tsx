@@ -35,7 +35,7 @@ import {
 export const StaffPage: React.FC = () => {
   const { currentOrg } = useOrg();
   const { t, formatCurrency } = useI18n();
-  const { success, error } = useToast();
+  const { showToast, success, error } = useToast();
 
   const [staffList, setStaffList] = useState<LocalStaff[]>([]);
   const [sites, setSites] = useState<LocalSite[]>([]);
