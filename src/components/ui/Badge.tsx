@@ -1,7 +1,7 @@
 import React from 'react';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'accent' | 'income' | 'expense' | 'warning' | 'neutral';
+  variant?: 'accent' | 'income' | 'expense' | 'warning' | 'neutral' | 'outline' | 'secondary' | 'success';
   size?: 'sm' | 'md';
 }
 
@@ -23,6 +23,9 @@ export const Badge: React.FC<BadgeProps> = ({
     expense: 'bg-[var(--expense)]/20 text-[var(--expense)] border border-[var(--expense)]/30',
     warning: 'bg-[var(--warning)]/20 text-[var(--warning)] border border-[var(--warning)]/30',
     neutral: 'bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]',
+    outline: 'bg-transparent text-[var(--text)] border border-[var(--border)]',
+    secondary: 'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)]',
+    success: 'bg-[var(--income)]/20 text-[var(--income)] border border-[var(--income)]/30',
   }[variant];
 
   return (

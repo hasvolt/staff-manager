@@ -12,6 +12,9 @@ Sister product of **Daily Khata Pro**, hosted at [https://staff.rozfiber.com](ht
 - **12 Accessible Visual Themes**: Carefully balanced color tokens and solid contrast (Emerald Black, Deep Obsidian, Monochrome, Day White, etc.).
 - **16 Languages Supported**: Including English, Hindi, Urdu, Bengali, Marathi, Gujarati, Punjabi, Tamil, Telugu, Kannada, Malayalam, Odia, Assamese, Nepali, Arabic, and Spanish (with native RTL support for Urdu and Arabic).
 - **Inbuilt Calculator**: Simple, tactile calculation (+, -, ×, ÷, %) accessible directly from any amount input field and the header, plus direct redirect to Daily Khata Pro advanced calculators.
+- **Wages, Advances & Payroll Ledger**: Automated daily wage, prorated monthly salaries (fixed 30 or actual calendar days), piece work, overtime, bonuses, deductions, penalties, loans, and duplicate payment protection.
+- **Month Settlement & Locked Periods**: Settle monthly payroll with one tap, lock periods to prevent accidental tampering, and owner-only unlock audits.
+- **Financial Dashboard & Labour Costing**: Live cost breakdown by site, role, and monthly trends with privacy mask mode.
 - **Multi-Role & Enterprise Ready**: Granular RBAC (Owner, Manager, Supervisor, Accountant, Viewer) and Supabase Row Level Security (RLS).
 - **Zero Data Loss**: Soft delete with Recycle Bin restore, revision history, and audit logging.
 

@@ -8,12 +8,12 @@ export interface SelectOption {
 }
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  options: SelectOption[];
+  options?: SelectOption[];
   hasError?: boolean;
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ options, className = '', hasError = false, disabled, ...props }, ref) => {
+  ({ options, children, className = '', hasError = false, disabled, ...props }, ref) => {
     return (
       <div className="relative flex items-center w-full">
         <select
@@ -26,16 +26,18 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           } ${className}`}
           {...props}
         >
-          {options.map((opt) => (
-            <option
-              key={opt.value}
-              value={opt.value}
-              disabled={opt.disabled}
-              className="bg-[var(--surface)] text-[var(--text)] py-1"
-            >
-              {opt.label}
-            </option>
-          ))}
+          {options
+            ? options.map((opt) => (
+                <option
+                  key={opt.value}
+                  value={opt.value}
+                  disabled={opt.disabled}
+                  className="bg-[var(--surface)] text-[var(--text)] py-1"
+                >
+                  {opt.label}
+                </option>
+              ))
+            : children}
         </select>
         <ChevronDown className="absolute right-3 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
       </div>

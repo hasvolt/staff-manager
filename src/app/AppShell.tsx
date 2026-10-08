@@ -41,7 +41,7 @@ import { JoinBusinessModal } from '@/features/org/JoinBusinessModal';
 export const AppShell: React.FC = () => {
   const { t, language } = useI18n();
   const { openCalculator } = useCalculator();
-  const { user, isLocalMode } = useAuth();
+  const { user, profile, isLocalMode } = useAuth();
   const { currentOrg, role } = useOrg();
   const location = useLocation();
 
@@ -149,7 +149,7 @@ export const AppShell: React.FC = () => {
             >
               <UserIcon className="w-3.5 h-3.5" />
               <span className="truncate max-w-[80px] hidden sm:inline">
-                {user.user_metadata?.full_name?.split(' ')[0] || 'Account'}
+                {profile?.full_name?.trim()?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Account'}
               </span>
             </button>
           ) : (

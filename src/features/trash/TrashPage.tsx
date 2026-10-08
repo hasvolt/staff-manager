@@ -31,6 +31,7 @@ import {
   Filter,
   Clock,
   ShieldAlert,
+  CreditCard,
 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
@@ -221,6 +222,28 @@ export const TrashPage: React.FC = () => {
       });
     }
 
+    // 7. Payments
+    const deletedPayments = await localDb.payments
+      .where('org_id')
+      .equals(currentOrg.id)
+      .filter((p) => !!p.deleted_at)
+      .toArray();
+    for (const p of deletedPayments) {
+      if (purgeCutoff && p.deleted_at! < purgeCutoff) {
+        await localDb.payments.delete(p.id);
+        continue;
+      }
+      const staffMember = await localDb.staff.get(p.staff_id);
+      trashList.push({
+        id: p.id,
+        type: 'payment',
+        title: `Payment: ${p.type.toUpperCase()} (₹${p.amount})`,
+        subtitle: `${staffMember?.name || 'Staff'} • ${p.pay_date} • Mode: ${p.mode || 'cash'}`,
+        deletedAt: p.deleted_at!,
+        raw: p,
+      });
+    }
+
     trashList.sort((a, b) => b.deletedAt.localeCompare(a.deletedAt));
     setItems(trashList);
     setIsLoading(false);
@@ -238,6 +261,7 @@ export const TrashPage: React.FC = () => {
       else if (item.type === 'site') await siteRepo.restore(item.id);
       else if (item.type === 'work_type') await workTypeRepo.restore(item.id);
       else if (item.type === 'custom_field') await customFieldRepo.restore(item.id);
+      else if (item.type === 'payment') await paymentRepo.restore(item.id);
 
       success(`Restored "${item.title}" successfully`);
       loadTrash();
@@ -254,6 +278,7 @@ export const TrashPage: React.FC = () => {
       else if (item.type === 'site') await localDb.sites.delete(item.id);
       else if (item.type === 'work_type') await localDb.work_types.delete(item.id);
       else if (item.type === 'custom_field') await localDb.custom_field_defs.delete(item.id);
+      else if (item.type === 'payment') await localDb.payments.delete(item.id);
 
       success(`Permanently deleted "${item.title}"`);
       setItemToPurge(null);
@@ -273,6 +298,7 @@ export const TrashPage: React.FC = () => {
         else if (item.type === 'site') await localDb.sites.delete(item.id);
         else if (item.type === 'work_type') await localDb.work_types.delete(item.id);
         else if (item.type === 'custom_field') await localDb.custom_field_defs.delete(item.id);
+        else if (item.type === 'payment') await localDb.payments.delete(item.id);
       }
       success('Recycle Bin emptied.');
       setShowEmptyTrashConfirm(false);
@@ -344,7 +370,7 @@ export const TrashPage: React.FC = () => {
         />
 
         <div className="flex items-center gap-1.5 self-start sm:self-auto overflow-x-auto w-full sm:w-auto">
-          {['all', 'staff', 'attendance', 'work', 'site', 'work_type', 'custom_field'].map((type) => (
+          {['all', 'staff', 'attendance', 'work', 'site', 'work_type', 'custom_field', 'payment'].map((type) => (
             <button
               key={type}
               type="button"
@@ -355,7 +381,7 @@ export const TrashPage: React.FC = () => {
                   : 'bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
             >
-              {type === 'work_type' ? 'Work Types' : type === 'custom_field' ? 'Fields' : type}
+              {type === 'work_type' ? 'Work Types' : type === 'custom_field' ? 'Fields' : type === 'payment' ? 'Payments' : type}
             </button>
           ))}
         </div>
@@ -383,6 +409,7 @@ export const TrashPage: React.FC = () => {
                   {item.type === 'site' && <MapPin className="w-4 h-4 text-blue-400" />}
                   {item.type === 'work_type' && <Layers className="w-4 h-4 text-amber-400" />}
                   {item.type === 'custom_field' && <Sliders className="w-4 h-4 text-rose-400" />}
+                  {item.type === 'payment' && <CreditCard className="w-4 h-4 text-emerald-400" />}
                 </div>
 
                 <div className="min-w-0">

@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { AttendanceCalendarModal } from './AttendanceCalendarModal';
 import { attendanceRepo, staffRepo, siteRepo } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalAttendanceEntry, LocalSite } from '@/lib/db/dexie';
+import { isDateInClosedPeriod } from '@/lib/calculations/salaryCalculations';
 import { useOrg } from '@/features/org/orgContext';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useToast } from '@/components/ui/Toast';
@@ -22,6 +23,7 @@ import {
   Check,
   Plus,
   Minus,
+  Lock,
 } from 'lucide-react';
 
 export const AttendancePage: React.FC = () => {
@@ -35,6 +37,7 @@ export const AttendancePage: React.FC = () => {
   const [sites, setSites] = useState<LocalSite[]>([]);
   const [search, setSearch] = useState('');
   const [selectedStaffForCalendar, setSelectedStaffForCalendar] = useState<LocalStaff | null>(null);
+  const [isPeriodLocked, setIsPeriodLocked] = useState(false);
 
   const loadData = async () => {
     if (!currentOrg?.id) return;
@@ -55,6 +58,16 @@ export const AttendancePage: React.FC = () => {
 
     const siteList = await siteRepo.list(currentOrg.id, false);
     setSites(siteList);
+
+    // Check if period is closed
+    const closings = await localDb.period_closings
+      .where('org_id')
+      .equals(currentOrg.id)
+      .filter((c) => !c.deleted_at && c.status === 'closed')
+      .toArray();
+
+    const locked = isDateInClosedPeriod(selectedDate, closings);
+    setIsPeriodLocked(!!locked);
   };
 
   useEffect(() => {
@@ -87,6 +100,10 @@ export const AttendancePage: React.FC = () => {
     status: 'present' | 'absent' | 'half' | 'leave_paid' | 'leave_unpaid' | 'holiday'
   ) => {
     if (!currentOrg) return;
+    if (isPeriodLocked) {
+      error('Cannot modify attendance: Selected date belongs to a locked settlement period.');
+      return;
+    }
     try {
       const existing = attendanceMap[staffId];
       if (existing) {
@@ -113,6 +130,10 @@ export const AttendancePage: React.FC = () => {
   // Adjust overtime
   const adjustOvertime = async (staffId: string, delta: number) => {
     if (!currentOrg) return;
+    if (isPeriodLocked) {
+      error('Cannot modify overtime: Selected date belongs to a locked settlement period.');
+      return;
+    }
     try {
       const existing = attendanceMap[staffId];
       if (existing) {
@@ -137,6 +158,10 @@ export const AttendancePage: React.FC = () => {
   // Mark all active staff present
   const handleMarkAllPresent = async () => {
     if (!currentOrg || staffList.length === 0) return;
+    if (isPeriodLocked) {
+      error('Cannot modify attendance: Selected date belongs to a locked settlement period.');
+      return;
+    }
     try {
       let count = 0;
       for (const s of staffList) {
@@ -184,13 +209,23 @@ export const AttendancePage: React.FC = () => {
             />
           </div>
 
-          <Button variant="income" size="sm" onClick={handleMarkAllPresent}>
+          <Button variant="income" size="sm" onClick={handleMarkAllPresent} disabled={isPeriodLocked}>
             <CheckCheck className="w-4 h-4" />
             <span className="hidden sm:inline">Mark All Present</span>
             <span className="sm:hidden">All Present</span>
           </Button>
         </div>
       </div>
+
+      {/* Period Locked Alert Banner */}
+      {isPeriodLocked && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2.5 text-xs text-amber-400">
+          <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="font-semibold">
+            This date ({selectedDate}) falls inside a closed &amp; locked settlement period. Edits to attendance are disabled.
+          </span>
+        </div>
+      )}
 
       {/* Daily Stats KPI bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
@@ -33,6 +33,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 }) => {
   const {
     user,
+    profile,
+    loadProfile,
     isLocalMode,
     updateProfile,
     updatePassword,
@@ -43,12 +45,55 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const { upgradeLocalToCloud } = useOrg();
   const { success, error, info } = useToast();
 
-  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '');
-  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState(profile?.full_name || user?.user_metadata?.full_name || '');
+  const [phone, setPhone] = useState(profile?.phone || '');
   const [newPassword, setNewPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
+
+  // When profile modal opens (and on user change), load row from public.profiles
+  // and fill fields with stored values
+  useEffect(() => {
+    if (!isOpen || !user) return;
+
+    let isMounted = true;
+    setIsFetchingProfile(true);
+
+    const initProfile = async () => {
+      try {
+        // 1. First populate from IndexedDB for instantaneous display and offline support
+        const cached = await localDb.profiles.get(user.id);
+        if (cached && isMounted) {
+          setFullName(cached.full_name || '');
+          setPhone(cached.phone || '');
+        } else if (isMounted) {
+          setFullName(profile?.full_name || user.user_metadata?.full_name || '');
+          setPhone(profile?.phone || '');
+        }
+
+        // 2. Load fresh from public.profiles (and handle missing/empty fallback & upsert)
+        const fresh = await loadProfile(user.id);
+        if (fresh && isMounted) {
+          setFullName(fresh.full_name || '');
+          setPhone(fresh.phone || '');
+        }
+      } catch (err) {
+        console.warn('Failed to load profile in modal:', err);
+      } finally {
+        if (isMounted) {
+          setIsFetchingProfile(false);
+        }
+      }
+    };
+
+    initProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, user?.id]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +103,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     if (res.error) {
       error(res.error.message || 'Failed to update profile');
     } else {
+      if (res.profile) {
+        setFullName(res.profile.full_name || '');
+        setPhone(res.profile.phone || '');
+      }
       success('Profile details saved!');
     }
   };

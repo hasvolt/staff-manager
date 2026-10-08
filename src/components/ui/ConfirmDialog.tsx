@@ -9,8 +9,10 @@ export interface ConfirmDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message?: string;
+  description?: string;
   confirmLabel?: string;
+  confirmText?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'primary';
   isLoading?: boolean;
@@ -22,12 +24,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   title,
   message,
+  description,
   confirmLabel,
+  confirmText,
   cancelLabel,
   variant = 'danger',
   isLoading = false,
 }) => {
   const { t } = useI18n();
+  const bodyMessage = message || description || '';
+  const confirmBtnText = confirmLabel || confirmText || t('common.confirm');
 
   return (
     <Modal
@@ -51,12 +57,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             onClick={onConfirm}
             isLoading={isLoading}
           >
-            {confirmLabel || t('common.confirm')}
+            {confirmBtnText}
           </Button>
         </>
       }
     >
-      <p className="text-sm text-[var(--text-muted)] leading-relaxed">{message}</p>
+      <p className="text-sm text-[var(--text-muted)] leading-relaxed">{bodyMessage}</p>
     </Modal>
   );
 };
