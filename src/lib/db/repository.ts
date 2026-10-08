@@ -84,6 +84,19 @@ export class LocalRepository<T extends SyncedEntity> implements IRepository<T> {
       attempts: 0,
     });
 
+    // Write audit log
+    if ((record as any).org_id) {
+      await localDb.audit_log.add({
+        org_id: (record as any).org_id,
+        entity_type: this.tableName,
+        entity_id: record.id,
+        action: 'insert',
+        after_data: record,
+        device_id: deviceId,
+        created_at: now,
+      });
+    }
+
     return record;
   }
 
@@ -116,6 +129,20 @@ export class LocalRepository<T extends SyncedEntity> implements IRepository<T> {
       attempts: 0,
     });
 
+    // Write audit log
+    if ((updated as any).org_id) {
+      await localDb.audit_log.add({
+        org_id: (updated as any).org_id,
+        entity_type: this.tableName,
+        entity_id: id,
+        action: 'update',
+        before_data: existing,
+        after_data: updated,
+        device_id: getDeviceId(),
+        created_at: now,
+      });
+    }
+
     return updated;
   }
 
@@ -145,6 +172,19 @@ export class LocalRepository<T extends SyncedEntity> implements IRepository<T> {
       created_at: now,
       attempts: 0,
     });
+
+    // Write audit log
+    if ((deleted as any).org_id) {
+      await localDb.audit_log.add({
+        org_id: (deleted as any).org_id,
+        entity_type: this.tableName,
+        entity_id: id,
+        action: 'delete',
+        before_data: existing,
+        device_id: getDeviceId(),
+        created_at: now,
+      });
+    }
   }
 
   async restore(id: string): Promise<void> {
@@ -173,6 +213,19 @@ export class LocalRepository<T extends SyncedEntity> implements IRepository<T> {
       created_at: now,
       attempts: 0,
     });
+
+    // Write audit log
+    if ((restored as any).org_id) {
+      await localDb.audit_log.add({
+        org_id: (restored as any).org_id,
+        entity_type: this.tableName,
+        entity_id: id,
+        action: 'restore',
+        after_data: restored,
+        device_id: getDeviceId(),
+        created_at: now,
+      });
+    }
   }
 
   async bulkCreate(items: (Omit<T, 'id' | 'created_at' | 'updated_at' | 'revision'> & { id?: string })[]): Promise<T[]> {

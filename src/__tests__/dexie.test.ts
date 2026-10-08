@@ -1,3 +1,4 @@
+import './setup';
 import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { localDb } from '@/lib/db/dexie';
