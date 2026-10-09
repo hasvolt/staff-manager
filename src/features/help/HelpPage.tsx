@@ -227,6 +227,28 @@ export const HelpPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Official Documentation Portal Link */}
+      <Card variant="surface" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-[var(--accent)]/30 bg-[var(--surface-2)]/40">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-[var(--accent)]" />
+            <h3 className="font-bold text-sm text-[var(--text)]">Official Rozfiber Documentation Portal</h3>
+          </div>
+          <p className="text-xs text-[var(--text-muted)]">
+            Explore complete user manuals, API guides, step-by-step videos, and platform guides across all Rozfiber services at <span className="font-mono text-[var(--accent)]">docs.rozfiber.com</span>.
+          </p>
+        </div>
+        <a
+          href="https://docs.rozfiber.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-semibold hover:opacity-90 transition shrink-0 text-center flex items-center justify-center gap-1.5"
+        >
+          <span>Open docs.rozfiber.com</span>
+          <span>↗</span>
+        </a>
+      </Card>
+
       {/* Support Card */}
       <Card variant="surface" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
