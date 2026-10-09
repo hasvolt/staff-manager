@@ -30,6 +30,8 @@ interface StaffDetailModalProps {
   onEdit: (staff: LocalStaff) => void;
   onDuplicate: (staff: LocalStaff) => void;
   onDeleteRequest: (staff: LocalStaff) => void;
+  onViewHistory?: (staff: LocalStaff) => void;
+  onViewSalarySlip?: (staff: LocalStaff) => void;
 }
 
 export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
@@ -39,6 +41,8 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
   onEdit,
   onDuplicate,
   onDeleteRequest,
+  onViewHistory,
+  onViewSalarySlip,
 }) => {
   const { t, formatCurrency, formatDate } = useI18n();
   const { role } = useOrg();
@@ -241,7 +245,33 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
             <span>Remove / Trash</span>
           </Button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                onClose();
+                onViewHistory?.(staff);
+              }}
+            >
+              <History className="w-4 h-4" />
+              <span>Full History</span>
+            </Button>
+
+            {canViewMoney && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onClose();
+                  onViewSalarySlip?.(staff);
+                }}
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>Salary Slip</span>
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"

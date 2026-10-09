@@ -31,6 +31,15 @@ export const SettingsPage: React.FC = () => {
   const [hidePaymentsFromViewers, setHidePaymentsFromViewers] = useState(
     currentOrg?.settings?.hide_payments_from_viewers || false
   );
+  const [requireOwnerDeleteApproval, setRequireOwnerDeleteApproval] = useState(
+    currentOrg?.settings?.require_owner_delete_approval || false
+  );
+  const [customSiteLabel, setCustomSiteLabel] = useState(
+    currentOrg?.settings?.custom_site_label || ''
+  );
+  const [customWorkLabel, setCustomWorkLabel] = useState(
+    currentOrg?.settings?.custom_work_label || ''
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -43,6 +52,9 @@ export const SettingsPage: React.FC = () => {
       setPrintHeader(currentOrg.settings?.print_header || '');
       setPrintFooter(currentOrg.settings?.print_footer || '');
       setHidePaymentsFromViewers(Boolean(currentOrg.settings?.hide_payments_from_viewers));
+      setRequireOwnerDeleteApproval(Boolean(currentOrg.settings?.require_owner_delete_approval));
+      setCustomSiteLabel(currentOrg.settings?.custom_site_label || '');
+      setCustomWorkLabel(currentOrg.settings?.custom_work_label || '');
     }
   }, [currentOrg]);
 
@@ -87,6 +99,9 @@ export const SettingsPage: React.FC = () => {
         print_header: printHeader.trim(),
         print_footer: printFooter.trim(),
         hide_payments_from_viewers: hidePaymentsFromViewers,
+        require_owner_delete_approval: requireOwnerDeleteApproval,
+        custom_site_label: customSiteLabel.trim() || undefined,
+        custom_work_label: customWorkLabel.trim() || undefined,
       },
     });
     setIsLoading(false);
@@ -187,6 +202,32 @@ export const SettingsPage: React.FC = () => {
           </FormField>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <FormField
+              label="Custom 'Site / Project' Label"
+              helpText="Rename 'Site' across the app (e.g. Shop, Field, Branch, Factory)"
+            >
+              <Input
+                disabled={!isOwner}
+                value={customSiteLabel}
+                onChange={(e) => setCustomSiteLabel(e.target.value)}
+                placeholder="e.g. Shop / Branch / Site"
+              />
+            </FormField>
+
+            <FormField
+              label="Custom 'Work / Task' Label"
+              helpText="Rename 'Work Type' (e.g. Task, Service, Operation)"
+            >
+              <Input
+                disabled={!isOwner}
+                value={customWorkLabel}
+                onChange={(e) => setCustomWorkLabel(e.target.value)}
+                placeholder="e.g. Task / Service"
+              />
+            </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FormField label="Default Print Header (Salary Slip / Receipts)">
               <Input
                 disabled={!isOwner}
@@ -207,12 +248,18 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {isOwner && (
-            <div className="pt-2 border-t border-[var(--border)]">
+            <div className="pt-2 border-t border-[var(--border)] space-y-3">
               <Switch
                 label="Hide payment amounts from Viewers"
                 description="When enabled, team members with the 'Viewer' role cannot see salaries or payout history."
                 checked={hidePaymentsFromViewers}
                 onChange={() => setHidePaymentsFromViewers(!hidePaymentsFromViewers)}
+              />
+              <Switch
+                label="Require Owner Approval to Delete Staff with History"
+                description="Managers must obtain explicit Owner confirmation before moving staff with past attendance or payments into the Trash."
+                checked={requireOwnerDeleteApproval}
+                onChange={() => setRequireOwnerDeleteApproval(!requireOwnerDeleteApproval)}
               />
             </div>
           )}

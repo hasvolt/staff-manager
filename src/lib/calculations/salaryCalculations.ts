@@ -35,14 +35,19 @@ export interface NetDuesBreakdown {
   staffId: string;
   totalEarned: number;
   bonusTotal: number;
+  bonus: number;
   reimbursementTotal: number;
+  reimbursements: number;
   grossPayable: number; // earned + bonus + reimbursement
   advancesTaken: number; // advance + loan
   advancesRecovered: number; // advance deduction or repayment
   advancesOutstanding: number; // advancesTaken - advancesRecovered
   deductionTotal: number;
+  deductions: number;
   penaltyTotal: number;
+  penalties: number;
   salaryPaid: number; // direct salary payments
+  alreadyPaid: number;
   totalPaid: number; // all payments made (salary + advances + bonuses + etc)
   netPayable: number; // grossPayable - deductions - penalties - advancesRecovered - salaryPaid
   status: 'owed_to_staff' | 'owed_by_staff' | 'settled';
@@ -364,14 +369,19 @@ export function calculateStaffNetDues(params: {
     staffId,
     totalEarned: roundMoney(totalEarned),
     bonusTotal,
+    bonus: bonusTotal,
     reimbursementTotal,
+    reimbursements: reimbursementTotal,
     grossPayable,
     advancesTaken,
     advancesRecovered,
     advancesOutstanding,
     deductionTotal,
+    deductions: deductionTotal,
     penaltyTotal,
+    penalties: penaltyTotal,
     salaryPaid,
+    alreadyPaid: salaryPaid,
     totalPaid,
     netPayable,
     status,
@@ -393,4 +403,45 @@ export function isDateInClosedPeriod(
     if (c.staff_id && staffId && c.staff_id !== staffId) return false;
     return date >= c.period_start && date <= c.period_end;
   });
+}
+
+/**
+ * High-level period earnings calculator supporting alternate parameter names
+ */
+export function calculateStaffPeriodEarnings(params: {
+  staff: LocalStaff;
+  compensation?: LocalStaffCompensation;
+  periodStart?: string;
+  periodEnd?: string;
+  startDate?: string;
+  endDate?: string;
+  attendance?: LocalAttendanceEntry[];
+  attendanceEntries?: LocalAttendanceEntry[];
+  workEntries?: LocalWorkEntry[];
+  monthCalcMode?: string;
+  monthMode?: MonthCalculationMode;
+}) {
+  const start = params.startDate || params.periodStart || '1970-01-01';
+  const end = params.endDate || params.periodEnd || '2099-12-31';
+  const att = params.attendanceEntries || params.attendance || [];
+  const wrk = params.workEntries || [];
+  const mode = (params.monthCalcMode === 'actual' ? 'calendar_days' : params.monthMode || 'fixed_30') as MonthCalculationMode;
+
+  const res = calculateStaffEarnings({
+    staff: params.staff,
+    compensation: params.compensation,
+    startDate: start,
+    endDate: end,
+    attendanceEntries: att,
+    workEntries: wrk,
+    monthMode: mode,
+  });
+
+  return {
+    ...res,
+    baseWage: res.basePay,
+    overtimeEarned: res.overtimePay,
+    pieceRateEarned: res.piecePay,
+    formulaBreakdown: [res.formulaText],
+  };
 }

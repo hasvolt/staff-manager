@@ -35,3 +35,55 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Print View Styling - Always black on white regardless of active theme */
+@media print {
+  @page {
+    margin: 12mm;
+    size: auto;
+  }
+
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Force all tokens to black & white printable defaults */
+  * {
+    color: #000000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Hide app navigation, headers, footers, and action buttons during print */
+  header, nav, aside, .no-print, button, .app-shell-header, .app-shell-bottom-nav {
+    display: none !important;
+  }
+
+  /* Make print area expand to full page */
+  .printable-area {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}

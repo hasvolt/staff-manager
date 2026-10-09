@@ -220,7 +220,10 @@ export class StaffManagerDatabase extends Dexie {
   conflicts!: Table<ConflictItem, string>;
 
   constructor() {
-    super('staff_manager_db');
+    super('staff_manager_db', {
+      indexedDB: typeof indexedDB !== 'undefined' ? indexedDB : (globalThis as any).indexedDB,
+      IDBKeyRange: typeof IDBKeyRange !== 'undefined' ? IDBKeyRange : (globalThis as any).IDBKeyRange,
+    });
     this.version(1).stores({
       profiles: 'id, updated_at',
       organizations: 'id, owner_id, updated_at, deleted_at, syncStatus',

@@ -11,6 +11,9 @@ import { StaffFormModal } from './StaffFormModal';
 import { StaffDetailModal } from './StaffDetailModal';
 import { StaffDeleteDialog } from './StaffDeleteDialog';
 import { CustomFieldsModal } from './CustomFieldsModal';
+import { ImportStaffModal } from './ImportStaffModal';
+import { StaffHistoryModal } from '@/features/history/StaffHistoryModal';
+import { SalarySlipModal } from '@/features/reports/SalarySlipModal';
 import { staffRepo, staffCompensationRepo, siteRepo } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalSite } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
@@ -48,12 +51,15 @@ export const StaffPage: React.FC = () => {
 
   // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCustomFieldsOpen, setIsCustomFieldsOpen] = useState(false);
   const [staffToEdit, setStaffToEdit] = useState<LocalStaff | null>(null);
   const [selectedStaffDetail, setSelectedStaffDetail] = useState<LocalStaff | null>(null);
   const [staffToDelete, setStaffToDelete] = useState<LocalStaff | null>(null);
   const [staffHasHistory, setStaffHasHistory] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [historyStaff, setHistoryStaff] = useState<LocalStaff | null>(null);
+  const [salarySlipStaffId, setSalarySlipStaffId] = useState<string | null>(null);
 
   // Bulk selection mode
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -263,6 +269,15 @@ export const StaffPage: React.FC = () => {
               <List className="w-4 h-4" />
             </button>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsImportOpen(true)}
+            title="Import staff from CSV spreadsheet"
+          >
+            <span>Import CSV</span>
+          </Button>
 
           <Button
             variant="outline"
@@ -592,6 +607,12 @@ export const StaffPage: React.FC = () => {
         onUpdated={loadData}
       />
 
+      <ImportStaffModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImportComplete={loadData}
+      />
+
       <StaffDetailModal
         isOpen={!!selectedStaffDetail}
         onClose={() => setSelectedStaffDetail(null)}
@@ -602,6 +623,8 @@ export const StaffPage: React.FC = () => {
         }}
         onDuplicate={handleDuplicate}
         onDeleteRequest={handleOpenDelete}
+        onViewHistory={(s) => setHistoryStaff(s)}
+        onViewSalarySlip={(s) => setSalarySlipStaffId(s.id)}
       />
 
       <StaffDeleteDialog
@@ -611,6 +634,22 @@ export const StaffPage: React.FC = () => {
         hasHistory={staffHasHistory}
         onCompleted={loadData}
       />
+
+      {historyStaff && (
+        <StaffHistoryModal
+          isOpen={Boolean(historyStaff)}
+          onClose={() => setHistoryStaff(null)}
+          staff={historyStaff}
+        />
+      )}
+
+      {salarySlipStaffId && (
+        <SalarySlipModal
+          isOpen={Boolean(salarySlipStaffId)}
+          onClose={() => setSalarySlipStaffId(null)}
+          staffId={salarySlipStaffId}
+        />
+      )}
     </div>
   );
 };

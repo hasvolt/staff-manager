@@ -9,6 +9,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PaymentFormModal } from './PaymentFormModal';
 import { StaffLedgerModal } from './StaffLedgerModal';
 import { MonthSettlementModal } from './MonthSettlementModal';
+import { PaymentReceiptModal } from '@/features/reports/PaymentReceiptModal';
+import { SalarySlipModal } from '@/features/reports/SalarySlipModal';
+import { StaffHistoryModal } from '@/features/history/StaffHistoryModal';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useToast } from '@/components/ui/Toast';
@@ -39,6 +42,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Receipt,
+  History,
+  FileText,
 } from 'lucide-react';
 
 export const PaymentsPage: React.FC = () => {
@@ -95,6 +101,9 @@ export const PaymentsPage: React.FC = () => {
   const [selectedStaffForLedger, setSelectedStaffForLedger] = useState<LocalStaff | null>(null);
 
   const [isSettlementModalOpen, setIsSettlementModalOpen] = useState(false);
+  const [receiptPayment, setReceiptPayment] = useState<LocalPayment | null>(null);
+  const [salarySlipStaffId, setSalarySlipStaffId] = useState<string | null>(null);
+  const [historyStaff, setHistoryStaff] = useState<LocalStaff | null>(null);
 
   // Load all payments and staff
   const loadData = async () => {
@@ -528,6 +537,14 @@ export const PaymentsPage: React.FC = () => {
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
+                          onClick={() => setReceiptPayment(p)}
+                          title="Print / Share Receipt"
+                          className="p-1.5 rounded-lg hover:bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--accent)] transition cursor-pointer"
+                        >
+                          <Receipt className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleEditPayment(p)}
                           title="Edit"
                           className="p-1.5 rounded-lg hover:bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer"
@@ -591,14 +608,30 @@ export const PaymentsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center gap-1.5 pt-2 border-t border-[var(--border)]">
                   <Button
                     variant="secondary"
                     size="sm"
                     className="flex-1"
                     onClick={() => handleOpenStaffLedger(staff)}
                   >
-                    <span>Full Ledger</span>
+                    <span>Ledger</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    title="Salary Slip"
+                    onClick={() => setSalarySlipStaffId(staff.id)}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    title="Work & Payment History"
+                    onClick={() => setHistoryStaff(staff)}
+                  >
+                    <History className="w-3.5 h-3.5" />
                   </Button>
                   <Button
                     variant="income"
@@ -702,6 +735,34 @@ export const PaymentsPage: React.FC = () => {
             setIsSettlementModalOpen(false);
             handleOpenNewPayment(sId, amt, pStart, pEnd);
           }}
+        />
+      )}
+
+      {/* Payment Receipt Modal */}
+      {receiptPayment && (
+        <PaymentReceiptModal
+          isOpen={Boolean(receiptPayment)}
+          onClose={() => setReceiptPayment(null)}
+          payment={receiptPayment}
+          staff={staffList.find((s) => s.id === receiptPayment.staff_id) || null}
+        />
+      )}
+
+      {/* Salary Slip Modal */}
+      {salarySlipStaffId && (
+        <SalarySlipModal
+          isOpen={Boolean(salarySlipStaffId)}
+          onClose={() => setSalarySlipStaffId(null)}
+          staffId={salarySlipStaffId}
+        />
+      )}
+
+      {/* Staff History Modal */}
+      {historyStaff && (
+        <StaffHistoryModal
+          isOpen={Boolean(historyStaff)}
+          onClose={() => setHistoryStaff(null)}
+          staff={historyStaff}
         />
       )}
     </div>

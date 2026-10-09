@@ -8,6 +8,7 @@ import { WorkEntryModal } from '@/features/work/WorkEntryModal';
 import { SitesModal } from '@/features/work/SitesModal';
 import { WorkTypesModal } from '@/features/work/WorkTypesModal';
 import { PaymentFormModal } from '@/features/payments/PaymentFormModal';
+import { DailyKhataIntegrationCard } from './DailyKhataIntegrationCard';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useAuth } from '@/features/auth/authContext';
@@ -786,6 +787,9 @@ export const HomePage: React.FC = () => {
           </div>
         </Card>
       )}
+
+      {/* Daily Khata Pro Sister Product & Calculators Integration Card */}
+      <DailyKhataIntegrationCard />
 
       {/* 3-Step Quick Start Onboarding Guide */}
       <Card variant="surface" className="border border-[var(--border)]">

@@ -14,6 +14,9 @@ export interface BusinessSettings {
   print_header?: string;
   print_footer?: string;
   hide_payments_from_viewers?: boolean;
+  require_owner_delete_approval?: boolean;
+  custom_site_label?: string; // e.g. "Shop", "Project", "Field", "Branch"
+  custom_work_label?: string; // e.g. "Task", "Service", "Operation"
 }
 
 interface OrgContextType {

@@ -204,12 +204,58 @@ class SyncEngine {
     }
   }
 
+  private channel: any = null;
+  private realtimeListeners: Set<(payload: any) => void> = new Set();
+
+  public subscribeRealtimeEvents(listener: (payload: any) => void) {
+    this.realtimeListeners.add(listener);
+    return () => {
+      this.realtimeListeners.delete(listener);
+    };
+  }
+
+  public subscribeRealtime(orgId: string) {
+    if (!isSupabaseConfigured || !orgId) return;
+    if (this.channel) {
+      supabase.removeChannel(this.channel);
+      this.channel = null;
+    }
+
+    try {
+      this.channel = supabase
+        .channel(`org_realtime_${orgId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', filter: `org_id=eq.${orgId}` },
+          async (payload) => {
+            // Incremental pull on remote change
+            await this.pullIncremental(orgId);
+            this.notify();
+            this.realtimeListeners.forEach((l) => l(payload));
+          }
+        )
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime subscription error:', e);
+    }
+  }
+
+  public unsubscribeRealtime() {
+    if (this.channel) {
+      supabase.removeChannel(this.channel);
+      this.channel = null;
+    }
+  }
+
   public startPeriodicSync(getOrgId: () => string | undefined) {
     if (this.timer) clearInterval(this.timer);
 
     const runSync = () => {
       const orgId = getOrgId();
       this.syncNow(orgId);
+      if (orgId && !this.channel) {
+        this.subscribeRealtime(orgId);
+      }
     };
 
     window.addEventListener('online', runSync);
@@ -222,6 +268,7 @@ class SyncEngine {
   public stopPeriodicSync() {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
+    this.unsubscribeRealtime();
   }
 }
 

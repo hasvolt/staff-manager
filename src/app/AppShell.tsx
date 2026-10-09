@@ -21,6 +21,10 @@ import {
   Info,
   User as UserIcon,
   CloudUpload,
+  UserCheck,
+  Activity,
+  Database,
+  GitMerge,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useCalculator } from '@/features/calculator/calculatorContext';
@@ -37,6 +41,10 @@ import { AuthModal } from '@/features/auth/AuthModal';
 import { ProfileModal } from '@/features/auth/ProfileModal';
 import { CreateBusinessModal } from '@/features/org/CreateBusinessModal';
 import { JoinBusinessModal } from '@/features/org/JoinBusinessModal';
+import { MembersModal } from '@/features/members/MembersModal';
+import { ConflictModal } from '@/features/sync/ConflictModal';
+import { ActivityFeedModal } from '@/features/sync/ActivityFeedModal';
+import { BackupRestoreModal } from '@/features/sync/BackupRestoreModal';
 
 export const AppShell: React.FC = () => {
   const { t, language } = useI18n();
@@ -52,6 +60,10 @@ export const AppShell: React.FC = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
   const [isJoinOrgModalOpen, setIsJoinOrgModalOpen] = useState(false);
+  const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
+  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   const appName = import.meta.env.VITE_APP_NAME || 'Staff Manager';
   const dailyKhataUrl = import.meta.env.VITE_DAILY_KHATA_URL || 'https://www.rozfiber.com';
@@ -262,6 +274,54 @@ export const AppShell: React.FC = () => {
                 <span>Create Another Business</span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsMembersModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <UserCheck className="w-4 h-4 text-[var(--accent)]" />
+                <span>Team Members & Roles</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsConflictModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <GitMerge className="w-4 h-4 text-amber-500" />
+                <span>Sync Conflicts</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsActivityModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <Activity className="w-4 h-4 text-[var(--accent)]" />
+                <span>Activity & Audit Log</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsBackupModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <Database className="w-4 h-4 text-emerald-500" />
+                <span>Backup & Restore Data</span>
+              </button>
+
               <NavLink
                 to="/settings"
                 onClick={closeDrawer}
@@ -391,6 +451,22 @@ export const AppShell: React.FC = () => {
       <JoinBusinessModal
         isOpen={isJoinOrgModalOpen}
         onClose={() => setIsJoinOrgModalOpen(false)}
+      />
+      <MembersModal
+        isOpen={isMembersModalOpen}
+        onClose={() => setIsMembersModalOpen(false)}
+      />
+      <ConflictModal
+        isOpen={isConflictModalOpen}
+        onClose={() => setIsConflictModalOpen(false)}
+      />
+      <ActivityFeedModal
+        isOpen={isActivityModalOpen}
+        onClose={() => setIsActivityModalOpen(false)}
+      />
+      <BackupRestoreModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
       />
     </div>
   );
