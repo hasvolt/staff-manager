@@ -87,8 +87,9 @@ export const SyncStatusIndicator: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsModalOpen(true)}
-        className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] transition cursor-pointer"
+        className="h-9 sm:h-10 px-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center shrink-0 shadow-2xs"
         title="Sync Status Details"
+        aria-label="Sync Status Details"
       >
         {renderBadge()}
       </button>

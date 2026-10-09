@@ -11,8 +11,9 @@ import { useTheme, ALL_THEMES, ThemeName } from '@/lib/theme/themeContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useAuth } from '@/features/auth/authContext';
 import { useToast } from '@/components/ui/Toast';
-import { Settings, Palette, Globe, DollarSign, Building, Save, Shield } from 'lucide-react';
+import { Settings, Palette, Globe, DollarSign, Building, Save, Shield, Sparkles } from 'lucide-react';
 import { LanguageCode } from '@/locales/types';
+import { LanguageModal } from '@/components/LanguageModal';
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage, languages, currency, setCurrency } = useI18n();
@@ -41,6 +42,7 @@ export const SettingsPage: React.FC = () => {
     currentOrg?.settings?.custom_work_label || ''
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentOrg) {
@@ -312,12 +314,42 @@ export const SettingsPage: React.FC = () => {
 
       {/* Language Selection */}
       <Card variant="surface" className="space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
-          <Globe className="w-4 h-4 text-[var(--accent)]" />
-          <h3 className="font-semibold text-sm text-[var(--text)]">{t('settings.language')}</h3>
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-[var(--accent)]" />
+            <h3 className="font-semibold text-sm text-[var(--text)]">{t('settings.language')}</h3>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsLangModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span>Google Translator (100+)</span>
+          </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="p-2.5 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)] flex items-center justify-between">
+          <div className="flex flex-col text-xs">
+            <span className="font-medium text-[var(--text)]">Offline & Universal Online Translation</span>
+            <span className="text-[11px] text-[var(--text-muted)] mt-0.5">
+              16 languages work 100% offline. Google Translator supports 100+ world languages online.
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsLangModalOpen(true)}
+            className="shrink-0 text-xs ml-2"
+          >
+            Open Selector
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {languages.map((l) => {
             const isSelected = language === l.code;
             return (
@@ -330,7 +362,7 @@ export const SettingsPage: React.FC = () => {
                 }}
                 className={`flex flex-col p-2.5 rounded-xl border text-left transition cursor-pointer ${
                   isSelected
-                    ? 'border-[var(--accent)] bg-[var(--surface-2)] font-semibold'
+                    ? 'border-[var(--accent)] bg-[var(--surface-2)] font-semibold ring-1 ring-[var(--accent)]'
                     : 'border-[var(--border)] bg-[var(--surface-2)]/50 hover:bg-[var(--surface-2)]'
                 }`}
               >
@@ -343,6 +375,11 @@ export const SettingsPage: React.FC = () => {
           })}
         </div>
       </Card>
+
+      <LanguageModal
+        isOpen={isLangModalOpen}
+        onClose={() => setIsLangModalOpen(false)}
+      />
     </div>
   );
 };

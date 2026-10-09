@@ -12,10 +12,9 @@ import { DailyKhataIntegrationCard } from './DailyKhataIntegrationCard';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useAuth } from '@/features/auth/authContext';
-import { useCalculator } from '@/features/calculator/calculatorContext';
 import { useToast } from '@/components/ui/Toast';
 import { localDb, LocalStaff, LocalAttendanceEntry, LocalPayment, LocalSite } from '@/lib/db/dexie';
-import { attendanceRepo, staffRepo } from '@/lib/db/repository';
+import { attendanceRepo } from '@/lib/db/repository';
 import { syncEngine } from '@/lib/sync/syncEngine';
 import {
   calculateStaffEarnings,
@@ -41,8 +40,13 @@ import {
   Eye,
   EyeOff,
   ExternalLink,
-  DollarSign,
   TrendingUp,
+  FileText,
+  Clock,
+  HelpCircle,
+  Check,
+  ChevronRight,
+  Info,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -53,7 +57,8 @@ export const HomePage: React.FC = () => {
   const { success, error, info } = useToast();
   const navigate = useNavigate();
 
-  const advancedCalcUrl = import.meta.env.VITE_ADVANCED_CALCULATOR_URL || 'https://www.rozfiber.com/calculator';
+  const advancedCalcUrl =
+    import.meta.env.VITE_ADVANCED_CALCULATOR_URL || 'https://www.rozfiber.com/calculator';
 
   // Privacy mask toggle (stored in localStorage)
   const [isPrivacyMasked, setIsPrivacyMasked] = useState<boolean>(() => {
@@ -84,7 +89,7 @@ export const HomePage: React.FC = () => {
   const [staffPreviewList, setStaffPreviewList] = useState<LocalStaff[]>([]);
   const [allActiveStaff, setAllActiveStaff] = useState<LocalStaff[]>([]);
   const [todayAttendanceMap, setTodayAttendanceMap] = useState<Record<string, LocalAttendanceEntry>>({});
-  const [sitesList, setSitesList] = useState<LocalSite[]>([]);
+  const [, setSitesList] = useState<LocalSite[]>([]);
   const [allPayments, setAllPayments] = useState<LocalPayment[]>([]);
 
   // Financial Dashboard States for this month
@@ -101,6 +106,8 @@ export const HomePage: React.FC = () => {
   const [isSitesModalOpen, setIsSitesModalOpen] = useState(false);
   const [isWorkTypesModalOpen, setIsWorkTypesModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isHelpGuideOpen, setIsHelpGuideOpen] = useState(false);
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -254,7 +261,20 @@ export const HomePage: React.FC = () => {
 
       // Monthly Trend (Last 4 months)
       const trendList = [];
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthNames = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       for (let i = 3; i >= 0; i--) {
         const d = new Date(curYear, curMonth - i, 1);
         const y = d.getFullYear();
@@ -263,7 +283,9 @@ export const HomePage: React.FC = () => {
         const mEnd = `${y}-${String(m + 1).padStart(2, '0')}-${String(getDaysInMonth(y, m)).padStart(2, '0')}`;
 
         const mPaid = payments
-          .filter((p) => !p.deleted_at && p.pay_date >= mStart && p.pay_date <= mEnd && p.type === 'salary')
+          .filter(
+            (p) => !p.deleted_at && p.pay_date >= mStart && p.pay_date <= mEnd && p.type === 'salary'
+          )
           .reduce((sum, p) => sum + roundMoney(p.amount), 0);
 
         trendList.push({
@@ -305,18 +327,63 @@ export const HomePage: React.FC = () => {
     }
   };
 
+  // 1-Tap Bulk Action: Mark All Present
+  const handleMarkAllPresent = async () => {
+    if (!currentOrg || allActiveStaff.length === 0) return;
+    setIsMarkingAll(true);
+    try {
+      for (const staff of allActiveStaff) {
+        const existing = todayAttendanceMap[staff.id];
+        if (existing) {
+          if (existing.status !== 'present') {
+            await attendanceRepo.update(existing.id, {
+              status: 'present',
+              updated_at: new Date().toISOString(),
+            });
+          }
+        } else {
+          await attendanceRepo.create({
+            org_id: currentOrg.id,
+            staff_id: staff.id,
+            work_date: todayStr,
+            status: 'present',
+            overtime_hours: 0,
+          });
+        }
+      }
+      success(`All ${allActiveStaff.length} staff marked Present for today!`);
+      await loadDashboardData();
+    } catch {
+      error('Error marking all staff present');
+    } finally {
+      setIsMarkingAll(false);
+    }
+  };
+
   const isSupervisor = role === 'supervisor';
+  const unmarkedTodayCount = Math.max(
+    0,
+    activeStaffCount - (presentTodayCount + absentTodayCount)
+  );
+
   const maxTrendAmount = useMemo(() => {
     const max = Math.max(...monthlyTrend.map((t) => t.amount), 1);
     return max;
   }, [monthlyTrend]);
 
+  // Onboarding 3-step progress checks
+  const step1Done = activeStaffCount > 0;
+  const step2Done = presentTodayCount + absentTodayCount > 0;
+  const step3Done = allPayments.length > 0;
+  const completedStepsCount =
+    (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
+
   return (
-    <div className="space-y-6 animate-in fade-in text-left pb-10">
-      {/* Welcome & Status Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-6 animate-in fade-in text-left pb-12">
+      {/* 1. Header Bar: Business Info, Privacy Mask & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)]">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">
               {currentOrg?.name || t('home.title')}
             </h1>
@@ -325,7 +392,7 @@ export const HomePage: React.FC = () => {
                 type="button"
                 onClick={togglePrivacyMask}
                 title={isPrivacyMasked ? 'Reveal amounts' : 'Mask amounts for privacy'}
-                className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer"
+                className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
               >
                 {isPrivacyMasked ? (
                   <EyeOff className="w-4 h-4 text-amber-400" />
@@ -335,8 +402,8 @@ export const HomePage: React.FC = () => {
               </button>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
-            {t('tagline')}
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-medium">
+            {t('tagline')} &bull; <span className="text-[var(--text)] font-semibold">{todayStr}</span>
           </p>
         </div>
 
@@ -346,7 +413,7 @@ export const HomePage: React.FC = () => {
               href={advancedCalcUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] text-xs font-semibold hover:bg-[var(--surface)] transition active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-xs"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)]" />
               <span>{t('calc.advanced')}</span>
@@ -361,13 +428,13 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={async () => {
-              info('Syncing changes...');
+              info('Syncing changes with cloud...');
               const res = await syncEngine.syncNow(currentOrg?.id);
-              if (res.success) success('Synced!');
+              if (res.success) success('Synced successfully!');
               else error(res.message);
               loadDashboardData();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] text-xs font-semibold hover:bg-[var(--surface)] transition active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-xs"
           >
             <RefreshCw className="w-3.5 h-3.5 text-[var(--accent)]" />
             <span>Sync</span>
@@ -375,222 +442,681 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Staff & Daily Attendance KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      {/* 2. Top Summary KPI Cards (High Contrast & Clear Bilingual Labels) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Card 1: Total Staff */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/staff')}
-          className="flex flex-col justify-between"
+          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)]">
-              {t('home.totalStaff')}
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-[var(--surface)]/40 flex items-center justify-center text-[var(--accent)] shadow-2xs">
-              <Users className="w-4 h-4" />
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+                {t('home.totalStaff')}
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">कुल स्टाफ</span>
+            </div>
+            <div className="w-10 h-10 rounded-2xl bg-[var(--surface)]/70 border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-xs">
+              <Users className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
+          <div className="mt-4">
             <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">
               {activeStaffCount}
             </div>
             <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
-              Active staff enrolled
+              Enrolled active members
             </span>
           </div>
         </Card>
 
+        {/* Card 2: Present Today */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="flex flex-col justify-between"
+          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--income)] shadow-sm"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)]">
-              {t('home.presentToday')}
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-[var(--income)]/20 flex items-center justify-center text-[var(--income)] shadow-2xs">
-              <CheckCircle2 className="w-4 h-4" />
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+                {t('home.presentToday')}
+              </span>
+              <span className="text-[11px] text-[var(--income)] font-bold">आज उपस्थित</span>
+            </div>
+            <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-xs">
+              <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
+          <div className="mt-4">
             <div className="text-2xl sm:text-3xl font-extrabold text-[var(--income)] tracking-tight">
               {presentTodayCount}
             </div>
             <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
-              Marked present today
+              {activeStaffCount > 0
+                ? `${Math.round((presentTodayCount / activeStaffCount) * 100)}% attendance today`
+                : 'No staff yet'}
             </span>
           </div>
         </Card>
 
+        {/* Card 3: Unmarked / Absent Today */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="flex flex-col justify-between"
+          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--expense)] shadow-sm"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--text-muted)]">
-              {t('home.absentToday')}
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-[var(--expense)]/20 flex items-center justify-center text-[var(--expense)] shadow-2xs">
-              <XCircle className="w-4 h-4" />
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+                Unmarked / Absent
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)] font-medium">बाकी / गैरहाजिर</span>
+            </div>
+            <div className="w-10 h-10 rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-xs">
+              <Clock className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text-muted)] tracking-tight">
-              {absentTodayCount}
+          <div className="mt-4">
+            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">
+              {unmarkedTodayCount > 0 ? (
+                <span className="text-amber-400">{unmarkedTodayCount} pending</span>
+              ) : (
+                <span className="text-[var(--text-muted)]">{absentTodayCount} absent</span>
+              )}
             </div>
             <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
-              Leaves or absent today
+              {unmarkedTodayCount > 0 ? 'Needs today attendance' : 'All marked today'}
             </span>
           </div>
         </Card>
+
+        {/* Card 4: Net Payable Balance (Hidden from Supervisor) */}
+        {!isSupervisor ? (
+          <Card
+            variant="gradient"
+            interactive
+            onClick={() => navigate('/payments')}
+            className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+                  Payable This Month
+                </span>
+                <span className="text-[11px] text-[var(--text-muted)] font-medium">इस माह कुल बकाया</span>
+              </div>
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)]/70 border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-xs">
+                <CreditCard className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="text-xl sm:text-2xl font-black text-[var(--income)] tracking-tight">
+                {renderAmount(monthTotalPayable)}
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+                Net dues for current cycle
+              </span>
+            </div>
+          </Card>
+        ) : (
+          <Card
+            variant="gradient"
+            interactive
+            onClick={() => setIsWorkModalOpen(true)}
+            className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+                  Daily Work Log
+                </span>
+                <span className="text-[11px] text-[var(--text-muted)] font-medium">दैनिक कार्य दर्ज</span>
+              </div>
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-xs">
+                <Briefcase className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="text-xl sm:text-2xl font-bold text-[var(--text)] tracking-tight">
+                Log Work
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+                Units, sites & daily tasks
+              </span>
+            </div>
+          </Card>
+        )}
       </div>
 
-      {/* PHASE 3 FINANCIAL KPI METRICS (Hidden from Supervisor) */}
-      {!isSupervisor && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-          <Card
-            variant="surface"
-            interactive
-            onClick={() => navigate('/payments')}
-            className="p-3.5 border border-[var(--border)] flex flex-col justify-between"
+      {/* 3. Action-First Tactile Dashboard: 4 Big Primary Action Cards */}
+      <div>
+        <div className="flex items-center justify-between mb-3 px-1">
+          <h2 className="text-sm sm:text-base font-bold text-[var(--text)] flex items-center gap-2">
+            <span>Primary Quick Actions</span>
+            <span className="text-xs font-normal text-[var(--text-muted)]">
+              (त्वरित कार्य - एक क्लिक में शुरू करें)
+            </span>
+          </h2>
+          <button
+            type="button"
+            onClick={() => setIsHelpGuideOpen(true)}
+            className="text-xs text-[var(--accent)] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
           >
-            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-              Payable This Month
-            </span>
-            <div className="mt-1">
-              {renderAmount(monthTotalPayable, 'text-xl sm:text-2xl font-black text-[var(--income)]')}
-            </div>
-            <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
-              Net balance due to pay
-            </span>
-          </Card>
-
-          <Card
-            variant="surface"
-            interactive
-            onClick={() => navigate('/payments')}
-            className="p-3.5 border border-[var(--border)] flex flex-col justify-between"
-          >
-            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-              Salary Paid This Month
-            </span>
-            <div className="mt-1">
-              {renderAmount(monthTotalPaid, 'text-xl sm:text-2xl font-black text-[var(--text)]')}
-            </div>
-            <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
-              Disbursed in current period
-            </span>
-          </Card>
-
-          <Card
-            variant="surface"
-            interactive
-            onClick={() => navigate('/payments')}
-            className="p-3.5 border border-[var(--border)] flex flex-col justify-between col-span-2 sm:col-span-1"
-          >
-            <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-              Advances Outstanding
-            </span>
-            <div className="mt-1">
-              {renderAmount(totalAdvancesOutstanding, 'text-xl sm:text-2xl font-black text-amber-400')}
-            </div>
-            <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
-              Recoverable peshgi / udhar
-            </span>
-          </Card>
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>How it works</span>
+          </button>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* Action 1: Mark Attendance */}
+          <button
+            type="button"
+            onClick={() => navigate('/attendance')}
+            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+                <CalendarCheck className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-[var(--income)] border border-emerald-500/30">
+                10 Seconds
+              </span>
+            </div>
+            <div className="mt-4">
+              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--income)] transition-colors">
+                {t('home.actionAttendance')}
+              </h3>
+              <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
+                हाजिरी लगाएं (1-Tap Mark)
+              </p>
+              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                Present, Absent, Half-day and Overtime tracking.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-[var(--income)] gap-1 pt-2 border-t border-[var(--border)]">
+              <span>Mark Today</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
+          {/* Action 2: Make Payment / Advances */}
+          {!isSupervisor ? (
+            <button
+              type="button"
+              onClick={() => setIsPaymentModalOpen(true)}
+              className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+            >
+              <div className="flex items-start justify-between w-full">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform">
+                  <CreditCard className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--expense)] border border-rose-500/30">
+                  Instant
+                </span>
+              </div>
+              <div className="mt-4">
+                <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--expense)] transition-colors">
+                  {t('home.actionPayment')}
+                </h3>
+                <p className="text-xs font-semibold text-[var(--expense)] mt-0.5">
+                  वेतन व उधार/पेशगी दर्ज करें
+                </p>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                  Salary payout, advance (udhar), bonus & deductions.
+                </p>
+              </div>
+              <div className="mt-3 flex items-center text-xs font-semibold text-[var(--expense)] gap-1 pt-2 border-t border-[var(--border)]">
+                <span>Record Payout</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsWorkModalOpen(true)}
+              className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+            >
+              <div className="flex items-start justify-between w-full">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform">
+                  <Briefcase className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                  Daily Log
+                </span>
+              </div>
+              <div className="mt-4">
+                <h3 className="font-bold text-base text-[var(--text)] group-hover:text-purple-400 transition-colors">
+                  Log Daily Work
+                </h3>
+                <p className="text-xs font-semibold text-purple-400 mt-0.5">
+                  दैनिक कार्य व यूनिट दर्ज करें
+                </p>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                  Work descriptions, project sites, units and pieces.
+                </p>
+              </div>
+              <div className="mt-3 flex items-center text-xs font-semibold text-purple-400 gap-1 pt-2 border-t border-[var(--border)]">
+                <span>Enter Work</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          )}
+
+          {/* Action 3: Add New Staff */}
+          <button
+            type="button"
+            onClick={() => setIsStaffModalOpen(true)}
+            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/20 group-hover:scale-105 transition-transform">
+                <UserPlus className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30">
+                Setup
+              </span>
+            </div>
+            <div className="mt-4">
+              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
+                {t('home.actionAddStaff')}
+              </h3>
+              <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
+                नया स्टाफ जोड़ें (Daily/Monthly)
+              </p>
+              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                Add profile, designation, wage rate & weekly off.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-[var(--accent)] gap-1 pt-2 border-t border-[var(--border)]">
+              <span>Add Member</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+
+          {/* Action 4: Statements & Slips */}
+          <button
+            type="button"
+            onClick={() => navigate('/reports')}
+            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                <FileText className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                Print & PDF
+              </span>
+            </div>
+            <div className="mt-4">
+              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-blue-400 transition-colors">
+                {t('home.actionReports')}
+              </h3>
+              <p className="text-xs font-semibold text-blue-400 mt-0.5">
+                सैलरी स्लिप व लेजर हिसाब
+              </p>
+              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                Print salary slip, attendance register & export CSV.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-blue-400 gap-1 pt-2 border-t border-[var(--border)]">
+              <span>View Statements</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* 4. Interactive 3-Step Quick Guide Card (इन्टरेक्टिव 3-स्टेप गाइड) */}
+      <Card
+        variant="surface"
+        className="p-4 sm:p-5 border-2 border-[var(--border)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-2)] shadow-sm space-y-4"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm sm:text-base text-[var(--text)] flex items-center gap-2">
+                <span>{t('home.onboardingTitle')}</span>
+                <span className="text-xs font-normal text-[var(--text-muted)]">
+                  (आसान 3-स्टेप मार्गदर्शिका)
+                </span>
+              </h3>
+              <span className="text-xs text-[var(--text-muted)] block">
+                {completedStepsCount === 3
+                  ? 'All initial steps completed! Your business is active.'
+                  : `${completedStepsCount} of 3 steps completed. Follow these steps to get started.`}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)]">
+              {completedStepsCount} / 3 Complete
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsHelpGuideOpen(true)}
+              className="text-xs"
+            >
+              <HelpCircle className="w-3.5 h-3.5 mr-1 text-[var(--accent)]" />
+              <span>Full Guide</span>
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Step 1 */}
+          <div
+            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+              step1Done
+                ? 'bg-emerald-500/5 border-emerald-500/30'
+                : 'bg-[var(--surface-2)] border-[var(--accent)] shadow-xs'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Step 1
+                </span>
+                {step1Done ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                    <Check className="w-3 h-3" />
+                    <span>Done ({activeStaffCount})</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent)]/15 px-2 py-0.5 rounded-full">
+                    Action Needed
+                  </span>
+                )}
+              </div>
+              <h4 className="font-bold text-sm text-[var(--text)]">
+                Add Staff & Wage Rates
+              </h4>
+              <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
+                स्टाफ जोड़ें और वेतन तय करें
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+                Add name, designation & wage type (Daily, Monthly, Hourly, Per-piece).
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+              <Button
+                variant={step1Done ? 'secondary' : 'primary'}
+                size="sm"
+                fullWidth
+                onClick={() => setIsStaffModalOpen(true)}
+              >
+                {step1Done ? '+ Add More Staff' : '+ Add First Staff'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div
+            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+              step2Done
+                ? 'bg-emerald-500/5 border-emerald-500/30'
+                : step1Done
+                ? 'bg-[var(--surface-2)] border-[var(--income)] shadow-xs'
+                : 'bg-[var(--surface-2)] border-[var(--border)] opacity-85'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Step 2
+                </span>
+                {step2Done ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                    <Check className="w-3 h-3" />
+                    <span>Marked Today</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full">
+                    Daily 10s
+                  </span>
+                )}
+              </div>
+              <h4 className="font-bold text-sm text-[var(--text)]">
+                Mark Daily Attendance
+              </h4>
+              <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
+                10 सेकंड में दैनिक हाजिरी लगाएं
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+                1-tap: Present (उपस्थित), Half-day (आधा दिन), Absent (छुट्टी).
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+              <Button
+                variant={step2Done ? 'secondary' : 'income'}
+                size="sm"
+                fullWidth
+                onClick={() => navigate('/attendance')}
+              >
+                {step2Done ? 'View Attendance' : 'Mark Attendance Now'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div
+            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+              step3Done
+                ? 'bg-emerald-500/5 border-emerald-500/30'
+                : 'bg-[var(--surface-2)] border-[var(--border)]'
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Step 3
+                </span>
+                {step3Done ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                    <Check className="w-3 h-3" />
+                    <span>Records Active</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full">
+                    Payouts & Slips
+                  </span>
+                )}
+              </div>
+              <h4 className="font-bold text-sm text-[var(--text)]">
+                Advances & Salary Slips
+              </h4>
+              <p className="text-xs font-semibold text-rose-400 mt-0.5">
+                वेतन/उधार दर्ज करें व स्लिप बनाएं
+              </p>
+              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+                Record advance (peshgi), month settlement & download PDF slips.
+              </p>
+            </div>
+            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+              <Button
+                variant={step3Done ? 'secondary' : 'outline'}
+                size="sm"
+                fullWidth
+                onClick={() => {
+                  if (!isSupervisor) setIsPaymentModalOpen(true);
+                  else navigate('/reports');
+                }}
+              >
+                {!isSupervisor ? 'Record Payment' : 'View Reports'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* 5. Today's Quick Attendance Widget with 1-Tap "Mark All Present" */}
+      {staffPreviewList.length > 0 && (
+        <Card variant="surface" className="p-4 sm:p-5 border-2 border-[var(--border)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[var(--border)]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)]">
+                <CalendarCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm sm:text-base text-[var(--text)]">
+                  Today's Attendance Shortcut
+                </h3>
+                <span className="text-xs text-[var(--text-muted)]">
+                  {todayStr} &bull; {presentTodayCount} marked present &bull;{' '}
+                  {unmarkedTodayCount} pending
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="income"
+                size="sm"
+                onClick={handleMarkAllPresent}
+                isLoading={isMarkingAll}
+                className="text-xs shadow-xs"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                <span>Mark All Present (सभी उपस्थित)</span>
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/attendance')}
+                className="text-xs text-[var(--accent)] font-semibold hover:underline flex items-center gap-1 cursor-pointer px-2 py-1"
+              >
+                <span>Full Register</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {staffPreviewList.map((staff) => {
+              const currentStatus = todayAttendanceMap[staff.id]?.status;
+              return (
+                <div
+                  key={staff.id}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border)] hover:border-[var(--accent)]/40 transition shadow-2xs"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar name={staff.name} src={staff.photo_path || undefined} size="sm" />
+                    <div className="min-w-0">
+                      <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
+                        {staff.name}
+                      </span>
+                      <span className="text-[11px] text-[var(--text-muted)] block truncate font-medium">
+                        {staff.role_title || 'Worker'} &bull;{' '}
+                        {staff.payment_type === 'daily'
+                          ? 'Daily'
+                          : staff.payment_type === 'monthly'
+                          ? 'Monthly'
+                          : 'Per unit'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMark(staff.id, 'present')}
+                      title="Mark Present (उपस्थित)"
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                        currentStatus === 'present'
+                          ? 'bg-[var(--btn-income)] text-white border-[var(--btn-income)] shadow-sm'
+                          : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--income)] hover:text-[var(--income)]'
+                      }`}
+                    >
+                      P
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMark(staff.id, 'half')}
+                      title="Mark Half-Day (आधा दिन)"
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                        currentStatus === 'half'
+                          ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-sm'
+                          : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--warning)] hover:text-[var(--warning)]'
+                      }`}
+                    >
+                      H
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickMark(staff.id, 'absent')}
+                      title="Mark Absent (गैरहाजिर)"
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                        currentStatus === 'absent'
+                          ? 'bg-[var(--btn-expense)] text-white border-[var(--btn-expense)] shadow-sm'
+                          : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--expense)] hover:text-[var(--expense)]'
+                      }`}
+                    >
+                      A
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
       )}
 
-      {/* Primary Big Action Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* 6. Quick Sites & Work Types Management Shortcuts */}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 text-xs">
         <button
           type="button"
-          onClick={() => setIsStaffModalOpen(true)}
-          className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent)] transition duration-150 active:scale-97 cursor-pointer text-center group shadow-xs"
+          onClick={() => setIsSitesModalOpen(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
         >
-          <div className="w-11 h-11 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-110 transition">
-            <UserPlus className="w-5 h-5" />
-          </div>
-          <span className="text-xs sm:text-sm font-semibold text-[var(--text)]">
-            {t('home.actionAddStaff')}
-          </span>
+          <MapPin className="w-4 h-4 text-[var(--accent)]" />
+          <span>Manage Sites / Shops</span>
         </button>
 
         <button
           type="button"
-          onClick={() => navigate('/attendance')}
-          className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent)] transition duration-150 active:scale-97 cursor-pointer text-center group shadow-xs"
+          onClick={() => setIsWorkTypesModalOpen(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
         >
-          <div className="w-11 h-11 rounded-2xl bg-[var(--btn-income)] text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-110 transition">
-            <CalendarCheck className="w-5 h-5" />
-          </div>
-          <span className="text-xs sm:text-sm font-semibold text-[var(--text)]">
-            {t('home.actionAttendance')}
-          </span>
+          <Layers className="w-4 h-4 text-[var(--accent)]" />
+          <span>Manage Work Types</span>
         </button>
-
-        {/* Phase 3 Make Payment Action */}
-        {!isSupervisor ? (
-          <button
-            type="button"
-            onClick={() => setIsPaymentModalOpen(true)}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent)] transition duration-150 active:scale-97 cursor-pointer text-center group shadow-xs"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-[var(--btn-expense)] text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-110 transition">
-              <CreditCard className="w-5 h-5" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-[var(--text)]">
-              {t('home.actionPayment')}
-            </span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setIsWorkModalOpen(true)}
-            className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent)] transition duration-150 active:scale-97 cursor-pointer text-center group shadow-xs"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-purple-600 text-white flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-110 transition">
-              <Briefcase className="w-5 h-5" />
-            </div>
-            <span className="text-xs sm:text-sm font-semibold text-[var(--text)]">
-              Log Daily Work
-            </span>
-          </button>
-        )}
 
         <button
           type="button"
-          onClick={() => navigate('/reports')}
-          className="flex flex-col items-center justify-center p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] hover:border-[var(--accent)] transition duration-150 active:scale-97 cursor-pointer text-center group shadow-xs"
+          onClick={() => setIsWorkModalOpen(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-purple-400 transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
         >
-          <div className="w-11 h-11 rounded-2xl bg-[var(--surface)] text-[var(--text)] border border-[var(--border)] flex items-center justify-center mb-2.5 shadow-sm group-hover:scale-110 transition">
-            <BarChart3 className="w-5 h-5 text-[var(--accent)]" />
-          </div>
-          <span className="text-xs sm:text-sm font-semibold text-[var(--text)]">
-            {t('home.actionReports')}
-          </span>
+          <Briefcase className="w-4 h-4 text-purple-400" />
+          <span>Log Daily Work</span>
         </button>
       </div>
 
-      {/* PHASE 3 LABOUR COST BREAKDOWNS (Hidden from Supervisor) */}
+      {/* 7. Labour Cost Breakdowns & Trend Charts (Hidden from Supervisor) */}
       {!isSupervisor && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
           {/* Labour Cost By Site */}
-          <Card variant="surface" className="p-4 border border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[var(--accent)]" />
-                <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">Cost by Site / Shop</h3>
+                <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">
+                  Cost by Site / Shop
+                </h3>
               </div>
             </div>
 
             {costBySite.length === 0 ? (
-              <p className="text-xs text-[var(--text-muted)] py-4 text-center">No site cost entries yet</p>
+              <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+                No site cost entries yet
+              </p>
             ) : (
               <div className="space-y-2.5">
                 {costBySite.map((s, idx) => (
@@ -599,11 +1125,14 @@ export const HomePage: React.FC = () => {
                       <span className="text-[var(--text)] truncate">{s.name}</span>
                       {renderAmount(s.amount, 'text-[var(--income)]')}
                     </div>
-                    <div className="w-full bg-[var(--surface-2)] h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-[var(--surface-2)] h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-[var(--accent)] h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${Math.min(100, Math.round((s.amount / (monthTotalPayable || 1)) * 100))}%`,
+                          width: `${Math.min(
+                            100,
+                            Math.round((s.amount / (monthTotalPayable || 1)) * 100)
+                          )}%`,
                         }}
                       />
                     </div>
@@ -614,7 +1143,7 @@ export const HomePage: React.FC = () => {
           </Card>
 
           {/* Labour Cost By Role */}
-          <Card variant="surface" className="p-4 border border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-purple-400" />
@@ -623,7 +1152,9 @@ export const HomePage: React.FC = () => {
             </div>
 
             {costByRole.length === 0 ? (
-              <p className="text-xs text-[var(--text-muted)] py-4 text-center">No role cost entries yet</p>
+              <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+                No role cost entries yet
+              </p>
             ) : (
               <div className="space-y-2.5">
                 {costByRole.map((r, idx) => (
@@ -632,11 +1163,14 @@ export const HomePage: React.FC = () => {
                       <span className="text-[var(--text)] truncate">{r.name}</span>
                       {renderAmount(r.amount, 'text-[var(--income)]')}
                     </div>
-                    <div className="w-full bg-[var(--surface-2)] h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-[var(--surface-2)] h-2 rounded-full overflow-hidden">
                       <div
                         className="bg-purple-500 h-full rounded-full transition-all duration-500"
                         style={{
-                          width: `${Math.min(100, Math.round((r.amount / (monthTotalPayable || 1)) * 100))}%`,
+                          width: `${Math.min(
+                            100,
+                            Math.round((r.amount / (monthTotalPayable || 1)) * 100)
+                          )}%`,
                         }}
                       />
                     </div>
@@ -647,11 +1181,13 @@ export const HomePage: React.FC = () => {
           </Card>
 
           {/* Monthly Payout Trend Chart */}
-          <Card variant="surface" className="p-4 border border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-[var(--income)]" />
-                <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">Monthly Payout Trend</h3>
+                <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">
+                  Monthly Payout Trend
+                </h3>
               </div>
             </div>
 
@@ -659,7 +1195,10 @@ export const HomePage: React.FC = () => {
               {monthlyTrend.map((item, idx) => {
                 const heightPct = Math.max(12, Math.round((item.amount / maxTrendAmount) * 100));
                 return (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                  <div
+                    key={idx}
+                    className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end"
+                  >
                     <span className="text-[9px] font-mono text-[var(--text-muted)] truncate">
                       {isPrivacyMasked ? '••••' : item.amount > 0 ? `₹${item.amount}` : '0'}
                     </span>
@@ -678,163 +1217,8 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Sites & Work Types Management Shortcuts */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        <button
-          type="button"
-          onClick={() => setIsSitesModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:bg-[var(--surface)] transition whitespace-nowrap cursor-pointer"
-        >
-          <MapPin className="w-3.5 h-3.5 text-[var(--accent)]" />
-          <span>Manage Sites / Shops</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsWorkTypesModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:bg-[var(--surface)] transition whitespace-nowrap cursor-pointer"
-        >
-          <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />
-          <span>Manage Work Types</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setIsWorkModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:bg-[var(--surface)] transition whitespace-nowrap cursor-pointer"
-        >
-          <Briefcase className="w-3.5 h-3.5 text-purple-400" />
-          <span>Log Daily Work</span>
-        </button>
-      </div>
-
-      {/* Today's Quick Attendance Shortcut */}
-      {staffPreviewList.length > 0 && (
-        <Card variant="surface" className="border border-[var(--border)] space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
-            <div className="flex items-center gap-2">
-              <CalendarCheck className="w-4 h-4 text-[var(--income)]" />
-              <h3 className="font-bold text-sm text-[var(--text)]">Today's Attendance Shortcut</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate('/attendance')}
-              className="text-xs text-[var(--accent)] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <span>View All</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {staffPreviewList.map((staff) => {
-              const currentStatus = todayAttendanceMap[staff.id]?.status;
-              return (
-                <div
-                  key={staff.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Avatar name={staff.name} src={staff.photo_path || undefined} size="sm" />
-                    <div className="min-w-0">
-                      <span className="font-semibold text-xs text-[var(--text)] block truncate">
-                        {staff.name}
-                      </span>
-                      <span className="text-[10px] text-[var(--text-muted)] block truncate">
-                        {staff.role_title || 'Worker'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickMark(staff.id, 'present')}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        currentStatus === 'present'
-                          ? 'bg-[var(--btn-income)] text-white'
-                          : 'bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--income)]'
-                      }`}
-                    >
-                      P
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickMark(staff.id, 'half')}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        currentStatus === 'half'
-                          ? 'bg-[var(--warning)] text-black'
-                          : 'bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--warning)]'
-                      }`}
-                    >
-                      H
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickMark(staff.id, 'absent')}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition cursor-pointer ${
-                        currentStatus === 'absent'
-                          ? 'bg-[var(--btn-expense)] text-white'
-                          : 'bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--expense)]'
-                      }`}
-                    >
-                      A
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
-
-      {/* Daily Khata Pro Sister Product & Calculators Integration Card */}
+      {/* 8. Daily Khata Pro Sister Product & Calculators Integration Card */}
       <DailyKhataIntegrationCard />
-
-      {/* 3-Step Quick Start Onboarding Guide */}
-      <Card variant="surface" className="border border-[var(--border)]">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-          <h3 className="font-bold text-sm sm:text-base text-[var(--text)]">
-            {t('home.onboardingTitle')}
-          </h3>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-2)]/60">
-            <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              1
-            </div>
-            <div className="flex-1">
-              <p className="text-xs sm:text-sm text-[var(--text)] font-medium leading-relaxed">
-                {t('home.onboardingStep1')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-2)]/60">
-            <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              2
-            </div>
-            <div className="flex-1">
-              <p className="text-xs sm:text-sm text-[var(--text)] font-medium leading-relaxed">
-                {t('home.onboardingStep2')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-2)]/60">
-            <div className="w-6 h-6 rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-              3
-            </div>
-            <div className="flex-1">
-              <p className="text-xs sm:text-sm text-[var(--text)] font-medium leading-relaxed">
-                {t('home.onboardingStep3')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Card>
 
       {/* Modals */}
       {isStaffModalOpen && (
@@ -875,6 +1259,92 @@ export const HomePage: React.FC = () => {
           onClose={() => setIsPaymentModalOpen(false)}
           onSuccess={() => loadDashboardData()}
         />
+      )}
+
+      {/* How Staff Manager Works - Visual Help Modal */}
+      {isHelpGuideOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-[var(--overlay)] backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in"
+          onClick={() => setIsHelpGuideOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg bg-[var(--surface)] border-2 border-[var(--border)] rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center font-bold">
+                  <Info className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-[var(--text)]">
+                    How Staff Manager Works
+                  </h3>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    स्टाफ मैनेजर का सरल उपयोग मार्गदर्शक
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsHelpGuideOpen(false)}
+                className="p-1.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs leading-relaxed text-[var(--text)]">
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[var(--accent)] text-sm">
+                  <span>1. Staff Profiles (स्टाफ प्रोफाइल)</span>
+                </div>
+                <p className="text-[var(--text-muted)]">
+                  Add staff once with their wage rate. Supported types: <strong>Daily Wage</strong> (दैनिक मजदूरी), <strong>Monthly Salary</strong> (मासिक वेतन), <strong>Hourly</strong>, and <strong>Per-Piece</strong> (प्रति यूनिट).
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-[var(--income)] text-sm">
+                  <span>2. 10-Second Daily Attendance (दैनिक हाजिरी)</span>
+                </div>
+                <p className="text-[var(--text-muted)]">
+                  Mark <strong>Present</strong> (P), <strong>Half-day</strong> (H), or <strong>Absent</strong> (A). Use "Mark All Present" to record your whole team with 1 tap, then only change exceptions!
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-rose-400 text-sm">
+                  <span>3. Payments & Advances / Udhar (वेतन व पेशगी)</span>
+                </div>
+                <p className="text-[var(--text-muted)]">
+                  Record advance (उधार/पेशगी), salary payments, and bonus. Staff ledger automatically calculates earned vs paid dues without mathematical errors.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-blue-400 text-sm">
+                  <span>4. Professional Salary Slips & Offline (स्लिप व सुरक्षा)</span>
+                </div>
+                <p className="text-[var(--text-muted)]">
+                  Generate printable salary slips and download Excel/CSV anytime. The app works 100% offline; changes sync automatically whenever internet connects.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => setIsHelpGuideOpen(false)}
+              >
+                Got It! (समझ गया)
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

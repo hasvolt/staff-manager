@@ -28,12 +28,12 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
   if (!currentOrg) return null;
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative min-w-0" ref={dropdownRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 py-1.5 px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition text-xs font-semibold max-w-[160px] sm:max-w-[200px] cursor-pointer"
-        title="Switch Business"
+        className="flex items-center gap-1.5 sm:gap-2 py-1.5 px-2 sm:px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition text-xs font-semibold max-w-[120px] min-[360px]:max-w-[145px] min-[420px]:max-w-[185px] sm:max-w-[220px] cursor-pointer"
+        title={`Business: ${currentOrg.name}`}
       >
         <Building2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
         <span className="truncate text-left">{currentOrg.name}</span>
@@ -41,7 +41,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-64 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-1 text-left">
+        <div className="absolute left-0 mt-2 w-64 max-w-[calc(100vw-24px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-1 text-left">
           <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
             My Businesses ({organizations.length})
           </div>

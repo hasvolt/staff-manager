@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   Users,
@@ -20,6 +20,8 @@ import {
   Mail,
   Info,
   User as UserIcon,
+  ChevronDown,
+  LogOut,
   CloudUpload,
   UserCheck,
   Activity,
@@ -30,6 +32,7 @@ import { useI18n } from '@/lib/i18n/i18nContext';
 import { useCalculator } from '@/features/calculator/calculatorContext';
 import { useAuth } from '@/features/auth/authContext';
 import { useOrg } from '@/features/org/orgContext';
+import { useToast } from '@/components/ui/Toast';
 import { ThemeModal } from '@/components/ThemeModal';
 import { LanguageModal } from '@/components/LanguageModal';
 import { CalculatorModal } from '@/features/calculator/CalculatorModal';
@@ -49,11 +52,13 @@ import { BackupRestoreModal } from '@/features/sync/BackupRestoreModal';
 export const AppShell: React.FC = () => {
   const { t, language } = useI18n();
   const { openCalculator } = useCalculator();
-  const { user, profile, isLocalMode } = useAuth();
+  const { user, profile, isLocalMode, signOut } = useAuth();
   const { currentOrg, role } = useOrg();
+  const { success } = useToast();
   const location = useLocation();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -64,6 +69,18 @@ export const AppShell: React.FC = () => {
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const appName = import.meta.env.VITE_APP_NAME || 'Staff Manager';
   const dailyKhataUrl = import.meta.env.VITE_DAILY_KHATA_URL || 'https://www.rozfiber.com';
@@ -85,22 +102,25 @@ export const AppShell: React.FC = () => {
       <OfflineIndicator />
 
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <header className="sticky top-0 z-40 w-full h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+        {/* Left: Navigation Menu & Organization Context */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2 -ml-1 rounded-xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition cursor-pointer shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] flex items-center justify-center transition active:scale-95 cursor-pointer shrink-0"
             aria-label="Open Navigation Menu"
+            title="Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          <NavLink to="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--card-from)] to-[var(--card-to)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] font-bold text-sm shadow-xs group-hover:scale-105 transition">
+          {/* App Brand (Shown when no org selected or on medium+ screens) */}
+          <NavLink to="/" className={`${currentOrg ? 'hidden md:flex' : 'flex'} items-center gap-2.5 group shrink-0`}>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[var(--card-from)] to-[var(--card-to)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] font-bold text-sm shadow-xs group-hover:scale-105 transition">
               <Users className="w-4 h-4" />
             </div>
-            <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[var(--text)] hidden md:inline">
+            <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[var(--text)] hidden lg:inline">
               {appName}
             </span>
           </NavLink>
@@ -112,73 +132,151 @@ export const AppShell: React.FC = () => {
           />
         </div>
 
-        {/* Right Header Controls */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Sync Status Badge */}
+        {/* Right Header Controls (Clean, Focused & Uncluttered) */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Cloud & Local Sync Status Badge */}
           <SyncStatusIndicator />
 
-          {/* Calculator trigger */}
+          {/* Quick Inbuilt Calculator */}
           <button
             type="button"
             onClick={() => openCalculator()}
             title={t('calc.title')}
-            className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             aria-label={t('calc.title')}
           >
-            <Calculator className="w-5 h-5" />
+            <Calculator className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
 
-          {/* Theme switcher */}
-          <button
-            type="button"
-            onClick={() => setIsThemeModalOpen(true)}
-            title={t('theme.title')}
-            className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition cursor-pointer"
-            aria-label={t('theme.title')}
-          >
-            <Palette className="w-5 h-5" />
-          </button>
-
-          {/* Language selector */}
-          <button
-            type="button"
-            onClick={() => setIsLangModalOpen(true)}
-            title={t('language.title')}
-            className="flex items-center gap-1 py-1.5 px-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition cursor-pointer text-xs font-semibold"
-            aria-label={t('language.title')}
-          >
-            <Globe className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span className="uppercase">{language}</span>
-          </button>
-
-          {/* User Account / Profile Button */}
+          {/* User Account / Profile Menu */}
           {user ? (
-            <button
-              type="button"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-[var(--accent)]/40 bg-[var(--surface-2)] text-[var(--accent)] text-xs font-semibold hover:bg-[var(--surface)] transition cursor-pointer"
-              title="User Profile"
-            >
-              <UserIcon className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[80px] hidden sm:inline">
-                {profile?.full_name?.trim()?.split(' ')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Account'}
-              </span>
-            </button>
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="h-9 sm:h-10 pl-1.5 pr-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center gap-1.5 sm:gap-2"
+                title="Account Menu"
+                aria-label="Account Menu"
+              >
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0">
+                  {profile?.full_name?.trim()?.charAt(0).toUpperCase() ||
+                    user.user_metadata?.full_name?.charAt(0)?.toUpperCase() ||
+                    user.email?.charAt(0).toUpperCase() || (
+                      <UserIcon className="w-3.5 h-3.5" />
+                    )}
+                </div>
+                <span className="truncate max-w-[70px] sm:max-w-[100px] text-xs font-semibold hidden min-[400px]:inline">
+                  {profile?.full_name?.trim()?.split(' ')[0] ||
+                    user.user_metadata?.full_name?.split(' ')[0] ||
+                    'Account'}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-24px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-1 text-left">
+                  {/* User info banner */}
+                  <div className="p-2 border-b border-[var(--border)] mb-1">
+                    <p className="font-bold text-xs text-[var(--text)] truncate">
+                      {profile?.full_name || user.user_metadata?.full_name || 'My Account'}
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] truncate">{user.email}</p>
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <span className="text-[10px] font-semibold bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-md capitalize">
+                        {role}
+                      </span>
+                      <span className="text-[10px] text-[var(--text-muted)]">
+                        {isLocalMode ? 'Local Mode' : 'Cloud Synced'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsProfileModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <UserIcon className="w-4 h-4 text-[var(--accent)]" />
+                    <span>My Profile & Security</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsThemeModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Palette className="w-4 h-4 text-[var(--accent)]" />
+                      <span>Theme Colors</span>
+                    </div>
+                    <span className="text-[10px] bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-full capitalize">
+                      12 Themes
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsLangModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Globe className="w-4 h-4 text-[var(--accent)]" />
+                      <span>Google Translator</span>
+                    </div>
+                    <span className="text-[10px] bg-[var(--surface-2)] text-[var(--text-muted)] px-2 py-0.5 rounded-full uppercase">
+                      {language}
+                    </span>
+                  </button>
+
+                  <NavLink
+                    to="/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium"
+                  >
+                    <Settings className="w-4 h-4 text-[var(--text-muted)]" />
+                    <span>Settings</span>
+                  </NavLink>
+
+                  <div className="my-1 border-t border-[var(--border)]" />
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsUserMenuOpen(false);
+                      await signOut();
+                      success('Signed out successfully');
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-[var(--expense)] hover:bg-[var(--expense)]/10 transition font-medium cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <button
               type="button"
               onClick={() => setIsAuthModalOpen(true)}
-              className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-semibold hover:opacity-90 transition cursor-pointer shadow-xs"
+              className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl sm:rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-bold hover:opacity-95 transition-all duration-150 active:scale-95 cursor-pointer shadow-sm shadow-[var(--accent)]/20 shrink-0 flex items-center gap-1.5"
+              title="Sign In / Register"
+              aria-label="Sign In / Register"
             >
-              <UserIcon className="w-3.5 h-3.5" />
+              <UserIcon className="w-4 h-4 shrink-0" />
               <span>Sign In</span>
             </button>
           )}
-
-          {/* PWA Install Button */}
-          <div className="hidden sm:block">
-            <PWAInstallButton compact />
-          </div>
         </div>
       </header>
 
@@ -190,7 +288,7 @@ export const AppShell: React.FC = () => {
       {/* Bottom Navigation Bar */}
       <nav
         aria-label="Bottom Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md flex items-center justify-around px-2 sm:px-6 max-w-5xl sm:mx-auto"
+        className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t-2 border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md flex items-center justify-around px-2 sm:px-6 max-w-5xl sm:mx-auto shadow-lg"
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -199,15 +297,25 @@ export const AppShell: React.FC = () => {
             <NavLink
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition relative cursor-pointer ${
-                isActive ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+              className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-all duration-150 active:scale-95 relative cursor-pointer select-none ${
+                isActive
+                  ? 'text-[var(--accent)] font-bold'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
             >
               {isActive && (
-                <div className="absolute top-0 w-8 h-1 rounded-b-full bg-[var(--accent)]" />
+                <div className="absolute top-0 w-10 h-1 rounded-b-full bg-[var(--accent)] shadow-xs shadow-[var(--accent)]" />
               )}
-              <Icon className="w-5 h-5 mb-0.5" />
-              <span className="text-[11px] leading-tight line-clamp-1">{t(item.labelKey)}</span>
+              <div
+                className={`p-1 rounded-xl transition-colors ${
+                  isActive ? 'bg-[var(--accent)]/12' : ''
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] leading-tight line-clamp-1 mt-0.5">
+                {t(item.labelKey)}
+              </span>
             </NavLink>
           );
         })}
@@ -348,6 +456,57 @@ export const AppShell: React.FC = () => {
                 <HelpCircle className="w-4 h-4 text-[var(--text-muted)]" />
                 <span>{t('menu.help')}</span>
               </NavLink>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsThemeModalOpen(true);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Palette className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Theme Colors & Mode</span>
+                </div>
+                <span className="text-[10px] bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-full font-medium">
+                  12 Themes
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsLangModalOpen(true);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Google Translator & Language</span>
+                </div>
+                <span className="text-[10px] bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-full font-medium">
+                  100+ Online
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  openCalculator();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Calculator className="w-4 h-4 text-[var(--accent)]" />
+                  <span>Inbuilt Quick Calculator</span>
+                </div>
+                <span className="text-[10px] bg-[var(--surface-2)] text-[var(--text-muted)] px-2 py-0.5 rounded-full font-medium">
+                  + - &times; / %
+                </span>
+              </button>
 
               <div className="my-2 border-t border-[var(--border)] pt-2" />
 
