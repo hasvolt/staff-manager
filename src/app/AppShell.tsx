@@ -88,12 +88,12 @@ export const AppShell: React.FC = () => {
   const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'support@rozfiber.com';
 
   const navItems = [
-    { to: '/', labelKey: 'nav.home', icon: Home },
-    { to: '/staff', labelKey: 'nav.staff', icon: Users },
-    { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck },
-    { to: '/payments', labelKey: 'nav.payments', icon: CreditCard },
-    { to: '/reports', labelKey: 'nav.reports', icon: BarChart3 },
-  ];
+    { to: '/', labelKey: 'nav.home', icon: Home, visible: true },
+    { to: '/staff', labelKey: 'nav.staff', icon: Users, visible: true },
+    { to: '/attendance', labelKey: 'nav.attendance', icon: CalendarCheck, visible: true },
+    { to: '/payments', labelKey: 'nav.payments', icon: CreditCard, visible: role !== 'supervisor' },
+    { to: '/reports', labelKey: 'nav.reports', icon: BarChart3, visible: role !== 'supervisor' },
+  ].filter((item) => item.visible);
 
   const closeDrawer = () => setIsDrawerOpen(false);
 

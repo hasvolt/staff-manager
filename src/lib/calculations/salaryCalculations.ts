@@ -1,7 +1,9 @@
 import { LocalStaff, LocalStaffCompensation, LocalAttendanceEntry, LocalWorkEntry, LocalPayment, LocalPeriodClosing } from '@/lib/db/dexie';
 
 export interface RateHistoryItem {
-  effective_from: string; // YYYY-MM-DD
+  effective_from?: string; // YYYY-MM-DD
+  from?: string; // Legacy fallback YYYY-MM-DD
+  type?: 'daily' | 'monthly' | 'hourly' | 'piece';
   rate: number;
   overtime_rate?: number | null;
   note?: string;
@@ -83,10 +85,14 @@ export function getEffectiveRate(
     [];
 
   if (history && history.length > 0) {
-    // Sort descending by effective_from
+    // Sort descending by effective_from (or fallback legacy 'from')
     const sorted = [...history]
-      .filter((h) => h.effective_from && h.effective_from <= date)
-      .sort((a, b) => b.effective_from.localeCompare(a.effective_from));
+      .map((h) => ({
+        ...h,
+        resolvedDate: h.effective_from || h.from || '',
+      }))
+      .filter((h) => h.resolvedDate && h.resolvedDate <= date)
+      .sort((a, b) => b.resolvedDate.localeCompare(a.resolvedDate));
 
     if (sorted.length > 0) {
       return {

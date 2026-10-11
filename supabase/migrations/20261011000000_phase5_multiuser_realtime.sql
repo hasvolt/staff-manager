@@ -121,12 +121,30 @@ begin
   return true;
 end $$;
 
--- 4. Enable Supabase Realtime publication on primary collaboration tables
-alter publication supabase_realtime add table public.staff;
-alter publication supabase_realtime add table public.attendance_entries;
-alter publication supabase_realtime add table public.work_entries;
-alter publication supabase_realtime add table public.payments;
-alter publication supabase_realtime add table public.period_closings;
-alter publication supabase_realtime add table public.memberships;
-alter publication supabase_realtime add table public.invites;
-alter publication supabase_realtime add table public.audit_log;
+-- 4. Enable Supabase Realtime publication on primary collaboration tables (Idempotent)
+do $$
+declare
+  tbl text;
+  tables text[] := array[
+    'staff',
+    'attendance_entries',
+    'work_entries',
+    'payments',
+    'period_closings',
+    'memberships',
+    'invites',
+    'audit_log'
+  ];
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach tbl in array tables loop
+      if not exists (
+        select 1 from pg_publication_tables 
+        where pubname = 'supabase_realtime' and tablename = tbl and schemaname = 'public'
+      ) then
+        execute format('alter publication supabase_realtime add table public.%I', tbl);
+      end if;
+    end loop;
+  end if;
+end $$;
+

@@ -8,14 +8,23 @@ Migrations must be run in sequence:
    - Provisions baseline tables (`profiles`, `organizations`, `memberships`, `invites`, `devices`, `sites`, `work_types`, `custom_field_defs`, `staff`, `attendance_entries`, `work_entries`, `payments`, `period_closings`, `audit_log`), standard synced triggers, RLS policies, RPC functions (`create_organization`, `accept_invite`, `delete_my_account`), and the private `org-files` storage bucket.
 
 2. **Migration 002 - Phase 1 Hardening**: `supabase/migrations/20261009000000_phase1_hardening.sql`
-   - Hardens all database constraints, isolates staff pay data, restricts invites, protects the last owner, and guarantees cross-tenant integrity.
+   - Hardens all database constraints, isolates staff pay data into `staff_compensation`, restricts invites, protects the last owner, and guarantees cross-tenant integrity.
+
+3. **Migration 003 - Phase 3 Period Lock**: `supabase/migrations/20261010000000_phase3_period_lock.sql`
+   - Enforces database triggers preventing edits or insertions on attendance and payments within locked/closed accounting periods, and provisions unlock authorization RPC functions.
+
+4. **Migration 004 - Phase 5 Multi-User & Realtime**: `supabase/migrations/20261011000000_phase5_multiuser_realtime.sql`
+   - Provisions `transfer_org_ownership` RPC, supervisor site assignment enforcement, and enables idempotent Supabase Realtime publication on all primary collaboration tables.
 
 ### Applying in the Supabase SQL Editor
 1. Open your Supabase Project Dashboard (`https://supabase.com/dashboard/project/<your-project-id>`).
 2. Go to the **SQL Editor** tab on the left sidebar.
-3. Open `supabase/migrations/20261008000000_initial_schema.sql`, copy all text, paste into the SQL Editor, and click **Run**.
-4. Open `supabase/migrations/20261009000000_phase1_hardening.sql`, copy all text, paste into the SQL Editor, and click **Run**.
-5. Verify in the **Table Editor** that `staff_compensation` exists and columns `rate`, `overtime_rate`, `rate_history`, and `payment_note` have been moved from `staff`.
+3. Open and run each migration in order:
+   - `supabase/migrations/20261008000000_initial_schema.sql`
+   - `supabase/migrations/20261009000000_phase1_hardening.sql`
+   - `supabase/migrations/20261010000000_phase3_period_lock.sql`
+   - `supabase/migrations/20261011000000_phase5_multiuser_realtime.sql`
+4. Verify in the **Table Editor** that `staff_compensation` exists, `period_closings` triggers are active, and Realtime publications are configured.
 
 ### Applying with Supabase CLI
 ```bash

@@ -49,7 +49,21 @@ export const MonthSettlementModal: React.FC<MonthSettlementModalProps> = ({
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth());
-  const [calcMode, setCalcMode] = useState<MonthCalculationMode>('fixed_30');
+  const [calcMode, setCalcMode] = useState<MonthCalculationMode>(() => {
+    return currentOrg?.settings?.month_calc_mode === 'fixed30' || currentOrg?.settings?.month_calc_mode === 'fixed_30'
+      ? 'fixed_30'
+      : 'calendar_days';
+  });
+
+  useEffect(() => {
+    if (currentOrg?.settings?.month_calc_mode) {
+      setCalcMode(
+        currentOrg.settings.month_calc_mode === 'fixed30' || currentOrg.settings.month_calc_mode === 'fixed_30'
+          ? 'fixed_30'
+          : 'calendar_days'
+      );
+    }
+  }, [currentOrg?.settings?.month_calc_mode]);
 
   const [staffList, setStaffList] = useState<LocalStaff[]>([]);
   const [attendanceEntries, setAttendanceEntries] = useState<LocalAttendanceEntry[]>([]);

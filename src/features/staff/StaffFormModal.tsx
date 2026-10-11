@@ -83,6 +83,7 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
   const [notes, setNotes] = useState('');
   const [paymentType, setPaymentType] = useState<'daily' | 'monthly' | 'hourly' | 'piece'>('daily');
   const [rate, setRate] = useState<number | string>(700);
+  const [effectiveFromDate, setEffectiveFromDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [overtimeRate, setOvertimeRate] = useState<number | string>('');
   const [hoursPerDay, setHoursPerDay] = useState<number | string>('8');
   const [unitName, setUnitName] = useState('piece');
@@ -213,10 +214,12 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
         // Record rate history if rate or payment type changed
         let updatedHistory = staffToEdit.rate_history || [];
         if (staffToEdit.rate !== rateNum || staffToEdit.payment_type !== paymentType) {
+          const effDate = effectiveFromDate || new Date().toISOString().split('T')[0];
           updatedHistory = [
             ...updatedHistory,
             {
-              from: new Date().toISOString().split('T')[0],
+              effective_from: effDate,
+              from: effDate,
               type: paymentType,
               rate: rateNum,
               overtime_rate: otNum,
@@ -481,6 +484,19 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
                 placeholder="700"
               />
             </FormField>
+
+            {staffToEdit && (
+              <FormField
+                label="Effective From Date (Rate change applies from this date onwards)"
+                helpText="Past attendance before this date keeps previous rate"
+              >
+                <Input
+                  type="date"
+                  value={effectiveFromDate}
+                  onChange={(e) => setEffectiveFromDate(e.target.value)}
+                />
+              </FormField>
+            )}
           </div>
 
           {paymentType === 'piece' && (

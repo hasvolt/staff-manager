@@ -362,7 +362,7 @@ describe('Phase 3: Payments, Advances, Ledger, Calculations & Month Settlement T
     expect(dues.netPayable).toBe(7000);
   });
 
-  it('7. Rate change with effective-from date preserves historical periods', () => {
+  it('7. Rate change with effective-from date preserves historical periods (and supports legacy "from" key)', () => {
     const staff: LocalStaff = {
       id: generateUUID(),
       org_id: orgId,
@@ -370,8 +370,8 @@ describe('Phase 3: Payments, Advances, Ledger, Calculations & Month Settlement T
       payment_type: 'daily',
       rate: 600, // Current rate
       rate_history: [
-        { effective_from: '2026-08-01', rate: 450 },
-        { effective_from: '2026-10-15', rate: 600 },
+        { from: '2026-08-01', rate: 450 }, // Legacy format using 'from'
+        { effective_from: '2026-10-15', from: '2026-10-15', rate: 600 },
       ],
       status: 'active',
       weekly_off: [0],
@@ -380,7 +380,7 @@ describe('Phase 3: Payments, Advances, Ledger, Calculations & Month Settlement T
       revision: 2,
     };
 
-    // Past date before Oct 15 -> should use 450
+    // Past date before Oct 15 -> should resolve legacy 'from' and return 450
     const pastRate = getEffectiveRate(staff, undefined, '2026-09-20');
     expect(pastRate.rate).toBe(450);
 

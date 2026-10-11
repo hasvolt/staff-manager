@@ -221,7 +221,7 @@ export const StaffDetailModal: React.FC<StaffDetailModalProps> = ({
             <div className="space-y-1 pt-1">
               {staff.rate_history.map((rh, i) => (
                 <div key={i} className="flex justify-between text-[11px] text-[var(--text-muted)]">
-                  <span>From {formatDate(rh.from)}:</span>
+                  <span>From {formatDate(rh.effective_from || rh.from)}:</span>
                   <span className="font-semibold text-[var(--text)]">
                     {formatCurrency(rh.rate)} ({rh.type})
                   </span>
