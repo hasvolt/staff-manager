@@ -621,6 +621,7 @@ export const AppShell: React.FC = () => {
       <JoinBusinessModal
         isOpen={isJoinOrgModalOpen}
         initialCode={inviteCodeFromUrl}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
         onClose={() => {
           setIsJoinOrgModalOpen(false);
           setInviteCodeFromUrl('');

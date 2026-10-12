@@ -211,12 +211,18 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     try {
-      const { data: joinedOrgId, error } = await supabase.rpc('accept_invite', { p_code: code.trim() });
+      const { data: joinedOrgId, error } = await supabase.rpc('accept_invite', { p_code: code.trim().toUpperCase() });
       if (error) throw error;
 
+      if (joinedOrgId) {
+        localStorage.setItem(DEFAULT_ORG_ID_KEY, joinedOrgId);
+      }
+
       await reloadOrganizations();
-      if (joinedOrgId) switchBusiness(joinedOrgId);
-      return { error: null };
+      if (joinedOrgId) {
+        syncEngine.syncNow(joinedOrgId);
+      }
+      return { error: null, orgId: joinedOrgId };
     } catch (err: any) {
       return { error: err };
     }
