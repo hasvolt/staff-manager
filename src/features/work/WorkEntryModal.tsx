@@ -9,6 +9,7 @@ import { FileUpload } from '@/components/ui/FileUpload';
 import { workRepo, staffRepo, siteRepo, workTypeRepo } from '@/lib/db/repository';
 import { LocalStaff, LocalSite, LocalWorkType } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
+import { useOrgLabels } from '@/lib/org/labels';
 import { useToast } from '@/components/ui/Toast';
 import { Briefcase, Clock, Calendar, CheckSquare, Plus } from 'lucide-react';
 
@@ -33,6 +34,7 @@ const WORK_SUGGESTIONS = [
 
 export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({ isOpen, onClose, onSaved }) => {
   const { currentOrg } = useOrg();
+  const { siteLabel, workLabel } = useOrgLabels();
   const { success, error } = useToast();
 
   const [staffList, setStaffList] = useState<LocalStaff[]>([]);
@@ -202,12 +204,12 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({ isOpen, onClose,
             />
           </FormField>
 
-          <FormField label="Site / Project / Shop">
+          <FormField label={siteLabel}>
             <Select
               value={siteId}
               onChange={(e) => setSiteId(e.target.value)}
               options={[
-                { value: '', label: 'General / No Site' },
+                { value: '', label: `General / No ${siteLabel}` },
                 ...sites.map((s) => ({ value: s.id, label: s.name })),
               ]}
             />
@@ -216,7 +218,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({ isOpen, onClose,
 
         {/* Work Description with Suggestions */}
         <div className="space-y-1.5">
-          <FormField label="Task / Work Description">
+          <FormField label={`${workLabel} Description`}>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -238,7 +240,7 @@ export const WorkEntryModal: React.FC<WorkEntryModalProps> = ({ isOpen, onClose,
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <FormField label="Work Type">
+          <FormField label={workLabel}>
             <Select
               value={workTypeId}
               onChange={(e) => setWorkTypeId(e.target.value)}

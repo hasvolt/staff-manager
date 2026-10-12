@@ -407,19 +407,28 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({
         >
           {/* Header */}
           <div className="flex items-start justify-between border-b border-slate-200 pb-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                {currentOrg?.name || 'Business Name'}
-              </h2>
-              {currentOrg?.settings?.address && (
-                <p className="text-xs text-slate-500 mt-0.5">{currentOrg.settings.address}</p>
+            <div className="flex items-center gap-3">
+              {currentOrg?.logo_path && (
+                <img
+                  src={currentOrg.logo_path}
+                  alt="Business Logo"
+                  className="w-12 h-12 rounded-xl object-contain border border-slate-200 p-0.5 bg-white shrink-0"
+                />
               )}
-              {currentOrg?.settings?.phone && (
-                <p className="text-xs text-slate-500">Phone: {currentOrg.settings.phone}</p>
-              )}
-              {customHeader && (
-                <p className="text-xs font-medium text-slate-600 mt-1">{customHeader}</p>
-              )}
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  {currentOrg?.name || 'Business Name'}
+                </h2>
+                {currentOrg?.settings?.address && (
+                  <p className="text-xs text-slate-500 mt-0.5">{currentOrg.settings.address}</p>
+                )}
+                {currentOrg?.settings?.phone && (
+                  <p className="text-xs text-slate-500">Phone: {currentOrg.settings.phone}</p>
+                )}
+                {customHeader && (
+                  <p className="text-xs font-medium text-slate-600 mt-1">{customHeader}</p>
+                )}
+              </div>
             </div>
 
             <div className="text-right">

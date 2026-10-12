@@ -655,6 +655,15 @@ export const StaffHistoryModal: React.FC<StaffHistoryModalProps> = ({
                               {item.detail}
                             </p>
                           )}
+                          {((item.rawRecord as any).photo_path || (item.rawRecord as any).receipt_path) && (
+                            <div className="mt-2 w-14 h-14 rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--surface-2)] shrink-0 shadow-2xs">
+                              <img
+                                src={(item.rawRecord as any).photo_path || (item.rawRecord as any).receipt_path}
+                                alt="Attachment"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
 

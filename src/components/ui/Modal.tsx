@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export interface ModalProps {
@@ -40,11 +41,11 @@ export const Modal: React.FC<ModalProps> = ({
     '3xl': 'max-w-3xl',
   }[maxWidth];
 
-  return (
+  const modalContent = (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[var(--overlay)] backdrop-blur-xs animate-in fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -77,4 +78,7 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
+

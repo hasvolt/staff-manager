@@ -235,11 +235,11 @@ export const HelpPage: React.FC = () => {
             <h3 className="font-bold text-sm text-[var(--text)]">Official Rozfiber Documentation Portal</h3>
           </div>
           <p className="text-xs text-[var(--text-muted)]">
-            Explore complete user manuals, API guides, step-by-step videos, and platform guides across all Rozfiber services at <span className="font-mono text-[var(--accent)]">docs.rozfiber.com</span>.
+            Explore complete user manuals, API guides, step-by-step videos, and platform guides at <span className="font-mono text-[var(--accent)]">docs.rozfiber.com/staff-manager/</span>.
           </p>
         </div>
         <a
-          href="https://docs.rozfiber.com"
+          href="https://docs.rozfiber.com/staff-manager/"
           target="_blank"
           rel="noopener noreferrer"
           className="px-4 py-2 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-semibold hover:opacity-90 transition shrink-0 text-center flex items-center justify-center gap-1.5"

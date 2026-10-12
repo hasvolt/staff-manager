@@ -10,14 +10,21 @@ import { KeyRound, Check } from 'lucide-react';
 interface JoinBusinessModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialCode?: string;
 }
 
-export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({ isOpen, onClose }) => {
+export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({ isOpen, onClose, initialCode = '' }) => {
   const { joinWithInvite } = useOrg();
   const { success, error } = useToast();
 
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(initialCode);
   const [isLoading, setIsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (initialCode) {
+      setCode(initialCode.toUpperCase());
+    }
+  }, [initialCode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

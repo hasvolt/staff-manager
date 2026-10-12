@@ -69,8 +69,19 @@ export const AppShell: React.FC = () => {
   const [isConflictModalOpen, setIsConflictModalOpen] = useState(false);
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [inviteCodeFromUrl, setInviteCodeFromUrl] = useState('');
 
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Auto-detect invite link code in URL (?invite=CODE)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('invite');
+    if (code) {
+      setInviteCodeFromUrl(code);
+      setIsJoinOrgModalOpen(true);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -609,7 +620,11 @@ export const AppShell: React.FC = () => {
       />
       <JoinBusinessModal
         isOpen={isJoinOrgModalOpen}
-        onClose={() => setIsJoinOrgModalOpen(false)}
+        initialCode={inviteCodeFromUrl}
+        onClose={() => {
+          setIsJoinOrgModalOpen(false);
+          setInviteCodeFromUrl('');
+        }}
       />
       <MembersModal
         isOpen={isMembersModalOpen}

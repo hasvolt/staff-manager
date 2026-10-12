@@ -2,7 +2,7 @@
 **Version:** 1.0.0  
 **Target Audience:** Business Owners, Contractors, Factory/Workshop Owners, Shopkeepers, Accountants, HR & Supervisors  
 **Official App URL:** [https://staff.rozfiber.com](https://staff.rozfiber.com)  
-**Rozfiber Central Documentation Portal:** [https://docs.rozfiber.com](https://docs.rozfiber.com)  
+**Rozfiber Central Documentation Portal:** [https://docs.rozfiber.com/staff-manager/](https://docs.rozfiber.com/staff-manager/)  
 
 ---
 
@@ -24,11 +24,11 @@ For maximum user convenience, SEO authority, and customer support efficiency, th
 
 | Location | Purpose | Best For |
 |---|---|---|
-| **docs.rozfiber.com** *(Central Docs)* | Comprehensive, searchable, indexed documentation with deep-dives, API references, troubleshooting guides, and screenshots. | New visitors, Google search, company IT teams, customer support links. |
+| **docs.rozfiber.com/staff-manager/** *(Central Docs)* | Comprehensive, searchable, indexed documentation with deep-dives, API references, troubleshooting guides, and screenshots. | New visitors, Google search, company IT teams, customer support links. |
 | **staff.rozfiber.com** *(In-App Help Center)* | Quick onboarding (3-Step Guide), contextual tooltips, interactive sample demo data generator, and quick how-tos. | Logged-in daily users who need answers inside the app without switching tabs. |
 
 In the app, users can click **Help & Guides** in the side drawer menu, with a direct link:  
-👉 *"Read Full Documentation on docs.rozfiber.com"*
+👉 *"Read Full Documentation on docs.rozfiber.com/staff-manager/"*
 
 ---
 
@@ -191,6 +191,6 @@ Staff Manager enforces 5 strict security roles at both UI and PostgreSQL Databas
 
 ## 5. Contact & Support
 - **Application URL:** [https://staff.rozfiber.com](https://staff.rozfiber.com)
-- **Central Documentation:** [https://docs.rozfiber.com](https://docs.rozfiber.com)
+- **Central Documentation:** [https://docs.rozfiber.com/staff-manager/](https://docs.rozfiber.com/staff-manager/)
 - **Sister App:** [Daily Khata Pro](https://dailykhata.rozfiber.com)
 - **Support Email:** support@rozfiber.com

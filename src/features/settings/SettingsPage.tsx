@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/Toast';
 import { Settings, Palette, Globe, DollarSign, Building, Save, Shield, Sparkles } from 'lucide-react';
 import { LanguageCode } from '@/locales/types';
 import { LanguageModal } from '@/components/LanguageModal';
+import { FileUpload } from '@/components/ui/FileUpload';
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage, languages, currency, setCurrency } = useI18n();
@@ -23,6 +24,7 @@ export const SettingsPage: React.FC = () => {
   const { success, error } = useToast();
 
   const [businessName, setBusinessName] = useState(currentOrg?.name || '');
+  const [logoPath, setLogoPath] = useState(currentOrg?.logo_path || '');
   const [address, setAddress] = useState(currentOrg?.settings?.address || '');
   const [phone, setPhone] = useState(currentOrg?.settings?.phone || '');
   const [terminology, setTerminology] = useState(currentOrg?.settings?.terminology_preset || 'general');
@@ -47,6 +49,7 @@ export const SettingsPage: React.FC = () => {
   useEffect(() => {
     if (currentOrg) {
       setBusinessName(currentOrg.name);
+      setLogoPath(currentOrg.logo_path || '');
       setAddress(currentOrg.settings?.address || '');
       setPhone(currentOrg.settings?.phone || '');
       setTerminology(currentOrg.settings?.terminology_preset || 'general');
@@ -93,6 +96,7 @@ export const SettingsPage: React.FC = () => {
     setIsLoading(true);
     const res = await updateSettings({
       name: businessName.trim(),
+      logo_path: logoPath || null,
       settings: {
         address: address.trim(),
         phone: phone.trim(),
@@ -139,6 +143,21 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSaveBusinessSettings} className="space-y-3.5">
+          {/* Business Logo Upload */}
+          {isOwner && (
+            <FormField
+              label="Business / Shop Logo"
+              helpText="Logo appears on printed salary slips, payment receipts, and reports"
+            >
+              <FileUpload
+                label="Upload Business Logo"
+                value={logoPath}
+                onChange={setLogoPath}
+                maxDimension={500}
+              />
+            </FormField>
+          )}
+
           <FormField label="Business / Shop Name" required>
             <Input
               disabled={!isOwner}

@@ -199,7 +199,7 @@ export function calculateStaffEarnings(params: {
     }
   }
 
-  const overtimePay = roundMoney(overtimeHours * overtimeRate);
+  let overtimePay = roundMoney(overtimeHours * overtimeRate);
 
   let basePay = 0;
   let pieceCount = 0;
@@ -209,19 +209,49 @@ export function calculateStaffEarnings(params: {
   let formulaText = '';
   const totalPayableDays = totalPresent + totalHalf * 0.5 + totalPaidLeave + totalHoliday;
 
-  if (paymentType === 'daily') {
-    // Formula: present * rate + half * (rate / 2) + paidLeave * rate + holiday * rate
-    const presentPay = roundMoney(totalPresent * rate);
-    const halfPay = roundMoney(totalHalf * (rate / 2));
-    const paidLeavePay = roundMoney(totalPaidLeave * rate);
-    const holidayPay = roundMoney(totalHoliday * rate);
-    basePay = roundMoney(presentPay + halfPay + paidLeavePay + holidayPay);
+  const history = compensation?.rate_history || staff.rate_history || staff.compensation?.rate_history || [];
+  const hasRateHistory = history && history.length > 0;
 
-    formulaText = `Daily: (P: ${totalPresent} × ${rate}) + (H: ${totalHalf} × ${roundMoney(
-      rate / 2
-    )}) + (Paid Leaves: ${totalPaidLeave} × ${rate}) + (Holidays: ${totalHoliday} × ${rate}) = ${basePay}`;
-    if (overtimeHours > 0) {
-      formulaText += ` + OT: (${overtimeHours} hrs × ${overtimeRate}) = ${overtimePay}`;
+  if (paymentType === 'daily') {
+    if (hasRateHistory) {
+      let dailySum = 0;
+      let otSum = 0;
+      relevantAttendance.forEach((entry) => {
+        const dayEff = getEffectiveRate(staff, compensation, entry.work_date);
+        const dayRate = dayEff.rate;
+        const dayOtRate = dayEff.overtime_rate ?? (dayEff.rate / hoursPerDay);
+
+        if (entry.status === 'present') {
+          dailySum += dayRate;
+        } else if (entry.status === 'half') {
+          dailySum += roundMoney(dayRate / 2);
+        } else if (entry.status === 'leave_paid' || entry.status === 'holiday') {
+          dailySum += dayRate;
+        }
+        if (entry.overtime_hours && entry.overtime_hours > 0) {
+          otSum += roundMoney(entry.overtime_hours * dayOtRate);
+        }
+      });
+      basePay = roundMoney(dailySum);
+      overtimePay = roundMoney(otSum);
+      formulaText = `Daily (Rate History): ${totalPresent} present, ${totalHalf} half days across revised rates = ${basePay}`;
+      if (overtimeHours > 0) {
+        formulaText += ` + OT: ${overtimeHours} hrs = ${overtimePay}`;
+      }
+    } else {
+      // Formula: present * rate + half * (rate / 2) + paidLeave * rate + holiday * rate
+      const presentPay = roundMoney(totalPresent * rate);
+      const halfPay = roundMoney(totalHalf * (rate / 2));
+      const paidLeavePay = roundMoney(totalPaidLeave * rate);
+      const holidayPay = roundMoney(totalHoliday * rate);
+      basePay = roundMoney(presentPay + halfPay + paidLeavePay + holidayPay);
+
+      formulaText = `Daily: (P: ${totalPresent} × ${rate}) + (H: ${totalHalf} × ${roundMoney(
+        rate / 2
+      )}) + (Paid Leaves: ${totalPaidLeave} × ${rate}) + (Holidays: ${totalHoliday} × ${rate}) = ${basePay}`;
+      if (overtimeHours > 0) {
+        formulaText += ` + OT: (${overtimeHours} hrs × ${overtimeRate}) = ${overtimePay}`;
+      }
     }
   } else if (paymentType === 'monthly') {
     // Prorated monthly salary

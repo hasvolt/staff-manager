@@ -10,6 +10,7 @@ import { FileUpload } from '@/components/ui/FileUpload';
 import { staffRepo, staffCompensationRepo, siteRepo, customFieldRepo, generateUUID } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalSite, LocalCustomFieldDef } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
+import { useOrgLabels } from '@/lib/org/labels';
 import { useToast } from '@/components/ui/Toast';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import {
@@ -64,6 +65,7 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
   onSaved,
 }) => {
   const { currentOrg } = useOrg();
+  const { siteLabel } = useOrgLabels();
   const { success, error, info } = useToast();
   const { t } = useI18n();
 
@@ -353,7 +355,7 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4 text-left">
         {/* Photo and Primary Identity */}
         <div className="flex flex-col sm:flex-row gap-4 items-start">
-          <div className="w-full sm:w-32 shrink-0">
+          <div className="w-full sm:w-64 shrink-0">
             <FileUpload
               label="Staff Photo"
               value={photoPath}
@@ -531,7 +533,7 @@ export const StaffFormModal: React.FC<StaffFormModalProps> = ({
               />
             </FormField>
 
-            <FormField label="Default Assigned Site">
+            <FormField label={`Default Assigned ${siteLabel}`}>
               <Select
                 value={defaultSiteId}
                 onChange={(e) => setDefaultSiteId(e.target.value)}

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 export interface BottomSheetProps {
@@ -27,11 +28,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const sheetContent = (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex flex-col justify-end bg-[var(--overlay)] backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-[60] flex flex-col justify-end bg-[var(--overlay)] backdrop-blur-xs animate-in fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -66,4 +67,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(sheetContent, document.body) : sheetContent;
 };

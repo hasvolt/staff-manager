@@ -12,9 +12,11 @@ import { MonthSettlementModal } from './MonthSettlementModal';
 import { PaymentReceiptModal } from '@/features/reports/PaymentReceiptModal';
 import { SalarySlipModal } from '@/features/reports/SalarySlipModal';
 import { StaffHistoryModal } from '@/features/history/StaffHistoryModal';
+import { Link } from 'react-router-dom';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useToast } from '@/components/ui/Toast';
+import { canUserPerformAction } from '@/lib/permissions/rbac';
 import { localDb, LocalStaff, LocalPayment, LocalPeriodClosing } from '@/lib/db/dexie';
 import { paymentRepo } from '@/lib/db/repository';
 import {
@@ -250,15 +252,25 @@ export const PaymentsPage: React.FC = () => {
     setIsLedgerModalOpen(true);
   };
 
-  // Check supervisor role permissions
-  if (role === 'supervisor') {
+  // Check role permissions (Supervisors and restricted Viewers)
+  const canViewPayments = canUserPerformAction(role as any, 'view_payments');
+  if (role === 'supervisor' || !canViewPayments) {
     return (
-      <div className="p-6 text-center space-y-3">
-        <Lock className="w-12 h-12 text-amber-400 mx-auto" />
-        <h2 className="text-lg font-bold text-[var(--text)]">Access Restricted</h2>
-        <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-          Supervisor role has access to daily attendance and work logging only. Financial payouts and salary details are reserved for managers and accountants.
+      <div className="py-12 px-4 max-w-md mx-auto text-center space-y-4 animate-in fade-in">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--expense)]/10 text-[var(--expense)] flex items-center justify-center mx-auto">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h2 className="text-lg font-bold text-[var(--text)]">Payments Restricted</h2>
+        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+          Your role ({role}) does not have permission to view or manage financial transactions. Daily attendance and work logs are available.
         </p>
+        <div className="pt-2">
+          <Link to="/attendance">
+            <Button variant="primary" size="sm">
+              Go to Daily Attendance
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

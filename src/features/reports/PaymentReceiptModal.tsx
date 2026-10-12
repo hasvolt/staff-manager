@@ -112,6 +112,13 @@ export const PaymentReceiptModal: React.FC<PaymentReceiptModalProps> = ({
         >
           {/* Header */}
           <div className="text-center border-b border-dashed border-slate-300 pb-3">
+            {currentOrg?.logo_path && (
+              <img
+                src={currentOrg.logo_path}
+                alt="Business Logo"
+                className="w-10 h-10 mx-auto mb-1.5 object-contain"
+              />
+            )}
             <h3 className="font-extrabold text-base tracking-tight text-slate-900">
               {currentOrg?.name || 'Staff Manager'}
             </h3>
@@ -179,6 +186,22 @@ export const PaymentReceiptModal: React.FC<PaymentReceiptModalProps> = ({
               {formatCurrency(payment.amount, currency)}
             </div>
           </div>
+
+          {/* Attached Voucher / Receipt Photo (if present) */}
+          {payment.receipt_path && (
+            <div className="pt-2 text-center">
+              <span className="text-[10px] text-slate-400 font-semibold block mb-1">
+                Attached Payment Voucher / Receipt
+              </span>
+              <div className="rounded-xl overflow-hidden border border-slate-200 max-h-40 bg-slate-50 flex items-center justify-center p-1">
+                <img
+                  src={payment.receipt_path}
+                  alt="Receipt"
+                  className="max-h-36 max-w-full object-contain rounded-lg"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Signatures */}
           <div className="pt-6 grid grid-cols-2 gap-4 text-center text-[10px] text-slate-500">

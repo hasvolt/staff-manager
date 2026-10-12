@@ -59,6 +59,11 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({ isOpen, 
     if (!file) return;
 
     const reader = new FileReader();
+
+    reader.onerror = () => {
+      error('Failed to read backup file. Please check file permissions or try again.');
+    };
+
     reader.onload = (event) => {
       try {
         const text = event.target?.result as string;
@@ -74,6 +79,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({ isOpen, 
       }
     };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleExecuteRestore = async () => {
@@ -174,7 +180,7 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({ isOpen, 
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".json"
+                  accept=".json,application/json,text/plain"
                   className="hidden"
                   onChange={handleFileChange}
                 />

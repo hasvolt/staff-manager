@@ -17,6 +17,7 @@ import { SalarySlipModal } from '@/features/reports/SalarySlipModal';
 import { staffRepo, staffCompensationRepo, siteRepo } from '@/lib/db/repository';
 import { localDb, LocalStaff, LocalSite } from '@/lib/db/dexie';
 import { useOrg } from '@/features/org/orgContext';
+import { useOrgLabels } from '@/lib/org/labels';
 import { canUserPerformAction } from '@/lib/permissions/rbac';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useToast } from '@/components/ui/Toast';
@@ -38,6 +39,7 @@ import {
 
 export const StaffPage: React.FC = () => {
   const { currentOrg, role } = useOrg();
+  const { siteLabel } = useOrgLabels();
   const { t, formatCurrency } = useI18n();
   const { showToast, success, error } = useToast();
 
@@ -347,7 +349,7 @@ export const StaffPage: React.FC = () => {
               onChange={(e) => setSiteFilter(e.target.value)}
               className="w-auto py-1 text-xs"
               options={[
-                { value: 'all', label: 'All Sites' },
+                { value: 'all', label: `All ${siteLabel}s` },
                 ...sites.map((s) => ({ value: s.id, label: s.name })),
               ]}
             />
@@ -383,7 +385,7 @@ export const StaffPage: React.FC = () => {
                 }}
                 className="w-auto py-1 text-xs"
                 options={[
-                  { value: '', label: 'Assign to Site...' },
+                  { value: '', label: `Assign to ${siteLabel}...` },
                   ...sites.map((s) => ({ value: s.id, label: s.name })),
                 ]}
               />
@@ -632,6 +634,7 @@ export const StaffPage: React.FC = () => {
         onClose={() => setStaffToDelete(null)}
         staff={staffToDelete}
         hasHistory={staffHasHistory}
+        requireOwnerApproval={Boolean(currentOrg?.settings?.require_owner_delete_approval && role !== 'owner')}
         onCompleted={loadData}
       />
 

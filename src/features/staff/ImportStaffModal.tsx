@@ -62,6 +62,12 @@ export const ImportStaffModal: React.FC<ImportStaffModalProps> = ({
 
     setIsValidating(true);
     const reader = new FileReader();
+
+    reader.onerror = () => {
+      setIsValidating(false);
+      error('Failed to read CSV file. Please check file permissions or try another file.');
+    };
+
     reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
@@ -76,6 +82,7 @@ export const ImportStaffModal: React.FC<ImportStaffModalProps> = ({
       }
     };
     reader.readAsText(file);
+    e.target.value = '';
   };
 
   const handleExecuteImport = async () => {
@@ -147,7 +154,7 @@ export const ImportStaffModal: React.FC<ImportStaffModalProps> = ({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".csv"
+              accept=".csv,text/csv,application/vnd.ms-excel,text/plain"
               className="hidden"
               onChange={handleFileUpload}
             />

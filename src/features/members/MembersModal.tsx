@@ -167,7 +167,11 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
 
   // Create invite link / code
   const handleCreateInvite = async () => {
-    if (!currentOrg?.id || !user) return;
+    if (!currentOrg?.id) {
+      error('No active business selected.');
+      return;
+    }
+
     if (!canRoleInviteRole(myRole as any, inviteRole as any)) {
       error(`Your role (${myRole}) cannot invite a ${inviteRole}.`);
       return;
@@ -175,7 +179,7 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
 
     setIsCreatingInvite(true);
     try {
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && user) {
         const { data, error: invErr } = await supabase
           .from('invites')
           .insert({
@@ -193,22 +197,23 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
         success(`Invite code generated: ${data.code}`);
         loadData();
       } else {
-        // Local simulation code
+        // Local simulation / Offline mode code
         const dummyCode = 'LOC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         const dummyInv: InviteRecord = {
           id: dummyCode,
           code: dummyCode,
           role: inviteRole,
-          assigned_site_ids: selectedSiteIds,
+          assigned_site_ids: inviteRole === 'supervisor' ? selectedSiteIds : [],
           expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
           max_uses: inviteMaxUses,
           used_count: 0,
           created_at: new Date().toISOString(),
         };
-        setActiveInvites([dummyInv, ...activeInvites]);
-        success(`Local invite generated: ${dummyCode}`);
+        setActiveInvites((prev) => [dummyInv, ...prev]);
+        success(`Invite code generated: ${dummyCode}`);
       }
     } catch (err: any) {
+      console.error('Invite generation error:', err);
       error(err.message || 'Failed to create invite.');
     } finally {
       setIsCreatingInvite(false);
@@ -509,36 +514,58 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
                 </FormField>
               </div>
 
-              {inviteRole === 'supervisor' && sites.length > 0 && (
-                <div>
-                  <label className="text-xs font-medium text-[var(--text)] block mb-1.5">
-                    Limit to Specific Sites (Optional):
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {sites.map((s) => {
-                      const isSelected = selectedSiteIds.includes(s.id);
-                      return (
-                        <button
-                          key={s.id}
-                          type="button"
-                          onClick={() => {
-                            if (isSelected) {
-                              setSelectedSiteIds(selectedSiteIds.filter((id) => id !== s.id));
-                            } else {
-                              setSelectedSiteIds([...selectedSiteIds, s.id]);
-                            }
-                          }}
-                          className={`text-xs px-2.5 py-1 rounded-lg border transition cursor-pointer ${
-                            isSelected
-                              ? 'bg-[var(--accent)] text-[var(--accent-contrast)] border-[var(--accent)]'
-                              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)]'
-                          }`}
-                        >
-                          {s.name}
-                        </button>
-                      );
-                    })}
+              {inviteRole === 'supervisor' && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[var(--text)] flex items-center gap-1.5">
+                      <span>Limit to Specific Sites / Projects</span>
+                      <span className="text-[10px] font-normal text-[var(--text-muted)]">(Optional)</span>
+                    </label>
+                    {sites.length > 0 && (
+                      <span className="text-[11px] text-[var(--text-muted)]">
+                        {selectedSiteIds.length === 0
+                          ? 'Can access all sites'
+                          : `${selectedSiteIds.length} site(s) selected`}
+                      </span>
+                    )}
                   </div>
+
+                  <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                    By default, Supervisors can mark attendance for all sites. If you select specific sites below, this supervisor will only see and manage staff assigned to those specific locations/projects.
+                  </p>
+
+                  {sites.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {sites.map((s) => {
+                        const isSelected = selectedSiteIds.includes(s.id);
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedSiteIds(selectedSiteIds.filter((id) => id !== s.id));
+                              } else {
+                                setSelectedSiteIds([...selectedSiteIds, s.id]);
+                              }
+                            }}
+                            className={`text-xs px-2.5 py-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1.5 ${
+                              isSelected
+                                ? 'bg-[var(--accent)] text-[var(--accent-contrast)] border-[var(--accent)] font-semibold shadow-xs'
+                                : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--surface-2)]'
+                            }`}
+                          >
+                            <span>{s.name}</span>
+                            {isSelected && <Check className="w-3 h-3" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-2.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[11px] text-[var(--text-muted)]">
+                      No sites added yet. Go to <strong>Settings &rarr; Sites / Projects</strong> to add construction sites, shops, or branches first.
+                    </div>
+                  )}
                 </div>
               )}
 

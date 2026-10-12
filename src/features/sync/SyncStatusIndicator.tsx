@@ -97,31 +97,78 @@ export const SyncStatusIndicator: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Cloud Sync & Outbox Status"
-        maxWidth="sm"
+        title={
+          <div className="flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-[var(--accent)]" />
+            <span>Cloud & Local Sync Engine</span>
+          </div>
+        }
+        maxWidth="md"
       >
         <div className="space-y-4 text-left">
-          <div className="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-between">
+          {/* Main Status Header Card */}
+          <div className="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-between gap-3">
             <div>
-              <span className="text-xs text-[var(--text-muted)] font-medium">Current Status</span>
+              <span className="text-xs text-[var(--text-muted)] font-medium">Sync Status</span>
               <div className="text-sm font-bold text-[var(--text)] mt-0.5 capitalize">
                 {state === 'synced'
-                  ? 'All changes synced to cloud'
+                  ? 'All changes safely synced to cloud'
                   : state === 'syncing'
-                  ? 'Syncing changes in background'
+                  ? 'Syncing in background...'
                   : state === 'offline'
-                  ? 'Offline mode (saves to device)'
-                  : 'Sync attention needed'}
+                  ? 'Offline mode (Safe local-first)'
+                  : 'Attention needed'}
               </div>
+              <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                {state === 'synced' && 'IndexedDB local cache and Supabase cloud database are 100% in sync.'}
+                {state === 'syncing' && 'Uploading outbox changes and fetching recent updates from server.'}
+                {state === 'offline' && 'Internet disconnected. All attendance and payment records are saved to your phone/PC.'}
+                {state === 'error' && 'Failed to connect to cloud. Data is safe locally in queue.'}
+              </p>
             </div>
-            {renderBadge()}
+            <div className="shrink-0">{renderBadge()}</div>
           </div>
 
-          <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)] text-xs flex justify-between items-center">
-            <span className="text-[var(--text-muted)]">Pending outbox changes:</span>
-            <span className="font-bold text-[var(--text)]">{outboxCount} records</span>
+          {/* Sync Stats Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)]">
+              <span className="text-[var(--text-muted)] block text-[11px]">Unsent Outbox Queue</span>
+              <span className="font-bold text-sm text-[var(--text)] mt-0.5 block">
+                {outboxCount} {outboxCount === 1 ? 'record' : 'records'}
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)]">
+                {outboxCount === 0 ? 'Queue is clear' : 'Will push automatically'}
+              </span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-[var(--surface-2)]/60 border border-[var(--border)]">
+              <span className="text-[var(--text-muted)] block text-[11px]">Network Connection</span>
+              <span className="font-bold text-sm text-[var(--text)] mt-0.5 block flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                {navigator.onLine ? 'Online' : 'Offline'}
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)]">
+                {navigator.onLine ? 'Realtime sync active' : 'Working on local storage'}
+              </span>
+            </div>
           </div>
 
+          {/* Educational Explain Box */}
+          <div className="p-3.5 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-xs text-[var(--text)] space-y-1.5">
+            <div className="font-bold text-[var(--accent)] flex items-center gap-1.5">
+              <span>What is this Synced feature?</span>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+              Staff Manager uses an <strong>Offline-First (Local-First)</strong> architecture. Even if your internet disconnects, you can still mark daily attendance, add payments, and view staff registers without getting blocked.
+            </p>
+            <ul className="text-[11px] text-[var(--text-muted)] list-disc pl-4 space-y-0.5">
+              <li><strong>Local Storage:</strong> Everything is instantly saved to your device’s fast IndexedDB.</li>
+              <li><strong>Outbox Queue:</strong> Every change is queued so no records ever get lost.</li>
+              <li><strong>Auto Sync:</strong> Whenever internet reconnects, changes sync to Supabase cloud database automatically.</li>
+            </ul>
+          </div>
+
+          {/* Last Error Details if any */}
           {lastError && (
             <div className="p-3 rounded-xl bg-[var(--expense)]/10 border border-[var(--expense)]/20 text-xs space-y-2">
               <div className="flex items-center justify-between text-[var(--expense)] font-semibold">
@@ -139,7 +186,7 @@ export const SyncStatusIndicator: React.FC = () => {
             </div>
           )}
 
-          <div className="pt-2 flex items-center justify-end gap-2">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--border)]">
             <Button variant="secondary" size="sm" onClick={() => setIsModalOpen(false)}>
               Close
             </Button>

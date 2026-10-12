@@ -13,6 +13,7 @@ interface StaffDeleteDialogProps {
   onClose: () => void;
   staff: LocalStaff | null;
   hasHistory: boolean;
+  requireOwnerApproval?: boolean;
   onCompleted: () => void;
 }
 
@@ -21,6 +22,7 @@ export const StaffDeleteDialog: React.FC<StaffDeleteDialogProps> = ({
   onClose,
   staff,
   hasHistory,
+  requireOwnerApproval = false,
   onCompleted,
 }) => {
   const { showToast, success, error } = useToast();
@@ -147,34 +149,50 @@ export const StaffDeleteDialog: React.FC<StaffDeleteDialogProps> = ({
         ) : (
           /* Confirmation to move to trash */
           <div className="space-y-3.5">
-            <div className="p-3 rounded-xl bg-[var(--expense)]/10 border border-[var(--expense)]/20 text-xs text-[var(--text)]">
-              This will move <strong>{staff.name}</strong> to the Recycle Bin.
-              {hasHistory && ' Because this employee has attendance or payment history, please type their name below to confirm.'}
-            </div>
+            {requireOwnerApproval && hasHistory ? (
+              <div className="p-3.5 rounded-xl bg-[var(--warning)]/15 border border-[var(--warning)]/30 text-xs text-[var(--text)] space-y-1.5">
+                <div className="font-semibold text-[var(--warning)] flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>Owner Approval Required</span>
+                </div>
+                <p className="text-[var(--text-muted)] leading-relaxed">
+                  Your business settings require the business Owner's approval to delete staff members with attendance or payment history. As a manager, please use <strong>Archive</strong> instead, or ask the owner to perform this deletion.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="p-3 rounded-xl bg-[var(--expense)]/10 border border-[var(--expense)]/20 text-xs text-[var(--text)]">
+                  This will move <strong>{staff.name}</strong> to the Recycle Bin.
+                  {hasHistory && ' Because this employee has attendance or payment history, please type their name below to confirm.'}
+                </div>
 
-            {hasHistory && (
-              <FormField label={`Type "${staff.name}" to confirm`}>
-                <Input
-                  value={confirmName}
-                  onChange={(e) => setConfirmName(e.target.value)}
-                  placeholder={staff.name}
-                />
-              </FormField>
+                {hasHistory && (
+                  <FormField label={`Type "${staff.name}" to confirm`}>
+                    <Input
+                      value={confirmName}
+                      onChange={(e) => setConfirmName(e.target.value)}
+                      placeholder={staff.name}
+                    />
+                  </FormField>
+                )}
+              </>
             )}
 
             <div className="pt-2 flex items-center justify-end gap-2">
               <Button variant="secondary" size="sm" onClick={() => setMode('choose')}>
                 Back
               </Button>
-              <Button
-                variant="expense"
-                size="sm"
-                isLoading={isLoading}
-                onClick={handleMoveToTrash}
-                disabled={hasHistory && confirmName.trim().toLowerCase() !== staff.name.trim().toLowerCase()}
-              >
-                Move to Trash
-              </Button>
+              {!(requireOwnerApproval && hasHistory) && (
+                <Button
+                  variant="expense"
+                  size="sm"
+                  isLoading={isLoading}
+                  onClick={handleMoveToTrash}
+                  disabled={hasHistory && confirmName.trim().toLowerCase() !== staff.name.trim().toLowerCase()}
+                >
+                  Move to Trash
+                </Button>
+              )}
             </div>
           </div>
         )}
