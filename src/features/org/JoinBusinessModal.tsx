@@ -39,15 +39,6 @@ export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({
     const cleanCode = code.trim().toUpperCase();
     if (!cleanCode) return;
 
-    if (!user) {
-      error('Please sign in first to join an organization with an invite code.');
-      if (onOpenAuth) {
-        onClose();
-        onOpenAuth();
-      }
-      return;
-    }
-
     setIsLoading(true);
     const res = await joinWithInvite(cleanCode);
     setIsLoading(false);

@@ -140,6 +140,7 @@ export const AppShell: React.FC = () => {
           <BusinessSwitcher
             onCreateNew={() => setIsCreateOrgModalOpen(true)}
             onJoinInvite={() => setIsJoinOrgModalOpen(true)}
+            onOpenMembers={() => setIsMembersModalOpen(true)}
           />
         </div>
 
@@ -248,6 +249,18 @@ export const AppShell: React.FC = () => {
                     <span className="text-[10px] bg-[var(--surface-2)] text-[var(--text-muted)] px-2 py-0.5 rounded-full uppercase">
                       {language}
                     </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsMembersModalOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <Users className="w-4 h-4 text-[var(--accent)]" />
+                    <span>Team Members & Roles</span>
                   </button>
 
                   <NavLink

@@ -39,8 +39,19 @@ if (typeof (globalThis as any).document === 'undefined') {
 if (typeof (globalThis as any).requestAnimationFrame === 'undefined') {
   (globalThis as any).requestAnimationFrame = (cb: Function) => setTimeout(cb, 0);
 }
-if (typeof globalThis.URL.createObjectURL === 'undefined') {
-  globalThis.URL.createObjectURL = () => 'blob:mock-url';
-  globalThis.URL.revokeObjectURL = () => {};
+if (typeof (globalThis as any).localStorage === 'undefined') {
+  let store: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => (k in store ? store[k] : null),
+    setItem: (k: string, v: string) => {
+      store[k] = String(v);
+    },
+    removeItem: (k: string) => {
+      delete store[k];
+    },
+    clear: () => {
+      store = {};
+    },
+  };
 }
 

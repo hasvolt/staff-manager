@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useOrg } from './orgContext';
-import { Building2, ChevronDown, Plus, KeyRound, Check } from 'lucide-react';
+import { Building2, ChevronDown, Plus, KeyRound, Check, Users } from 'lucide-react';
 
 interface BusinessSwitcherProps {
   onCreateNew: () => void;
   onJoinInvite: () => void;
+  onOpenMembers?: () => void;
 }
 
 export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
   onCreateNew,
   onJoinInvite,
+  onOpenMembers,
 }) => {
   const { currentOrg, organizations, switchBusiness, role } = useOrg();
   const [isOpen, setIsOpen] = useState(false);
@@ -97,6 +99,20 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
               <KeyRound className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               <span>Join with Invite Code</span>
             </button>
+
+            {onOpenMembers && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenMembers();
+                }}
+                className="w-full flex items-center gap-2 p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+              >
+                <Users className="w-3.5 h-3.5 text-[var(--accent)]" />
+                <span>Invite Team & Members</span>
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -5,6 +5,7 @@ import { localDb, LocalOrganization } from '@/lib/db/dexie';
 import { orgRepo, generateUUID } from '@/lib/db/repository';
 import { syncEngine } from '@/lib/sync/syncEngine';
 import { deleteOrgStorageFiles } from '@/lib/supabase/storage';
+import { processInviteAcceptance } from '@/lib/invites/inviteStore';
 
 export interface BusinessSettings {
   address?: string;
@@ -81,6 +82,12 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (active) {
       setCurrentOrg(active);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
+      const mem = await localDb.memberships.where('org_id').equals(active.id).first();
+      if (mem) {
+        setRole(mem.role);
+      } else {
+        setRole('owner');
+      }
     }
   }, [isLocalMode]);
 
@@ -160,79 +167,130 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     weekStart = 1
   ) => {
     try {
+      const newOrgId = generateUUID();
+      const newOrg: LocalOrganization = {
+        id: newOrgId,
+        org_id: newOrgId,
+        name,
+        business_type: businessType,
+        currency,
+        country,
+        week_start: weekStart,
+        settings: {
+          terminology_preset: (businessType as any) || 'general',
+          month_calc_mode: 'actual',
+        },
+        owner_id: user?.id || 'local_user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        revision: 1,
+        syncStatus: 'local-only',
+      };
+
+      // 1. Always store locally in Dexie first (Local-first architecture)
+      await localDb.organizations.put(newOrg);
+
+      // 2. Add owner membership locally
+      await localDb.memberships.put({
+        id: generateUUID(),
+        org_id: newOrgId,
+        user_id: user?.id || 'local_user',
+        role: 'owner',
+        assigned_site_ids: [],
+        status: 'active',
+        created_at: new Date().toISOString(),
+        syncStatus: 'local-only',
+      });
+
+      let finalOrgId = newOrgId;
+
+      // 3. If online and Supabase user session exists, try creating in cloud
       if (user && isSupabaseConfigured) {
-        // Call RPC create_organization
-        const { data: newOrgId, error } = await supabase.rpc('create_organization', {
-          p_name: name,
-          p_business_type: businessType,
-          p_currency: currency,
-          p_country: country,
-        });
+        try {
+          const { data: cloudOrgId, error: rpcErr } = await supabase.rpc('create_organization', {
+            p_name: name,
+            p_business_type: businessType,
+            p_currency: currency,
+            p_country: country,
+          });
 
-        if (error) throw error;
-
-        await reloadOrganizations();
-        if (newOrgId) switchBusiness(newOrgId);
-        return { error: null, orgId: newOrgId };
-      } else {
-        // Local organization creation
-        const newOrgId = generateUUID();
-        const newOrg: LocalOrganization = {
-          id: newOrgId,
-          org_id: newOrgId,
-          name,
-          business_type: businessType,
-          currency,
-          country,
-          week_start: weekStart,
-          settings: {
-            terminology_preset: 'general',
-            month_calc_mode: 'actual',
-          },
-          owner_id: user?.id || 'local_user',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          revision: 1,
-          syncStatus: 'local-only',
-        };
-        await localDb.organizations.put(newOrg);
-        await reloadOrganizations();
-        switchBusiness(newOrgId);
-        return { error: null, orgId: newOrgId };
+          if (!rpcErr && cloudOrgId) {
+            finalOrgId = cloudOrgId;
+            newOrg.id = cloudOrgId;
+            newOrg.org_id = cloudOrgId;
+            newOrg.syncStatus = 'synced';
+            await localDb.organizations.put(newOrg);
+            await localDb.memberships.put({
+              id: generateUUID(),
+              org_id: cloudOrgId,
+              user_id: user.id,
+              role: 'owner',
+              assigned_site_ids: [],
+              status: 'active',
+              created_at: new Date().toISOString(),
+              syncStatus: 'synced',
+            });
+          }
+        } catch (cloudErr) {
+          console.warn('Cloud organization creation failed, kept local:', cloudErr);
+        }
       }
+
+      // 4. Update states immediately so UI switches without delay
+      localStorage.setItem(DEFAULT_ORG_ID_KEY, finalOrgId);
+      setCurrentOrg(newOrg);
+      setRole('owner');
+      setOrganizations((prev) => {
+        const withoutNew = prev.filter((o) => o.id !== finalOrgId && o.id !== newOrgId);
+        return [...withoutNew, newOrg];
+      });
+
+      // Background reload
+      reloadOrganizations();
+      return { error: null, orgId: finalOrgId };
     } catch (err: any) {
+      console.error('Failed to create business:', err);
       return { error: err };
     }
   };
 
   const joinWithInvite = async (code: string) => {
-    if (!user || !isSupabaseConfigured) {
-      return { error: new Error('You must be signed in to join an organization with an invite code.') };
-    }
-
     try {
-      const { data: joinedOrgId, error } = await supabase.rpc('accept_invite', { p_code: code.trim().toUpperCase() });
-      if (error) throw error;
-
-      if (joinedOrgId) {
-        localStorage.setItem(DEFAULT_ORG_ID_KEY, joinedOrgId);
+      const res = await processInviteAcceptance(code, user?.id);
+      if (res.error) {
+        return { error: res.error };
       }
 
-      await reloadOrganizations();
-      if (joinedOrgId) {
-        syncEngine.syncNow(joinedOrgId);
+      if (res.orgId) {
+        localStorage.setItem(DEFAULT_ORG_ID_KEY, res.orgId);
+        await reloadOrganizations();
+        await switchBusiness(res.orgId);
+        syncEngine.syncNow(res.orgId);
+        return { error: null, orgId: res.orgId };
       }
-      return { error: null, orgId: joinedOrgId };
+
+      return { error: new Error('Failed to join business with invite code.') };
     } catch (err: any) {
       return { error: err };
     }
   };
 
-  const switchBusiness = (orgId: string) => {
-    const found = organizations.find((o) => o.id === orgId);
+  const switchBusiness = async (orgId: string) => {
+    let found = organizations.find((o) => o.id === orgId);
+    if (!found) {
+      found = await localDb.organizations.get(orgId);
+    }
     if (found) {
       setCurrentOrg(found);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, found.id);
+
+      const mem = await localDb.memberships.where('org_id').equals(found.id).first();
+      if (mem) {
+        setRole(mem.role);
+      } else if (found.owner_id === (user?.id || 'local_user')) {
+        setRole('owner');
+      }
+
       syncEngine.syncNow(found.id);
     }
   };

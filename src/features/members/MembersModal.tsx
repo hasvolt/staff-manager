@@ -11,6 +11,7 @@ import { useAuth } from '@/features/auth/authContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { localDb, LocalMembership, LocalSite } from '@/lib/db/dexie';
 import { canRoleInviteRole } from '@/lib/permissions/rbac';
+import { createInviteCode, revokeInviteCode, getStoredLocalInvites } from '@/lib/invites/inviteStore';
 import {
   Users,
   UserPlus,
@@ -97,6 +98,10 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
       const s = await localDb.sites.where('org_id').equals(currentOrg.id).filter((x) => !x.deleted_at).toArray();
       setSites(s);
 
+      // Load local stored invites
+      const localInv = getStoredLocalInvites(currentOrg.id);
+      setActiveInvites(localInv);
+
       // If cloud configured, fetch cloud data
       if (isSupabaseConfigured && user) {
         // Fetch memberships from supabase
@@ -129,17 +134,23 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
           }
         }
 
-        // Fetch invites
-        const { data: invData } = await supabase
-          .from('invites')
-          .select('*')
-          .eq('org_id', currentOrg.id)
-          .is('revoked_at', null)
-          .gt('expires_at', new Date().toISOString())
-          .order('created_at', { ascending: false });
+        // Fetch cloud invites
+        try {
+          const { data: invData } = await supabase
+            .from('invites')
+            .select('*')
+            .eq('org_id', currentOrg.id)
+            .is('revoked_at', null)
+            .gt('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: false });
 
-        if (invData) {
-          setActiveInvites(invData);
+          if (invData && invData.length > 0) {
+            const cloudCodes = new Set(invData.map((x: any) => x.code));
+            const remainingLocal = localInv.filter((x) => !cloudCodes.has(x.code));
+            setActiveInvites([...invData, ...remainingLocal]);
+          }
+        } catch (invLoadErr) {
+          console.warn('Could not load cloud invites, using local:', invLoadErr);
         }
 
         // Fetch devices
@@ -172,45 +183,28 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
       return;
     }
 
-    if (!canRoleInviteRole(myRole as any, inviteRole as any)) {
-      error(`Your role (${myRole}) cannot invite a ${inviteRole}.`);
+    const effectiveRole = currentOrg.owner_id === (user?.id || 'local_user') ? 'owner' : (myRole || 'owner');
+    if (!canRoleInviteRole(effectiveRole as any, inviteRole as any)) {
+      error(`Your role (${effectiveRole}) cannot invite a ${inviteRole}.`);
       return;
     }
 
     setIsCreatingInvite(true);
     try {
-      if (isSupabaseConfigured && user) {
-        const { data, error: invErr } = await supabase
-          .from('invites')
-          .insert({
-            org_id: currentOrg.id,
-            role: inviteRole,
-            assigned_site_ids: inviteRole === 'supervisor' ? selectedSiteIds : [],
-            max_uses: inviteMaxUses,
-            created_by: user.id,
-          })
-          .select()
-          .single();
+      const { code, invite, source } = await createInviteCode({
+        orgId: currentOrg.id,
+        orgName: currentOrg.name,
+        role: inviteRole,
+        assignedSiteIds: inviteRole === 'supervisor' ? selectedSiteIds : [],
+        maxUses: inviteMaxUses,
+        userId: user?.id,
+      });
 
-        if (invErr) throw invErr;
+      setActiveInvites((prev) => [invite, ...prev.filter((i) => i.code !== code)]);
+      success(`Invite code generated: ${code}`);
 
-        success(`Invite code generated: ${data.code}`);
+      if (source === 'cloud') {
         loadData();
-      } else {
-        // Local simulation / Offline mode code
-        const dummyCode = 'LOC-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        const dummyInv: InviteRecord = {
-          id: dummyCode,
-          code: dummyCode,
-          role: inviteRole,
-          assigned_site_ids: inviteRole === 'supervisor' ? selectedSiteIds : [],
-          expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
-          max_uses: inviteMaxUses,
-          used_count: 0,
-          created_at: new Date().toISOString(),
-        };
-        setActiveInvites((prev) => [dummyInv, ...prev]);
-        success(`Invite code generated: ${dummyCode}`);
       }
     } catch (err: any) {
       console.error('Invite generation error:', err);
@@ -223,14 +217,8 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
   const handleRevokeInvite = async (inviteId: string) => {
     if (!confirm('Revoke this invite code immediately?')) return;
     try {
-      if (isSupabaseConfigured) {
-        const { error: revErr } = await supabase
-          .from('invites')
-          .update({ revoked_at: new Date().toISOString() })
-          .eq('id', inviteId);
-        if (revErr) throw revErr;
-      }
-      setActiveInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      await revokeInviteCode(inviteId);
+      setActiveInvites((prev) => prev.filter((i) => i.id !== inviteId && i.code !== inviteId));
       success('Invite code revoked.');
     } catch (e: any) {
       error(e.message || 'Failed to revoke invite');
