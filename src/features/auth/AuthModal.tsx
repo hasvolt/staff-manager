@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from './authContext';
+import { useOrg } from '@/features/org/orgContext';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useToast } from '@/components/ui/Toast';
 import { Mail, Lock, User, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -28,6 +29,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     resetPasswordForEmail,
     enableGoogleLogin,
   } = useAuth();
+  const { joinWithInvite } = useOrg();
   const { t } = useI18n();
   const { success, error } = useToast();
 
@@ -37,6 +39,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const processPendingInvite = async () => {
+    try {
+      const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const code = params?.get('invite') || (typeof window !== 'undefined' ? sessionStorage.getItem('pending_invite_code') : null);
+      if (code) {
+        const joinRes = await joinWithInvite(code);
+        if (!joinRes.error) {
+          success('Joined business workspace successfully!');
+          sessionStorage.removeItem('pending_invite_code');
+        }
+      }
+    } catch (invErr) {
+      console.warn('Could not auto-process invite after login:', invErr);
+    }
+  };
 
   const resetForm = () => {
     setEmail('');
@@ -61,6 +79,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         const res = await signInWithPassword(email.trim(), password);
         if (res.error) throw res.error;
         success('Signed in successfully!');
+        await processPendingInvite();
         handleClose();
       } else if (mode === 'signup') {
         if (password.length < 8) {
@@ -73,6 +92,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setMessage('Account created! Please check your email to verify your address before logging in.');
         } else {
           success('Welcome! Your account is created.');
+          await processPendingInvite();
           handleClose();
         }
       } else if (mode === 'forgot') {

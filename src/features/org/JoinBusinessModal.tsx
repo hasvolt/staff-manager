@@ -80,6 +80,9 @@ export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  if (code.trim()) {
+                    sessionStorage.setItem('pending_invite_code', code.trim());
+                  }
                   onClose();
                   onOpenAuth();
                 }}

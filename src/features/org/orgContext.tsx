@@ -24,10 +24,12 @@ interface OrgContextType {
   currentOrg: LocalOrganization | null;
   organizations: LocalOrganization[];
   role: string;
+  orgRoles: Record<string, string>;
   isLoading: boolean;
   createBusiness: (name: string, businessType?: string, currency?: string, country?: string, weekStart?: number) => Promise<{ error: Error | null; orgId?: string }>;
-  joinWithInvite: (code: string) => Promise<{ error: Error | null }>;
-  switchBusiness: (orgId: string) => void;
+  joinWithInvite: (code: string) => Promise<{ error: Error | null; orgId?: string }>;
+  switchBusiness: (orgId: string) => Promise<void>;
+  leaveBusiness: (orgId: string) => Promise<{ error: Error | null }>;
   updateSettings: (updates: Partial<LocalOrganization> & { settings?: BusinessSettings }) => Promise<{ error: Error | null }>;
   reloadOrganizations: () => Promise<void>;
   upgradeLocalToCloud: () => Promise<{ error: Error | null; count?: number }>;
@@ -43,20 +45,33 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentOrg, setCurrentOrg] = useState<LocalOrganization | null>(null);
   const [organizations, setOrganizations] = useState<LocalOrganization[]>([]);
   const [role, setRole] = useState<string>('owner');
+  const [orgRoles, setOrgRoles] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const loadLocalOrgs = useCallback(async () => {
     const list = await localDb.organizations.toArray();
     setOrganizations(list);
 
+    const rolesMap: Record<string, string> = {};
+    for (const o of list) {
+      const mem = await localDb.memberships
+        .where('org_id')
+        .equals(o.id)
+        .and((m) => m.user_id === (user?.id || 'local_user') || !m.user_id)
+        .first();
+      rolesMap[o.id] = mem?.role || (o.owner_id === (user?.id || 'local_user') ? 'owner' : 'member');
+    }
+    setOrgRoles(rolesMap);
+
     const savedOrgId = localStorage.getItem(DEFAULT_ORG_ID_KEY);
     let active = list.find((o) => o.id === savedOrgId) || list[0] || null;
 
     // If local mode and no org exists yet, bootstrap default local business
     if (!active && isLocalMode && list.length === 0) {
+      const defaultOrgId = generateUUID();
       const defaultOrg: LocalOrganization = {
-        id: generateUUID(),
-        org_id: '',
+        id: defaultOrgId,
+        org_id: defaultOrgId,
         name: 'My Business',
         business_type: 'other',
         currency: 'INR',
@@ -66,74 +81,126 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           terminology_preset: 'general',
           month_calc_mode: 'actual',
         },
-        owner_id: 'local_user',
+        owner_id: user?.id || 'local_user',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         revision: 1,
         syncStatus: 'local-only',
       };
-      defaultOrg.org_id = defaultOrg.id;
       await localDb.organizations.put(defaultOrg);
+      await localDb.memberships.put({
+        id: generateUUID(),
+        org_id: defaultOrgId,
+        user_id: user?.id || 'local_user',
+        role: 'owner',
+        assigned_site_ids: [],
+        status: 'active',
+        created_at: new Date().toISOString(),
+        syncStatus: 'local-only',
+      });
       list.push(defaultOrg);
       active = defaultOrg;
+      rolesMap[defaultOrgId] = 'owner';
       setOrganizations([defaultOrg]);
+      setOrgRoles(rolesMap);
     }
 
     if (active) {
       setCurrentOrg(active);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
-      const mem = await localDb.memberships.where('org_id').equals(active.id).first();
-      if (mem) {
-        setRole(mem.role);
-      } else {
-        setRole('owner');
-      }
+      setRole(rolesMap[active.id] || 'owner');
     }
-  }, [isLocalMode]);
+  }, [isLocalMode, user]);
 
   const loadCloudOrgs = useCallback(async () => {
     if (!user || !isSupabaseConfigured) return;
 
     try {
-      // Fetch organizations where user is a member
+      // 1. Fetch direct memberships of this user
       const { data: memberData, error: memberErr } = await supabase
         .from('memberships')
-        .select('org_id, role, organizations(*)')
+        .select('id, org_id, user_id, role, assigned_site_ids, status')
         .eq('user_id', user.id);
 
-      if (memberErr) throw memberErr;
+      if (memberErr) {
+        console.warn('Could not query memberships directly:', memberErr);
+      }
 
-      const orgs: LocalOrganization[] = [];
-      let userRole = 'owner';
+      // 2. Fetch accessible organizations
+      const { data: cloudOrgsData, error: orgsErr } = await supabase
+        .from('organizations')
+        .select('*');
 
+      if (orgsErr) {
+        console.warn('Could not query organizations directly:', orgsErr);
+      }
+
+      // 3. Build roles map & cache memberships locally
+      const rolesMap: Record<string, string> = {};
       if (memberData && memberData.length > 0) {
-        for (const item of memberData) {
-          const o = item.organizations as any;
-          if (o) {
-            const orgObj: LocalOrganization = {
-              ...o,
-              org_id: o.id,
-              syncStatus: 'synced',
-            };
-            orgs.push(orgObj);
-            await localDb.organizations.put(orgObj);
+        for (const m of memberData) {
+          rolesMap[m.org_id] = m.role;
+          await localDb.memberships.put({
+            id: m.id || generateUUID(),
+            org_id: m.org_id,
+            user_id: user.id,
+            role: m.role,
+            assigned_site_ids: m.assigned_site_ids || [],
+            status: m.status || 'active',
+            created_at: new Date().toISOString(),
+            syncStatus: 'synced',
+          });
+        }
+      }
+
+      // 4. Merge cloud and local organizations into unified list
+      const orgsMap = new Map<string, LocalOrganization>();
+
+      if (cloudOrgsData && cloudOrgsData.length > 0) {
+        for (const o of cloudOrgsData) {
+          const orgObj: LocalOrganization = {
+            ...o,
+            org_id: o.id,
+            syncStatus: 'synced',
+          };
+          orgsMap.set(o.id, orgObj);
+          await localDb.organizations.put(orgObj);
+          if (!rolesMap[o.id] && o.owner_id === user.id) {
+            rolesMap[o.id] = 'owner';
           }
         }
+      }
+
+      // Also preserve any local-only or previously created businesses from localDb
+      const existingLocalList = await localDb.organizations.toArray();
+      for (const lOrg of existingLocalList) {
+        if (!orgsMap.has(lOrg.id)) {
+          orgsMap.set(lOrg.id, lOrg);
+          if (!rolesMap[lOrg.id]) {
+            const localMem = await localDb.memberships
+              .where('org_id')
+              .equals(lOrg.id)
+              .and((m) => m.user_id === user.id || m.user_id === 'local_user' || !m.user_id)
+              .first();
+            rolesMap[lOrg.id] = localMem?.role || (lOrg.owner_id === user.id ? 'owner' : 'member');
+          }
+        }
+      }
+
+      const combinedOrgs = Array.from(orgsMap.values());
+
+      if (combinedOrgs.length > 0) {
+        setOrganizations(combinedOrgs);
+        setOrgRoles(rolesMap);
 
         const savedOrgId = localStorage.getItem(DEFAULT_ORG_ID_KEY);
-        const active = orgs.find((o) => o.id === savedOrgId) || orgs[0];
+        const active = combinedOrgs.find((o) => o.id === savedOrgId) || combinedOrgs[0];
 
-        const activeMembership = memberData.find((m) => m.org_id === active.id);
-        if (activeMembership) {
-          userRole = activeMembership.role;
-        }
-
-        setOrganizations(orgs);
         setCurrentOrg(active);
-        setRole(userRole);
+        const activeRole = rolesMap[active.id] || (active.owner_id === user.id ? 'owner' : 'viewer');
+        setRole(activeRole);
         localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
       } else {
-        // If user has no memberships in cloud yet, load local organizations
         await loadLocalOrgs();
       }
     } catch (e) {
@@ -265,6 +332,15 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       if (res.orgId) {
+        // Clear pending invite from URL and storage so user never gets stuck in a loop
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('pending_invite_code');
+          if (window.location.search.includes('invite')) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('invite');
+            window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
+          }
+        }
         localStorage.setItem(DEFAULT_ORG_ID_KEY, res.orgId);
         await reloadOrganizations();
         await switchBusiness(res.orgId);
@@ -287,14 +363,70 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentOrg(found);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, found.id);
 
-      const mem = await localDb.memberships.where('org_id').equals(found.id).first();
-      if (mem) {
-        setRole(mem.role);
-      } else if (found.owner_id === (user?.id || 'local_user')) {
-        setRole('owner');
+      // Determine accurate role for this business
+      let effectiveRole = orgRoles[found.id];
+      if (!effectiveRole) {
+        const mem = await localDb.memberships
+          .where('org_id')
+          .equals(found.id)
+          .and((m) => m.user_id === (user?.id || 'local_user') || !m.user_id)
+          .first();
+        if (mem) {
+          effectiveRole = mem.role;
+        } else if (found.owner_id === (user?.id || 'local_user')) {
+          effectiveRole = 'owner';
+        } else {
+          effectiveRole = 'viewer';
+        }
       }
+      setRole(effectiveRole);
+      setOrgRoles((prev) => ({ ...prev, [found.id]: effectiveRole }));
 
       syncEngine.syncNow(found.id);
+    }
+  };
+
+  const leaveBusiness = async (orgId: string) => {
+    try {
+      const targetOrg = organizations.find((o) => o.id === orgId) || (await localDb.organizations.get(orgId));
+      if (!targetOrg) {
+        return { error: new Error('Business not found') };
+      }
+
+      if (targetOrg.owner_id === (user?.id || 'local_user')) {
+        return { error: new Error('You are the owner of this business. Please transfer ownership in Team Members before leaving, or delete the business.') };
+      }
+
+      if (user && isSupabaseConfigured) {
+        const { error: delErr } = await supabase
+          .from('memberships')
+          .delete()
+          .eq('org_id', orgId)
+          .eq('user_id', user.id);
+        if (delErr) throw delErr;
+      }
+
+      // Remove from localDb memberships and organizations
+      await localDb.memberships.where('org_id').equals(orgId).delete();
+      await localDb.organizations.delete(orgId);
+
+      const remainingOrgs = organizations.filter((o) => o.id !== orgId);
+      setOrganizations(remainingOrgs);
+
+      if (currentOrg?.id === orgId) {
+        const nextOrg = remainingOrgs[0] || null;
+        if (nextOrg) {
+          await switchBusiness(nextOrg.id);
+        } else {
+          setCurrentOrg(null);
+          localStorage.removeItem(DEFAULT_ORG_ID_KEY);
+        }
+      }
+
+      await reloadOrganizations();
+      return { error: null };
+    } catch (err: any) {
+      return { error: err };
     }
   };
 
@@ -450,10 +582,12 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentOrg,
         organizations,
         role,
+        orgRoles,
         isLoading,
         createBusiness,
         joinWithInvite,
         switchBusiness,
+        leaveBusiness,
         updateSettings,
         reloadOrganizations,
         upgradeLocalToCloud,

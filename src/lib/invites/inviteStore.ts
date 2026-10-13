@@ -257,6 +257,46 @@ export async function processInviteAcceptance(
 
       if (rpcErr) throw rpcErr;
       if (joinedOrgId) {
+        // Cache organization and membership immediately into localDb
+        try {
+          const { data: orgData } = await supabase
+            .from('organizations')
+            .select('*')
+            .eq('id', joinedOrgId)
+            .maybeSingle();
+
+          const { data: memData } = await supabase
+            .from('memberships')
+            .select('*')
+            .eq('org_id', joinedOrgId)
+            .eq('user_id', userId)
+            .maybeSingle();
+
+          if (orgData) {
+            const orgObj: LocalOrganization = {
+              ...orgData,
+              org_id: orgData.id,
+              syncStatus: 'synced',
+            };
+            await localDb.organizations.put(orgObj);
+          }
+
+          if (memData) {
+            await localDb.memberships.put({
+              id: memData.id || generateUUID(),
+              org_id: joinedOrgId,
+              user_id: userId,
+              role: memData.role || 'member',
+              assigned_site_ids: memData.assigned_site_ids || [],
+              status: memData.status || 'active',
+              created_at: memData.created_at || new Date().toISOString(),
+              syncStatus: 'synced',
+            });
+          }
+        } catch (cacheErr) {
+          console.warn('Could not cache joined organization locally:', cacheErr);
+        }
+
         return { error: null, orgId: joinedOrgId };
       }
     } catch (err: any) {

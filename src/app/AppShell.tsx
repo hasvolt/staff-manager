@@ -27,6 +27,9 @@ import {
   Activity,
   Database,
   GitMerge,
+  Building2,
+  KeyRound,
+  Check,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useCalculator } from '@/features/calculator/calculatorContext';
@@ -54,7 +57,7 @@ export const AppShell: React.FC = () => {
   const { t, language } = useI18n();
   const { openCalculator } = useCalculator();
   const { user, profile, isLocalMode, signOut } = useAuth();
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, organizations, switchBusiness, orgRoles, role } = useOrg();
   const { success } = useToast();
   const location = useLocation();
 
@@ -128,13 +131,20 @@ export const AppShell: React.FC = () => {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* App Brand (Shown when no org selected or on medium+ screens) */}
+          {/* App Brand (Always visible on mobile & desktop) */}
           <NavLink
             to="/"
-            className={`${currentOrg ? 'hidden md:flex' : 'flex'} items-center gap-2 group shrink-0`}
+            className="flex items-center gap-1.5 sm:gap-2 group shrink-0"
             title="Staff Manager Home"
           >
-            <AppLogo size="sm" showText={true} />
+            {/* On small mobile: show emblem badge so logo is always visible */}
+            <div className="flex md:hidden items-center">
+              <AppLogo size="xs" badgeOnly />
+            </div>
+            {/* On md+: show full logo with text */}
+            <div className="hidden md:flex items-center">
+              <AppLogo size="sm" showText={true} />
+            </div>
           </NavLink>
 
           {/* Business Switcher Dropdown */}
@@ -381,6 +391,48 @@ export const AppShell: React.FC = () => {
               </button>
             </div>
 
+            {/* Workspaces & Multi-Business Switcher in Drawer */}
+            {organizations.length > 1 && (
+              <div className="mb-3 pb-3 border-b border-[var(--border)]">
+                <div className="px-2 py-1 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  <span>Switch Business ({organizations.length})</span>
+                </div>
+                <div className="max-h-36 overflow-y-auto space-y-1 mt-1 pr-1">
+                  {organizations.map((org) => {
+                    const isSelected = org.id === currentOrg?.id;
+                    const orgRole = orgRoles[org.id] || (org.owner_id === (user?.id || 'local_user') ? 'owner' : 'viewer');
+                    return (
+                      <button
+                        key={org.id}
+                        type="button"
+                        onClick={() => {
+                          switchBusiness(org.id);
+                          closeDrawer();
+                          success(`Switched to "${org.name}"`);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer ${
+                          isSelected
+                            ? 'bg-[var(--surface-2)] text-[var(--text)] font-semibold border border-[var(--accent)]/30'
+                            : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]/60 border border-transparent'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Building2 className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-[var(--accent)]' : ''}`} />
+                          <span className="truncate">{org.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-[var(--surface)] text-[var(--text-muted)] font-bold">
+                            {orgRole}
+                          </span>
+                          {isSelected && <Check className="w-3 h-3 text-[var(--accent)]" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Menu Items */}
             <div className="flex-1 space-y-1 text-sm font-medium">
               <button
@@ -406,6 +458,18 @@ export const AppShell: React.FC = () => {
               >
                 <CloudUpload className="w-4 h-4 text-[var(--accent)]" />
                 <span>Create Another Business</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsJoinOrgModalOpen(true);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <KeyRound className="w-4 h-4 text-sky-400" />
+                <span>Join with Invite Code</span>
               </button>
 
               <button
@@ -640,6 +704,11 @@ export const AppShell: React.FC = () => {
         onClose={() => {
           setIsJoinOrgModalOpen(false);
           setInviteCodeFromUrl('');
+          if (typeof window !== 'undefined' && window.location.search.includes('invite')) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('invite');
+            window.history.replaceState({}, document.title, url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
+          }
         }}
       />
       <MembersModal
