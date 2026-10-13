@@ -38,6 +38,7 @@ import { LanguageModal } from '@/components/LanguageModal';
 import { CalculatorModal } from '@/features/calculator/CalculatorModal';
 import { PWAInstallButton } from '@/components/PWAInstallButton';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { AppLogo } from '@/components/ui/AppLogo';
 import { BusinessSwitcher } from '@/features/org/BusinessSwitcher';
 import { SyncStatusIndicator } from '@/features/sync/SyncStatusIndicator';
 import { AuthModal } from '@/features/auth/AuthModal';
@@ -128,13 +129,12 @@ export const AppShell: React.FC = () => {
           </button>
 
           {/* App Brand (Shown when no org selected or on medium+ screens) */}
-          <NavLink to="/" className={`${currentOrg ? 'hidden md:flex' : 'flex'} items-center gap-2.5 group shrink-0`}>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[var(--card-from)] to-[var(--card-to)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] font-bold text-sm shadow-xs group-hover:scale-105 transition">
-              <Users className="w-4 h-4" />
-            </div>
-            <span className="font-bold text-base sm:text-lg leading-tight tracking-tight text-[var(--text)] hidden lg:inline">
-              {appName}
-            </span>
+          <NavLink
+            to="/"
+            className={`${currentOrg ? 'hidden md:flex' : 'flex'} items-center gap-2 group shrink-0`}
+            title="Staff Manager Home"
+          >
+            <AppLogo size="sm" showText={true} />
           </NavLink>
 
           {/* Business Switcher Dropdown */}
@@ -364,12 +364,10 @@ export const AppShell: React.FC = () => {
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)] mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center font-bold">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-[var(--text)]">{currentOrg?.name || appName}</h3>
-                  <span className="text-[10px] text-[var(--text-muted)] capitalize">
+                <AppLogo size="sm" badgeOnly />
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-[var(--text)] truncate">{currentOrg?.name || appName}</h3>
+                  <span className="text-[10px] text-[var(--text-muted)] capitalize block">
                     Role: {role} &bull; {isLocalMode ? 'Local Mode' : 'Cloud Connected'}
                   </span>
                 </div>
@@ -610,12 +608,12 @@ export const AppShell: React.FC = () => {
             </div>
 
             {/* Drawer Footer */}
-            <div className="pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span>Staff Manager v1.1</span>
-                <span className="text-[10px] bg-[var(--surface-2)] px-2 py-0.5 rounded-md">PWA &bull; Local-First</span>
+            <div className="pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex flex-col gap-2">
+              <AppLogo size="xs" showText={true} subtitle="v1.1 • Local-First PWA" />
+              <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
+                <span>Sister app of Daily Khata Pro</span>
+                <span className="bg-[var(--surface-2)] px-2 py-0.5 rounded-md font-mono">Offline Ready</span>
               </div>
-              <p className="text-[10px]">Sister product of Daily Khata Pro</p>
             </div>
           </div>
         </div>

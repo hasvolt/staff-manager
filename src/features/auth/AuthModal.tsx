@@ -7,6 +7,7 @@ import { useAuth } from './authContext';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useToast } from '@/components/ui/Toast';
 import { Mail, Lock, User, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -106,6 +107,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        <div className="flex justify-center pb-1">
+          <AppLogo size="md" showText={true} />
+        </div>
         {message ? (
           <div className="p-4 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-[var(--accent)] mx-auto" />

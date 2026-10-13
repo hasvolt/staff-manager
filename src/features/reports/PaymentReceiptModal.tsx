@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { AppLogo } from '@/components/ui/AppLogo';
 import { useToast } from '@/components/ui/Toast';
 import { useOrg } from '@/features/org/orgContext';
 import { useI18n } from '@/lib/i18n/i18nContext';
@@ -112,12 +113,16 @@ export const PaymentReceiptModal: React.FC<PaymentReceiptModalProps> = ({
         >
           {/* Header */}
           <div className="text-center border-b border-dashed border-slate-300 pb-3">
-            {currentOrg?.logo_path && (
+            {currentOrg?.logo_path ? (
               <img
                 src={currentOrg.logo_path}
                 alt="Business Logo"
                 className="w-10 h-10 mx-auto mb-1.5 object-contain"
               />
+            ) : (
+              <div className="flex justify-center mb-1.5">
+                <AppLogo size="sm" badgeOnly />
+              </div>
             )}
             <h3 className="font-extrabold text-base tracking-tight text-slate-900">
               {currentOrg?.name || 'Staff Manager'}

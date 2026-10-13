@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { AppLogo } from '@/components/ui/AppLogo';
 import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { TextArea } from '@/components/ui/TextArea';
@@ -408,12 +409,14 @@ export const SalarySlipModal: React.FC<SalarySlipModalProps> = ({
           {/* Header */}
           <div className="flex items-start justify-between border-b border-slate-200 pb-4">
             <div className="flex items-center gap-3">
-              {currentOrg?.logo_path && (
+              {currentOrg?.logo_path ? (
                 <img
                   src={currentOrg.logo_path}
                   alt="Business Logo"
                   className="w-12 h-12 rounded-xl object-contain border border-slate-200 p-0.5 bg-white shrink-0"
                 />
+              ) : (
+                <AppLogo size="md" badgeOnly className="shrink-0" />
               )}
               <div>
                 <h2 className="text-xl font-bold text-slate-900 tracking-tight">

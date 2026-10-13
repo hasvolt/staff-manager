@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { Users, ExternalLink, ShieldCheck } from 'lucide-react';
+import { AppLogo } from '@/components/ui/AppLogo';
 
 export const AboutPage: React.FC = () => {
   const { t } = useI18n();
@@ -9,11 +10,16 @@ export const AboutPage: React.FC = () => {
 
   return (
     <div className="space-y-5 animate-in fade-in max-w-2xl text-left">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">{t('about.title')}</h1>
-        <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
-          Dedicated workforce management for local contractors, shops, workshops &amp; businesses
-        </p>
+      <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xs">
+        <AppLogo size="lg" badgeOnly />
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
+            Staff <span className="text-[var(--accent)]">Manager</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+            Dedicated workforce management for local contractors, shops, workshops &amp; businesses
+          </p>
+        </div>
       </div>
 
       <Card variant="surface" className="space-y-3 leading-relaxed text-xs sm:text-sm text-[var(--text-muted)]">

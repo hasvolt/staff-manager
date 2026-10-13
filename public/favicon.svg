@@ -1,30 +1,80 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
+    <!-- Background Gradient: Rich Deep Emerald -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0E6B4B"/>
-      <stop offset="100%" stop-color="#062E22"/>
+      <stop offset="0%" stop-color="#064E3B"/>
+      <stop offset="50%" stop-color="#062E22"/>
+      <stop offset="100%" stop-color="#021A12"/>
     </linearGradient>
+
+    <!-- Top glow -->
+    <radialGradient id="topGlow" cx="25%" cy="20%" r="65%">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#047857" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#021A12" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Emerald-Cyan Accent Gradient for Primary Staff -->
     <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7B7"/>
+      <stop offset="50%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Secondary Team Member Accent -->
+    <linearGradient id="secGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#059669" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Verified Badge Gradient -->
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#34D399"/>
       <stop offset="100%" stop-color="#10B981"/>
     </linearGradient>
+
+    <!-- Shadow Filter -->
+    <filter id="badgeShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
   </defs>
-  <!-- Background with safe rounded rectangle -->
-  <rect width="512" height="512" rx="108" fill="url(#bgGrad)"/>
-  <!-- Outer subtle border -->
-  <rect x="8" y="8" width="496" height="496" rx="100" fill="none" stroke="#10B981" stroke-width="6" stroke-opacity="0.3"/>
-  <!-- Central Icon: People/Staff + Attendance Check Badge -->
-  <g transform="translate(64, 64) scale(0.75)" fill="none" stroke="url(#accentGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
-    <!-- User Avatar Silhouette -->
-    <circle cx="256" cy="160" r="72" fill="#10B981" fill-opacity="0.2"/>
-    <path d="M128 384c0-70.69 57.31-128 128-128s128 57.31 128 128" />
-    <!-- Secondary team members in background -->
-    <circle cx="120" cy="180" r="44" stroke-width="20" stroke-opacity="0.6"/>
-    <path d="M40 370c0-44.18 35.82-80 80-80" stroke-width="20" stroke-opacity="0.6"/>
-    <circle cx="392" cy="180" r="44" stroke-width="20" stroke-opacity="0.6"/>
-    <path d="M392 290c44.18 0 80 35.82 80 80" stroke-width="20" stroke-opacity="0.6"/>
-    <!-- Attendance / Verification Checkmark Badge -->
-    <circle cx="370" cy="370" r="64" fill="#04100C" stroke="#34D399" stroke-width="24"/>
-    <path d="M338 370l22 22 44-44" stroke="#34D399" stroke-width="22"/>
+
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" rx="112" fill="url(#topGlow)"/>
+
+  <!-- Border Highlight -->
+  <rect x="8" y="8" width="496" height="496" rx="104" fill="none" stroke="#34D399" stroke-width="5" stroke-opacity="0.3"/>
+
+  <!-- TEAM GRAPHIC -->
+  <g>
+    <!-- Left Team Member (Behind) -->
+    <g opacity="0.75">
+      <circle cx="152" cy="186" r="42" fill="url(#secGrad)" />
+      <path d="M78 358 C78 282 120 256 160 252 C140 278 132 316 132 358 Z" fill="url(#secGrad)" />
+    </g>
+
+    <!-- Right Team Member (Behind) -->
+    <g opacity="0.75">
+      <circle cx="360" cy="186" r="42" fill="url(#secGrad)" />
+      <path d="M434 358 C434 282 392 256 352 252 C372 278 380 316 380 358 Z" fill="url(#secGrad)" />
+    </g>
+
+    <!-- Center Leader (Front) -->
+    <g>
+      <!-- Head -->
+      <circle cx="256" cy="154" r="56" fill="url(#accentGrad)" />
+      <!-- Torso / Shoulder -->
+      <path d="M148 360 C148 274 200 240 256 240 C312 240 364 274 364 360 C364 368 358 372 348 372 L164 372 C154 372 148 368 148 360 Z" fill="url(#accentGrad)" />
+    </g>
+  </g>
+
+  <!-- ATTENDANCE / VERIFIED BADGE -->
+  <g filter="url(#badgeShadow)">
+    <!-- Badge Background Circle -->
+    <circle cx="370" cy="370" r="76" fill="#031F15" stroke="#34D399" stroke-width="9"/>
+    <circle cx="370" cy="370" r="64" fill="url(#badgeGrad)" fill-opacity="0.18"/>
+    <!-- Checkmark Path -->
+    <path d="M336 370 L360 396 L408 344" fill="none" stroke="#34D399" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>
