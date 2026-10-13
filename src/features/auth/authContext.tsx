@@ -4,6 +4,7 @@ import { deleteOrgStorageFiles } from '@/lib/supabase/storage';
 import { syncEngine } from '@/lib/sync/syncEngine';
 import { User, Session } from '@supabase/supabase-js';
 import { localDb, LocalProfile } from '@/lib/db/dexie';
+import { saveCurrentAccount } from './accountManager';
 
 interface AuthContextType {
   user: User | null;
@@ -168,6 +169,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (user && user.email) {
+      saveCurrentAccount(user, profile);
+    }
+  }, [user, profile]);
 
   const signInWithPassword = async (email: string, pass: string) => {
     if (!isSupabaseConfigured) {

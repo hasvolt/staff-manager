@@ -30,6 +30,8 @@ import {
   Building2,
   KeyRound,
   Check,
+  ArrowLeftRight,
+  Sparkles,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useCalculator } from '@/features/calculator/calculatorContext';
@@ -46,6 +48,8 @@ import { BusinessSwitcher } from '@/features/org/BusinessSwitcher';
 import { SyncStatusIndicator } from '@/features/sync/SyncStatusIndicator';
 import { AuthModal } from '@/features/auth/AuthModal';
 import { ProfileModal } from '@/features/auth/ProfileModal';
+import { AccountSwitcherModal } from '@/features/auth/AccountSwitcherModal';
+import { VersionUpdateModal } from '@/components/VersionUpdateModal';
 import { CreateBusinessModal } from '@/features/org/CreateBusinessModal';
 import { JoinBusinessModal } from '@/features/org/JoinBusinessModal';
 import { MembersModal } from '@/features/members/MembersModal';
@@ -67,6 +71,9 @@ export const AppShell: React.FC = () => {
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [authModalPrefilledEmail, setAuthModalPrefilledEmail] = useState<string | undefined>(undefined);
   const [isCreateOrgModalOpen, setIsCreateOrgModalOpen] = useState(false);
   const [isJoinOrgModalOpen, setIsJoinOrgModalOpen] = useState(false);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
@@ -233,6 +240,40 @@ export const AppShell: React.FC = () => {
                   </div>
 
                   {/* Actions */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsAccountSwitcherOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <ArrowLeftRight className="w-4 h-4 text-emerald-400" />
+                      <span>Switch Account (खाता बदलें)</span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full font-semibold">
+                      Profiles
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setIsVersionModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      <span>Check for Updates (v2.4.0)</span>
+                    </div>
+                    <span className="text-[10px] bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-mono font-bold">
+                      v2.4.0
+                    </span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -517,6 +558,23 @@ export const AppShell: React.FC = () => {
                 type="button"
                 onClick={() => {
                   closeDrawer();
+                  setIsAccountSwitcherOpen(true);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <ArrowLeftRight className="w-4 h-4 text-emerald-400" />
+                  <span>Switch Account (खाता बदलें)</span>
+                </div>
+                <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full font-medium">
+                  Multi-User
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
                   setIsCreateOrgModalOpen(true);
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
@@ -663,6 +721,23 @@ export const AppShell: React.FC = () => {
                 </span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsVersionModalOpen(true);
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-2)] transition text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <span>New Version & Updates (वर्शन अपडेट)</span>
+                </div>
+                <span className="text-[10px] bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-mono font-bold">
+                  v2.4.0
+                </span>
+              </button>
+
               <div className="my-2 border-t border-[var(--border)] pt-2" />
 
               {/* Sister Product & External Utilities */}
@@ -738,7 +813,16 @@ export const AppShell: React.FC = () => {
 
             {/* Drawer Footer */}
             <div className="pt-4 border-t border-[var(--border)] text-xs text-[var(--text-muted)] flex flex-col gap-2">
-              <AppLogo size="xs" showText={true} subtitle="v1.1 • Local-First PWA" />
+              <button
+                type="button"
+                onClick={() => {
+                  closeDrawer();
+                  setIsVersionModalOpen(true);
+                }}
+                className="text-left w-full cursor-pointer hover:opacity-85 transition"
+              >
+                <AppLogo size="xs" showText={true} subtitle="v2.4.0 • Tap for Updates" />
+              </button>
               <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
                 <span>Sister app of Daily Khata Pro</span>
                 <span className="bg-[var(--surface-2)] px-2 py-0.5 rounded-md font-mono">Offline Ready</span>
@@ -752,11 +836,33 @@ export const AppShell: React.FC = () => {
       <ThemeModal isOpen={isThemeModalOpen} onClose={() => setIsThemeModalOpen(false)} />
       <LanguageModal isOpen={isLangModalOpen} onClose={() => setIsLangModalOpen(false)} />
       <CalculatorModal />
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialEmail={authModalPrefilledEmail}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthModalPrefilledEmail(undefined);
+        }}
+      />
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAccountSwitcher={() => setIsAccountSwitcherOpen(true)}
+      />
+      <AccountSwitcherModal
+        isOpen={isAccountSwitcherOpen}
+        onClose={() => setIsAccountSwitcherOpen(false)}
+        onOpenAuth={(email) => {
+          setAuthModalPrefilledEmail(email);
+          setIsAuthModalOpen(true);
+        }}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenCreateBusiness={() => setIsCreateOrgModalOpen(true)}
+      />
+      <VersionUpdateModal
+        isOpen={isVersionModalOpen}
+        onClose={() => setIsVersionModalOpen(false)}
       />
       <CreateBusinessModal
         isOpen={isCreateOrgModalOpen}

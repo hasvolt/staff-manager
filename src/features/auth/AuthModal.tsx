@@ -14,12 +14,14 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultMode?: 'signin' | 'signup';
+  initialEmail?: string;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   defaultMode = 'signin',
+  initialEmail = '',
 }) => {
   const {
     signInWithPassword,
@@ -34,8 +36,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const { success, error } = useToast();
 
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot' | 'magic'>(defaultMode);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
+
+  // Update email if initialEmail changes when opened
+  React.useEffect(() => {
+    if (isOpen && initialEmail) {
+      setEmail(initialEmail);
+    }
+  }, [isOpen, initialEmail]);
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);

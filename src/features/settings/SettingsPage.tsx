@@ -11,17 +11,44 @@ import { useTheme, ALL_THEMES, ThemeName } from '@/lib/theme/themeContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useAuth } from '@/features/auth/authContext';
 import { useToast } from '@/components/ui/Toast';
-import { Settings, Palette, Globe, DollarSign, Building, Save, Shield, Sparkles } from 'lucide-react';
+import {
+  Settings,
+  Palette,
+  Globe,
+  DollarSign,
+  Building,
+  Save,
+  Shield,
+  Sparkles,
+  ArrowLeftRight,
+  Users,
+  RefreshCw,
+  UserCheck,
+  CheckCircle2,
+  DownloadCloud,
+} from 'lucide-react';
 import { LanguageCode } from '@/locales/types';
 import { LanguageModal } from '@/components/LanguageModal';
 import { FileUpload } from '@/components/ui/FileUpload';
+import { AccountSwitcherModal } from '@/features/auth/AccountSwitcherModal';
+import { VersionUpdateModal } from '@/components/VersionUpdateModal';
+import { ProfileModal } from '@/features/auth/ProfileModal';
+import { AuthModal } from '@/features/auth/AuthModal';
+import { useAppUpdate } from '@/lib/pwa/useAppUpdate';
 
 export const SettingsPage: React.FC = () => {
   const { t, language, setLanguage, languages, currency, setCurrency } = useI18n();
   const { theme, setTheme } = useTheme();
   const { currentOrg, updateSettings, role } = useOrg();
-  const { user } = useAuth();
+  const { user, profile, isLocalMode } = useAuth();
   const { success, error } = useToast();
+  const { currentVersion, updateAvailable, checkForUpdate, isChecking } = useAppUpdate();
+
+  const [isAccountSwitcherOpen, setIsAccountSwitcherOpen] = useState(false);
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalPrefilledEmail, setAuthModalPrefilledEmail] = useState<string | undefined>(undefined);
 
   const [businessName, setBusinessName] = useState(currentOrg?.name || '');
   const [logoPath, setLogoPath] = useState(currentOrg?.logo_path || '');
@@ -395,9 +422,175 @@ export const SettingsPage: React.FC = () => {
         </div>
       </Card>
 
+      {/* Account & Multi-User Switcher Card */}
+      <Card variant="surface" className="space-y-3.5">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-emerald-400" />
+            <h3 className="font-semibold text-sm text-[var(--text)]">Account & Profiles / खाता बदलें</h3>
+          </div>
+          <span className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">
+            Multi-User
+          </span>
+        </div>
+
+        <div className="p-3 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+              {profile?.full_name?.charAt(0).toUpperCase() ||
+                user?.email?.charAt(0).toUpperCase() || (
+                  <UserCheck className="w-5 h-5" />
+                )}
+            </div>
+            <div className="min-w-0 text-left">
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-xs sm:text-sm text-[var(--text)] truncate">
+                  {profile?.full_name || user?.user_metadata?.full_name || (user ? 'My Account' : 'Guest Account')}
+                </p>
+                <span className="text-[10px] font-semibold bg-[var(--surface)] text-[var(--accent)] border border-[var(--border)] px-1.5 py-0.5 rounded-md capitalize">
+                  {role}
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)] truncate">
+                {user ? user.email : 'Local Guest Mode (No Cloud Account)'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAccountSwitcherOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              <span>Switch Account (खाता बदलें)</span>
+            </Button>
+            {user ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="text-xs"
+              >
+                Profile & Security
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setIsAuthModalOpen(true)}
+                className="text-xs"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* App Version & Updates Card */}
+      <Card variant="surface" className="space-y-3.5">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <h3 className="font-semibold text-sm text-[var(--text)]">App Version & Updates / वर्शन अपडेट</h3>
+          </div>
+          <span className="font-mono text-xs px-2 py-0.5 rounded-md bg-[var(--surface-2)] text-purple-400 border border-[var(--border)] font-bold">
+            v{currentVersion}
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center shrink-0 mt-0.5">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-xs text-[var(--text)]">Staff Manager • Offline-First PWA</p>
+                <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full font-bold">
+                  {updateAvailable ? 'Update Ready' : 'Up to Date'}
+                </span>
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                Automatically checks for new software releases and updates in background.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const res = await checkForUpdate();
+                if (res.hasUpdate) {
+                  setIsVersionModalOpen(true);
+                } else {
+                  success('App is up to date (v' + currentVersion + ')');
+                }
+              }}
+              isLoading={isChecking}
+              className="flex items-center gap-1.5 text-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isChecking ? 'animate-spin' : ''}`} />
+              <span>Check for Updates</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsVersionModalOpen(true)}
+              className="text-xs"
+            >
+              Update Center
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <LanguageModal
         isOpen={isLangModalOpen}
         onClose={() => setIsLangModalOpen(false)}
+      />
+
+      <AccountSwitcherModal
+        isOpen={isAccountSwitcherOpen}
+        onClose={() => setIsAccountSwitcherOpen(false)}
+        onOpenAuth={(email) => {
+          setAuthModalPrefilledEmail(email);
+          setIsAuthModalOpen(true);
+        }}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenCreateBusiness={() => {}}
+      />
+
+      <VersionUpdateModal
+        isOpen={isVersionModalOpen}
+        onClose={() => setIsVersionModalOpen(false)}
+      />
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenAccountSwitcher={() => setIsAccountSwitcherOpen(true)}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialEmail={authModalPrefilledEmail}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setAuthModalPrefilledEmail(undefined);
+        }}
       />
     </div>
   );

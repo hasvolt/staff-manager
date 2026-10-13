@@ -18,18 +18,21 @@ import {
   CloudUpload,
   ShieldAlert,
   Save,
+  ArrowLeftRight,
 } from 'lucide-react';
 
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenAuth: () => void;
+  onOpenAccountSwitcher?: () => void;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   onClose,
   onOpenAuth,
+  onOpenAccountSwitcher,
 }) => {
   const {
     user,
@@ -273,8 +276,24 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
               </div>
 
-              {/* Sign out options */}
+              {/* Account Switcher and Sign out options */}
               <div className="flex flex-wrap items-center gap-2 pt-2">
+                {onOpenAccountSwitcher && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onClose();
+                      onOpenAccountSwitcher();
+                    }}
+                    className="flex items-center gap-1.5 text-xs text-[var(--accent)] border-[var(--accent)]/40 hover:bg-[var(--accent)]/10"
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                    <span>Switch Account (खाता बदलें)</span>
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   size="sm"
