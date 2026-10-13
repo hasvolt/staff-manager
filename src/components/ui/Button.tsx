@@ -26,27 +26,27 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-150 active:scale-[0.97] active:brightness-95 cursor-pointer select-none disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] shadow-sm';
+      'inline-flex items-center justify-center font-semibold rounded-2xl transition-all duration-150 active:scale-[0.97] active:brightness-95 cursor-pointer select-none disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100 gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] shadow-xs tracking-tight';
 
     const sizeStyles = {
-      sm: 'px-3 py-1.5 min-h-[38px] text-xs',
-      md: 'px-4 py-2.5 min-h-[46px] text-sm',
-      lg: 'px-6 py-3.5 min-h-[52px] text-base',
+      sm: 'px-3 py-1.5 min-h-[38px] text-xs font-semibold rounded-xl',
+      md: 'px-4 py-2.5 min-h-[46px] text-sm font-semibold rounded-2xl',
+      lg: 'px-6 py-3.5 min-h-[52px] text-base font-bold rounded-2xl',
     }[size];
 
     const variantStyles = {
       primary:
-        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 border border-[var(--accent)] shadow-md shadow-[var(--accent)]/15',
+        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 border border-[var(--accent)] shadow-md shadow-[var(--accent)]/20 hover:shadow-lg hover:shadow-[var(--accent)]/25',
       secondary:
-        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/30',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/40 hover:shadow-xs',
       outline:
-        'bg-transparent text-[var(--text)] border-2 border-[var(--border)] hover:bg-[var(--surface-2)] hover:border-[var(--text-muted)]/40',
+        'bg-transparent text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)]',
       income:
-        'bg-[var(--btn-income)] text-white hover:opacity-95 border border-[var(--btn-income)] shadow-md shadow-emerald-500/20',
+        'bg-[var(--btn-income)] text-white hover:opacity-95 border border-[var(--btn-income)] shadow-md shadow-emerald-600/25 hover:shadow-lg hover:shadow-emerald-600/30',
       expense:
-        'bg-[var(--btn-expense)] text-white hover:opacity-95 border border-[var(--btn-expense)] shadow-md shadow-rose-500/20',
+        'bg-[var(--btn-expense)] text-white hover:opacity-95 border border-[var(--btn-expense)] shadow-md shadow-rose-600/25 hover:shadow-lg hover:shadow-rose-600/30',
       tactile:
-        'bg-[var(--surface-2)] text-[var(--text)] border-2 border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-sm hover:shadow',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-xs hover:shadow-sm',
       ghost:
         'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] shadow-none',
     }[variant];

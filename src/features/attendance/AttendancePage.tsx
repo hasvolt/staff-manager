@@ -228,40 +228,40 @@ export const AttendancePage: React.FC = () => {
       )}
 
       {/* Daily Stats KPI bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-        <div className="p-3 rounded-2xl bg-[var(--income)]/10 border border-[var(--income)]/30 text-center">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+        <div className="p-3.5 rounded-2xl bg-[var(--income)]/10 border border-[var(--income)]/30 text-center shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--income)] block">
             Present
           </span>
-          <span className="text-lg font-extrabold text-[var(--income)]">{stats.present}</span>
+          <span className="text-xl font-black text-[var(--income)]">{stats.present}</span>
         </div>
 
-        <div className="p-3 rounded-2xl bg-[var(--warning)]/10 border border-[var(--warning)]/30 text-center">
+        <div className="p-3.5 rounded-2xl bg-[var(--warning)]/10 border border-[var(--warning)]/30 text-center shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--warning)] block">
             Half Day
           </span>
-          <span className="text-lg font-extrabold text-[var(--warning)]">{stats.half}</span>
+          <span className="text-xl font-black text-[var(--warning)]">{stats.half}</span>
         </div>
 
-        <div className="p-3 rounded-2xl bg-[var(--expense)]/10 border border-[var(--expense)]/30 text-center">
+        <div className="p-3.5 rounded-2xl bg-[var(--expense)]/10 border border-[var(--expense)]/30 text-center shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--expense)] block">
             Absent
           </span>
-          <span className="text-lg font-extrabold text-[var(--expense)]">{stats.absent}</span>
+          <span className="text-xl font-black text-[var(--expense)]">{stats.absent}</span>
         </div>
 
-        <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-center">
+        <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-center shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 block">
             Leave
           </span>
-          <span className="text-lg font-extrabold text-purple-400">{stats.leave}</span>
+          <span className="text-xl font-black text-purple-400">{stats.leave}</span>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 p-3 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] text-center">
+        <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] text-center shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] block">
             Total OT Hours
           </span>
-          <span className="text-lg font-extrabold text-[var(--text)]">{stats.otHours}h</span>
+          <span className="text-xl font-black text-[var(--text)]">{stats.otHours}h</span>
         </div>
       </div>
 
@@ -289,7 +289,7 @@ export const AttendancePage: React.FC = () => {
             return (
               <div
                 key={staff.id}
-                className="p-3 sm:p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent)]/40 transition-all shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 {/* Staff Info & Monthly Calendar Shortcut */}
                 <div className="flex items-center gap-3 min-w-0">
@@ -316,7 +316,7 @@ export const AttendancePage: React.FC = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-[var(--text-muted)] truncate">
+                    <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
                       {staff.role_title || 'Worker'} &bull; {staff.payment_type}
                     </p>
                   </div>
@@ -324,86 +324,91 @@ export const AttendancePage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedStaffForCalendar(staff)}
-                    className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition ml-auto sm:ml-2"
+                    className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-2)] transition ml-auto sm:ml-2 cursor-pointer"
                     title="View Monthly Calendar"
                   >
                     <Calendar className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* 1-Tap Quick Action Buttons */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                {/* 1-Tap Quick Action Buttons (High Tap Targets for Mobile) */}
+                <div className="flex items-center gap-2 flex-wrap">
                   {/* Present Button */}
                   <button
                     type="button"
                     onClick={() => setStaffStatus(staff.id, 'present')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer active:scale-95 ${
+                    className={`min-w-[42px] h-9 px-3 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer active:scale-90 flex items-center justify-center gap-1 ${
                       currentStatus === 'present'
-                        ? 'bg-[var(--btn-income)] text-white border-[var(--btn-income)] shadow-xs'
-                        : 'bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--income)]/20 hover:text-[var(--income)]'
+                        ? 'bg-[var(--btn-income)] text-white border-[var(--btn-income)] shadow-sm'
+                        : 'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--income)]/20 hover:text-[var(--income)] hover:border-[var(--income)]/40'
                     }`}
                   >
-                    P
+                    <span>P</span>
+                    <span className="hidden min-[420px]:inline text-[10px] font-normal opacity-90">Present</span>
                   </button>
 
                   {/* Half Day Button */}
                   <button
                     type="button"
                     onClick={() => setStaffStatus(staff.id, 'half')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer active:scale-95 ${
+                    className={`min-w-[42px] h-9 px-3 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer active:scale-90 flex items-center justify-center gap-1 ${
                       currentStatus === 'half'
-                        ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-xs font-extrabold'
-                        : 'bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--warning)]/20 hover:text-[var(--warning)]'
+                        ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-sm font-extrabold'
+                        : 'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--warning)]/20 hover:text-[var(--warning)] hover:border-[var(--warning)]/40'
                     }`}
                   >
-                    H
+                    <span>H</span>
+                    <span className="hidden min-[420px]:inline text-[10px] font-normal opacity-90">Half</span>
                   </button>
 
                   {/* Absent Button */}
                   <button
                     type="button"
                     onClick={() => setStaffStatus(staff.id, 'absent')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer active:scale-95 ${
+                    className={`min-w-[42px] h-9 px-3 rounded-xl text-xs font-bold border transition-all duration-150 cursor-pointer active:scale-90 flex items-center justify-center gap-1 ${
                       currentStatus === 'absent'
-                        ? 'bg-[var(--btn-expense)] text-white border-[var(--btn-expense)] shadow-xs'
-                        : 'bg-[var(--surface-2)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--expense)]/20 hover:text-[var(--expense)]'
+                        ? 'bg-[var(--btn-expense)] text-white border-[var(--btn-expense)] shadow-sm'
+                        : 'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--expense)]/20 hover:text-[var(--expense)] hover:border-[var(--expense)]/40'
                     }`}
                   >
-                    A
+                    <span>A</span>
+                    <span className="hidden min-[420px]:inline text-[10px] font-normal opacity-90">Absent</span>
                   </button>
 
                   {/* Leave Paid Button */}
                   <button
                     type="button"
                     onClick={() => setStaffStatus(staff.id, 'leave_paid')}
-                    className={`px-2.5 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer active:scale-95 ${
+                    className={`h-9 px-2.5 rounded-xl text-xs font-semibold border transition-all duration-150 cursor-pointer active:scale-90 ${
                       currentStatus === 'leave_paid'
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
-                        : 'bg-[var(--surface-2)] text-[var(--text-muted)] border-[var(--border)] hover:text-purple-400'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
+                        : 'bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)] hover:text-purple-400 hover:border-purple-400/40'
                     }`}
                   >
                     Leave
                   </button>
 
                   {/* Overtime Stepper */}
-                  <div className="flex items-center gap-1 pl-1 ml-auto sm:ml-0">
+                  <div className="flex items-center gap-1 pl-1 ml-auto sm:ml-0 bg-[var(--surface-2)] p-0.5 rounded-xl border border-[var(--border)]">
                     <button
                       type="button"
                       onClick={() => adjustOvertime(staff.id, -1)}
                       disabled={otHours <= 0}
-                      className="w-7 h-7 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] flex items-center justify-center hover:bg-[var(--surface)] transition disabled:opacity-40"
+                      className="w-8 h-8 rounded-lg bg-[var(--surface)] text-[var(--text)] flex items-center justify-center hover:bg-[var(--surface-2)] transition disabled:opacity-40 cursor-pointer active:scale-95"
+                      title="Decrease OT hours"
                     >
-                      <Minus className="w-3 h-3" />
+                      <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="w-9 text-center font-mono text-xs font-bold text-[var(--accent)]">
+                    <span className="w-8 text-center font-mono text-xs font-bold text-[var(--accent)]">
                       {otHours}h
                     </span>
                     <button
                       type="button"
                       onClick={() => adjustOvertime(staff.id, 1)}
-                      className="w-7 h-7 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)] flex items-center justify-center hover:bg-[var(--surface)] transition"
+                      className="w-8 h-8 rounded-lg bg-[var(--surface)] text-[var(--text)] flex items-center justify-center hover:bg-[var(--surface-2)] transition cursor-pointer active:scale-95"
+                      title="Increase OT hours"
                     >
-                      <Plus className="w-3 h-3" />
+                      <Plus className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

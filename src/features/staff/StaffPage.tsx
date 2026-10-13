@@ -521,24 +521,24 @@ export const StaffPage: React.FC = () => {
               }}
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {filteredStaff.map((staff) => {
                 const isSelected = selectedIds.has(staff.id);
                 return (
                   <div
                     key={staff.id}
                     onClick={() => setSelectedStaffDetail(staff)}
-                    className={`p-3.5 rounded-2xl border transition text-left cursor-pointer flex items-center justify-between gap-3 shadow-2xs group ${
+                    className={`p-3.5 sm:p-4 rounded-2xl border transition-all text-left cursor-pointer flex items-center justify-between gap-3 shadow-2xs hover:shadow-xs group select-none active:scale-[0.99] ${
                       isSelected
                         ? 'border-[var(--accent)] bg-[var(--surface-2)] ring-1 ring-[var(--accent)]'
-                        : 'border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)]/50'
+                        : 'border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)]/60 hover:border-[var(--accent)]/50'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <button
                         type="button"
                         onClick={(e) => toggleSelectOne(staff.id, e)}
-                        className="text-[var(--text-muted)] hover:text-[var(--accent)] p-0.5 shrink-0"
+                        className="text-[var(--text-muted)] hover:text-[var(--accent)] p-0.5 shrink-0 cursor-pointer"
                       >
                         {isSelected ? (
                           <CheckSquare className="w-4 h-4 text-[var(--accent)]" />
@@ -551,7 +551,7 @@ export const StaffPage: React.FC = () => {
 
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-semibold text-sm text-[var(--text)] truncate">
+                          <span className="font-bold text-sm text-[var(--text)] truncate">
                             {staff.name}
                           </span>
                           {staff.status !== 'active' && (
@@ -560,11 +560,11 @@ export const StaffPage: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] truncate">
+                        <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
                           {staff.role_title || 'Staff'} {staff.staff_code && `• ${staff.staff_code}`}
                         </p>
                         {canViewMoney && staff.rate !== undefined && (
-                          <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
+                          <p className="text-xs font-bold text-[var(--accent)] mt-0.5">
                             {formatCurrency(staff.rate)}{' '}
                             <span className="text-[10px] text-[var(--text-muted)] font-normal">
                               / {staff.payment_type}
@@ -574,15 +574,15 @@ export const StaffPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {staff.phone && (
                         <a
                           href={`tel:${staff.phone}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--income)] hover:bg-[var(--surface-2)] transition"
-                          title="Call staff"
+                          className="w-8 h-8 rounded-xl bg-[var(--income)]/15 text-[var(--income)] hover:bg-[var(--income)]/25 flex items-center justify-center transition active:scale-90"
+                          title={`Call ${staff.name}`}
                         >
-                          <Phone className="w-4 h-4" />
+                          <Phone className="w-3.5 h-3.5" />
                         </a>
                       )}
                       <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-0.5 transition" />

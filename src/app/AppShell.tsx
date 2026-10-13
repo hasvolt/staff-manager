@@ -120,32 +120,35 @@ export const AppShell: React.FC = () => {
       {/* Top Header */}
       <header className="sticky top-0 z-40 w-full h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Navigation Menu & Organization Context */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] flex items-center justify-center transition active:scale-95 cursor-pointer shrink-0"
+            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] flex items-center justify-center transition active:scale-95 cursor-pointer shrink-0"
             aria-label="Open Navigation Menu"
             title="Menu"
           >
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* App Brand (Always visible on mobile & desktop) */}
+          {/* App Brand */}
           <NavLink
             to="/"
             className="flex items-center gap-1.5 sm:gap-2 group shrink-0"
             title="Staff Manager Home"
           >
             {/* On small mobile: show emblem badge so logo is always visible */}
-            <div className="flex md:hidden items-center">
+            <div className="flex sm:hidden items-center">
               <AppLogo size="xs" badgeOnly />
             </div>
-            {/* On md+: show full logo with text */}
-            <div className="hidden md:flex items-center">
+            {/* On sm+: show full logo with text */}
+            <div className="hidden sm:flex items-center">
               <AppLogo size="sm" showText={true} />
             </div>
           </NavLink>
+
+          {/* Subtle vertical separator on sm+ */}
+          <div className="hidden sm:block w-px h-5 bg-[var(--border)] shrink-0" />
 
           {/* Business Switcher Dropdown */}
           <BusinessSwitcher
@@ -168,10 +171,21 @@ export const AppShell: React.FC = () => {
             type="button"
             onClick={() => openCalculator()}
             title={t('calc.title')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             aria-label={t('calc.title')}
           >
             <Calculator className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+          </button>
+
+          {/* Theme Colors Shortcut (Visible on desktop) */}
+          <button
+            type="button"
+            onClick={() => setIsThemeModalOpen(true)}
+            title="Theme Colors"
+            className="hidden lg:flex w-10 h-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+            aria-label="Theme Colors"
+          >
+            <Palette className="w-4.5 h-4.5" />
           </button>
 
           {/* User Account / Profile Menu */}
@@ -180,7 +194,7 @@ export const AppShell: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="h-9 sm:h-10 pl-1.5 pr-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center gap-1.5 sm:gap-2"
+                className="h-8.5 sm:h-10 pl-1.5 pr-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center gap-1.5 sm:gap-2"
                 title="Account Menu"
                 aria-label="Account Menu"
               >
@@ -191,12 +205,12 @@ export const AppShell: React.FC = () => {
                       <UserIcon className="w-3.5 h-3.5" />
                     )}
                 </div>
-                <span className="truncate max-w-[70px] sm:max-w-[100px] text-xs font-semibold hidden min-[400px]:inline">
+                <span className="truncate max-w-[70px] sm:max-w-[100px] text-xs font-semibold hidden md:inline">
                   {profile?.full_name?.trim()?.split(' ')[0] ||
                     user.user_metadata?.full_name?.split(' ')[0] ||
                     'Account'}
                 </span>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
+                <ChevronDown className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 hidden sm:block" />
               </button>
 
               {/* User Dropdown Menu */}
@@ -307,26 +321,77 @@ export const AppShell: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsAuthModalOpen(true)}
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl sm:rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-bold hover:opacity-95 transition-all duration-150 active:scale-95 cursor-pointer shadow-sm shadow-[var(--accent)]/20 shrink-0 flex items-center gap-1.5"
+              className="h-8.5 sm:h-10 px-2.5 sm:px-4 rounded-xl sm:rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-bold hover:opacity-95 transition-all duration-150 active:scale-95 cursor-pointer shadow-sm shadow-[var(--accent)]/20 shrink-0 flex items-center gap-1.5"
               title="Sign In / Register"
               aria-label="Sign In / Register"
             >
               <UserIcon className="w-4 h-4 shrink-0" />
-              <span>Sign In</span>
+              <span className="hidden sm:inline">Sign In</span>
             </button>
           )}
         </div>
       </header>
 
+      {/* Dedicated Desktop Navigation Bar (Spacious, Clean, Zero Overload) */}
+      <nav
+        aria-label="Desktop Primary Navigation"
+        className="hidden md:block sticky top-14 sm:top-16 z-30 w-full border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md shadow-2xs"
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between gap-4">
+          {/* Primary Navigation Tabs */}
+          <div className="flex items-center gap-1.5 lg:gap-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.to;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 select-none ${
+                    isActive
+                      ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs font-bold'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span>{t(item.labelKey)}</span>
+                </NavLink>
+              );
+            })}
+          </div>
+
+          {/* Right Sub-nav Info: Date & Quick Link */}
+          <div className="flex items-center gap-3 text-xs text-[var(--text-muted)] font-medium">
+            <span className="hidden lg:inline-flex items-center gap-1.5 bg-[var(--surface-2)]/80 px-2.5 py-1 rounded-lg border border-[var(--border)]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+            </span>
+
+            {import.meta.env.VITE_DAILY_KHATA_URL && (
+              <a
+                href={import.meta.env.VITE_DAILY_KHATA_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden xl:inline-flex items-center gap-1 text-[var(--text-muted)] hover:text-[var(--accent)] transition"
+                title="Open Daily Khata Pro"
+              >
+                <span>Daily Khata Pro</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+        </div>
+      </nav>
+
       {/* Main Page Content Body */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 pb-24 sm:pb-20">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 pb-24 md:pb-12">
         <Outlet />
       </main>
 
-      {/* Bottom Navigation Bar */}
+      {/* Bottom Navigation Bar (Thumb-friendly for mobile, hidden on md+ where top nav is active) */}
       <nav
         aria-label="Bottom Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t-2 border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md flex items-center justify-around px-2 sm:px-6 max-w-5xl sm:mx-auto shadow-lg"
+        className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md flex md:hidden items-center justify-around px-2 sm:px-6 shadow-lg"
       >
         {navItems.map((item) => {
           const Icon = item.icon;

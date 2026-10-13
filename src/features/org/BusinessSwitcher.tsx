@@ -77,7 +77,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 sm:gap-2 py-1.5 px-2 sm:px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition text-xs font-semibold max-w-[125px] min-[360px]:max-w-[150px] min-[420px]:max-w-[190px] sm:max-w-[260px] cursor-pointer"
+        className="flex items-center gap-1.5 sm:gap-2 h-8.5 sm:h-9 px-2 sm:px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition text-xs font-semibold max-w-[115px] min-[360px]:max-w-[135px] min-[400px]:max-w-[170px] sm:max-w-[260px] cursor-pointer shrink-0"
         title={`Workspace: ${currentOrg.name} (${role})`}
       >
         <Building2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
@@ -87,7 +87,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
         >
           {activeRoleBadge.label}
         </span>
-        <ChevronDown className="w-3 h-3 text-[var(--text-muted)] shrink-0 ml-auto" />
+        <ChevronDown className="w-3 h-3 text-[var(--text-muted)] shrink-0 ml-0.5" />
       </button>
 
       {isOpen && (

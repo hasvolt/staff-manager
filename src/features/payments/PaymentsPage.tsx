@@ -336,51 +336,51 @@ export const PaymentsPage: React.FC = () => {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card variant="surface" className="p-3.5 border border-[var(--border)]">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
             Salary Paid
           </span>
-          <div className="mt-1">
-            {renderAmount(overallStats.totalSalaryPaid, 'text-lg sm:text-xl font-black text-[var(--income)]')}
+          <div className="mt-1.5">
+            {renderAmount(overallStats.totalSalaryPaid, 'text-lg sm:text-2xl font-black text-[var(--income)]')}
           </div>
-          <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
             Total wage payouts
           </span>
         </Card>
 
-        <Card variant="surface" className="p-3.5 border border-[var(--border)]">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
             Advances Outstanding
           </span>
-          <div className="mt-1">
-            {renderAmount(overallStats.netAdvancesOutstanding, 'text-lg sm:text-xl font-black text-amber-400')}
+          <div className="mt-1.5">
+            {renderAmount(overallStats.netAdvancesOutstanding, 'text-lg sm:text-2xl font-black text-amber-400')}
           </div>
-          <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
             Peshgi / Udhar recoverable
           </span>
         </Card>
 
-        <Card variant="surface" className="p-3.5 border border-[var(--border)]">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
             Bonuses Awarded
           </span>
-          <div className="mt-1">
-            {renderAmount(overallStats.totalBonuses, 'text-lg sm:text-xl font-black text-purple-400')}
+          <div className="mt-1.5">
+            {renderAmount(overallStats.totalBonuses, 'text-lg sm:text-2xl font-black text-purple-400')}
           </div>
-          <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
             Incentives added
           </span>
         </Card>
 
-        <Card variant="surface" className="p-3.5 border border-[var(--border)]">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
             Deductions &amp; Fines
           </span>
-          <div className="mt-1">
-            {renderAmount(overallStats.totalDeductions, 'text-lg sm:text-xl font-black text-[var(--expense)]')}
+          <div className="mt-1.5">
+            {renderAmount(overallStats.totalDeductions, 'text-lg sm:text-2xl font-black text-[var(--expense)]')}
           </div>
-          <span className="text-[10px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
             Katoti and penalties
           </span>
         </Card>

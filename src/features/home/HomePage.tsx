@@ -442,14 +442,14 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Top Summary KPI Cards (High Contrast & Clear Bilingual Labels) */}
+      {/* 2. Top Summary KPI Cards (Modern, High Contrast, Responsive) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Total Staff */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/staff')}
-          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
+          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -458,7 +458,7 @@ export const HomePage: React.FC = () => {
               </span>
               <span className="text-[11px] text-[var(--text-muted)] font-medium">कुल स्टाफ</span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--surface)]/70 border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform">
               <Users className="w-5 h-5" />
             </div>
           </div>
@@ -477,7 +477,7 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--income)] shadow-sm"
+          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -486,7 +486,7 @@ export const HomePage: React.FC = () => {
               </span>
               <span className="text-[11px] text-[var(--income)] font-bold">आज उपस्थित</span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
@@ -507,7 +507,7 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--expense)] shadow-sm"
+          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -516,7 +516,7 @@ export const HomePage: React.FC = () => {
               </span>
               <span className="text-[11px] text-[var(--text-muted)] font-medium">बाकी / गैरहाजिर</span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform">
               <Clock className="w-5 h-5" />
             </div>
           </div>
@@ -540,7 +540,7 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => navigate('/payments')}
-            className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
+            className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -549,7 +549,7 @@ export const HomePage: React.FC = () => {
                 </span>
                 <span className="text-[11px] text-[var(--text-muted)] font-medium">इस माह कुल बकाया</span>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-[var(--surface)]/70 border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-xs">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform">
                 <CreditCard className="w-5 h-5" />
               </div>
             </div>
@@ -567,7 +567,7 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => setIsWorkModalOpen(true)}
-            className="flex flex-col justify-between p-4 sm:p-5 border-2 border-[var(--border)] hover:border-[var(--accent)] shadow-sm"
+            className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -576,7 +576,7 @@ export const HomePage: React.FC = () => {
                 </span>
                 <span className="text-[11px] text-[var(--text-muted)] font-medium">दैनिक कार्य दर्ज</span>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-xs">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform">
                 <Briefcase className="w-5 h-5" />
               </div>
             </div>
@@ -597,7 +597,7 @@ export const HomePage: React.FC = () => {
         <div className="flex items-center justify-between mb-3 px-1">
           <h2 className="text-sm sm:text-base font-bold text-[var(--text)] flex items-center gap-2">
             <span>Primary Quick Actions</span>
-            <span className="text-xs font-normal text-[var(--text-muted)]">
+            <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
               (त्वरित कार्य - एक क्लिक में शुरू करें)
             </span>
           </h2>
@@ -616,10 +616,10 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/attendance')}
-            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-600/25 group-hover:scale-105 transition-transform">
                 <CalendarCheck className="w-6 h-6" />
               </div>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-[var(--income)] border border-emerald-500/30">
@@ -648,10 +648,10 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsPaymentModalOpen(true)}
-              className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-600/25 group-hover:scale-105 transition-transform">
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--expense)] border border-rose-500/30">
@@ -678,10 +678,10 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsWorkModalOpen(true)}
-              className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/25 group-hover:scale-105 transition-transform">
                   <Briefcase className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
@@ -710,10 +710,10 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsStaffModalOpen(true)}
-            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/20 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/25 group-hover:scale-105 transition-transform">
                 <UserPlus className="w-6 h-6" />
               </div>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30">
@@ -741,10 +741,10 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/reports')}
-            className="group flex flex-col justify-between p-4 rounded-2xl bg-[var(--surface)] border-2 border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-150 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-sm relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform">
                 <FileText className="w-6 h-6" />
               </div>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
@@ -959,10 +959,10 @@ export const HomePage: React.FC = () => {
 
       {/* 5. Today's Quick Attendance Widget with 1-Tap "Mark All Present" */}
       {staffPreviewList.length > 0 && (
-        <Card variant="surface" className="p-4 sm:p-5 border-2 border-[var(--border)] space-y-4">
+        <Card variant="surface" className="p-4 sm:p-5 border border-[var(--border)] shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[var(--border)]">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)]">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs">
                 <CalendarCheck className="w-5 h-5" />
               </div>
               <div>
@@ -1029,7 +1029,7 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'present')}
                       title="Mark Present (उपस्थित)"
-                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'present'
                           ? 'bg-[var(--btn-income)] text-white border-[var(--btn-income)] shadow-sm'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--income)] hover:text-[var(--income)]'
@@ -1041,9 +1041,9 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'half')}
                       title="Mark Half-Day (आधा दिन)"
-                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'half'
-                          ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-sm'
+                          ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-sm font-extrabold'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--warning)] hover:text-[var(--warning)]'
                       }`}
                     >
@@ -1053,7 +1053,7 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'absent')}
                       title="Mark Absent (गैरहाजिर)"
-                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'absent'
                           ? 'bg-[var(--btn-expense)] text-white border-[var(--btn-expense)] shadow-sm'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--expense)] hover:text-[var(--expense)]'
