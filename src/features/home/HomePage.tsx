@@ -371,6 +371,14 @@ export const HomePage: React.FC = () => {
     return max;
   }, [monthlyTrend]);
 
+  const maxSiteCost = useMemo(() => {
+    return Math.max(...costBySite.map((s) => s.amount), 1);
+  }, [costBySite]);
+
+  const maxRoleCost = useMemo(() => {
+    return Math.max(...costByRole.map((r) => r.amount), 1);
+  }, [costByRole]);
+
   // Onboarding 3-step progress checks
   const step1Done = activeStaffCount > 0;
   const step2Done = presentTodayCount + absentTodayCount > 0;
@@ -379,12 +387,12 @@ export const HomePage: React.FC = () => {
     (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
 
   return (
-    <div className="space-y-6 animate-in fade-in text-left pb-12">
+    <div className="space-y-5 sm:space-y-6 animate-in fade-in text-left pb-12">
       {/* 1. Header Bar: Business Info, Privacy Mask & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)]">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/50 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">
+            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-[var(--text)] truncate">
               {currentOrg?.name || t('home.title')}
             </h1>
             {!isSupervisor && (
@@ -392,7 +400,8 @@ export const HomePage: React.FC = () => {
                 type="button"
                 onClick={togglePrivacyMask}
                 title={isPrivacyMasked ? 'Reveal amounts' : 'Mask amounts for privacy'}
-                className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+                className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+                aria-label="Toggle Privacy Mask"
               >
                 {isPrivacyMasked ? (
                   <EyeOff className="w-4 h-4 text-amber-400" />
@@ -402,26 +411,26 @@ export const HomePage: React.FC = () => {
               </button>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1 font-medium">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium truncate">
             {t('tagline')} &bull; <span className="text-[var(--text)] font-semibold">{todayStr}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
           {advancedCalcUrl && (
             <a
               href={advancedCalcUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)]" />
+              <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
               <span>{t('calc.advanced')}</span>
             </a>
           )}
 
-          <Badge variant="accent">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <Badge variant="accent" className="text-xs">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
             <span>{isLocalMode ? 'Local Mode' : 'Cloud Sync Active'}</span>
           </Badge>
 
@@ -434,39 +443,42 @@ export const HomePage: React.FC = () => {
               else error(res.message);
               loadDashboardData();
             }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+            title="Manual sync with cloud"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <RefreshCw className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
             <span>Sync</span>
           </button>
         </div>
       </div>
 
       {/* 2. Top Summary KPI Cards (Modern, High Contrast, Responsive) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Total Staff */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/staff')}
-          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 {t('home.totalStaff')}
               </span>
-              <span className="text-[11px] text-[var(--text-muted)] font-medium">कुल स्टाफ</span>
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
+                कुल स्टाफ
+              </span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform">
-              <Users className="w-5 h-5" />
+            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">
+          <div className="mt-3 sm:mt-4">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
               {activeStaffCount}
             </div>
-            <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
               Enrolled active members
             </span>
           </div>
@@ -477,24 +489,26 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 {t('home.presentToday')}
               </span>
-              <span className="text-[11px] text-[var(--income)] font-bold">आज उपस्थित</span>
+              <span className="text-[10px] sm:text-[11px] text-[var(--income)] font-bold block truncate">
+                आज उपस्थित
+              </span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform">
-              <CheckCircle2 className="w-5 h-5" />
+            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--income)] tracking-tight">
+          <div className="mt-3 sm:mt-4">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--income)] tracking-tight truncate">
               {presentTodayCount}
             </div>
-            <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
               {activeStaffCount > 0
                 ? `${Math.round((presentTodayCount / activeStaffCount) * 100)}% attendance today`
                 : 'No staff yet'}
@@ -507,28 +521,30 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 Unmarked / Absent
               </span>
-              <span className="text-[11px] text-[var(--text-muted)] font-medium">बाकी / गैरहाजिर</span>
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
+                बाकी / गैरहाजिर
+              </span>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform">
-              <Clock className="w-5 h-5" />
+            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">
+          <div className="mt-3 sm:mt-4">
+            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
               {unmarkedTodayCount > 0 ? (
                 <span className="text-amber-400">{unmarkedTodayCount} pending</span>
               ) : (
                 <span className="text-[var(--text-muted)]">{absentTodayCount} absent</span>
               )}
             </div>
-            <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
               {unmarkedTodayCount > 0 ? 'Needs today attendance' : 'All marked today'}
             </span>
           </div>
@@ -540,24 +556,26 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => navigate('/payments')}
-            className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+            className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+            <div className="flex items-start justify-between gap-1.5">
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                   Payable This Month
                 </span>
-                <span className="text-[11px] text-[var(--text-muted)] font-medium">इस माह कुल बकाया</span>
+                <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
+                  इस माह कुल बकाया
+                </span>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform">
-                <CreditCard className="w-5 h-5" />
+              <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+                <CreditCard className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-4">
-              <div className="text-xl sm:text-2xl font-black text-[var(--income)] tracking-tight">
+            <div className="mt-3 sm:mt-4">
+              <div className="text-lg sm:text-xl lg:text-2xl font-black text-[var(--income)] tracking-tight truncate">
                 {renderAmount(monthTotalPayable)}
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
                 Net dues for current cycle
               </span>
             </div>
@@ -567,24 +585,26 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => setIsWorkModalOpen(true)}
-            className="group flex flex-col justify-between p-4 sm:p-5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+            className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text)] block">
+            <div className="flex items-start justify-between gap-1.5">
+              <div className="min-w-0 flex-1">
+                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                   Daily Work Log
                 </span>
-                <span className="text-[11px] text-[var(--text-muted)] font-medium">दैनिक कार्य दर्ज</span>
+                <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
+                  दैनिक कार्य दर्ज
+                </span>
               </div>
-              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform">
-                <Briefcase className="w-5 h-5" />
+              <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+                <Briefcase className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-4">
-              <div className="text-xl sm:text-2xl font-bold text-[var(--text)] tracking-tight">
+            <div className="mt-3 sm:mt-4">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)] tracking-tight truncate">
                 Log Work
               </div>
-              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
                 Units, sites & daily tasks
               </span>
             </div>
@@ -611,22 +631,22 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
           {/* Action 1: Mark Attendance */}
           <button
             type="button"
             onClick={() => navigate('/attendance')}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-600/25 group-hover:scale-105 transition-transform">
-                <CalendarCheck className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-600/25 group-hover:scale-105 transition-transform shrink-0">
+                <CalendarCheck className="w-5.5 h-5.5" />
               </div>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-[var(--income)] border border-emerald-500/30">
-                10 Seconds
+              <span className="text-[11px] font-semibold text-[var(--income)] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+                Daily Attendance
               </span>
             </div>
-            <div className="mt-4">
+            <div className="mt-3.5">
               <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--income)] transition-colors">
                 {t('home.actionAttendance')}
               </h3>
@@ -637,7 +657,7 @@ export const HomePage: React.FC = () => {
                 Present, Absent, Half-day and Overtime tracking.
               </p>
             </div>
-            <div className="mt-3 flex items-center text-xs font-semibold text-[var(--income)] gap-1 pt-2 border-t border-[var(--border)]">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--income)]">
               <span>Mark Today</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -648,17 +668,17 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsPaymentModalOpen(true)}
-              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
+              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-12 h-12 rounded-2xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-600/25 group-hover:scale-105 transition-transform">
-                  <CreditCard className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-600/25 group-hover:scale-105 transition-transform shrink-0">
+                  <CreditCard className="w-5.5 h-5.5" />
                 </div>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-[var(--expense)] border border-rose-500/30">
-                  Instant
+                <span className="text-[11px] font-semibold text-[var(--expense)] bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg">
+                  Salary & Udhar
                 </span>
               </div>
-              <div className="mt-4">
+              <div className="mt-3.5">
                 <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--expense)] transition-colors">
                   {t('home.actionPayment')}
                 </h3>
@@ -669,7 +689,7 @@ export const HomePage: React.FC = () => {
                   Salary payout, advance (udhar), bonus & deductions.
                 </p>
               </div>
-              <div className="mt-3 flex items-center text-xs font-semibold text-[var(--expense)] gap-1 pt-2 border-t border-[var(--border)]">
+              <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--expense)]">
                 <span>Record Payout</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -678,17 +698,17 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsWorkModalOpen(true)}
-              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
+              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/25 group-hover:scale-105 transition-transform">
-                  <Briefcase className="w-6 h-6" />
+                <div className="w-11 h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/25 group-hover:scale-105 transition-transform shrink-0">
+                  <Briefcase className="w-5.5 h-5.5" />
                 </div>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
-                  Daily Log
+                <span className="text-[11px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-lg">
+                  Daily Work
                 </span>
               </div>
-              <div className="mt-4">
+              <div className="mt-3.5">
                 <h3 className="font-bold text-base text-[var(--text)] group-hover:text-purple-400 transition-colors">
                   Log Daily Work
                 </h3>
@@ -699,7 +719,7 @@ export const HomePage: React.FC = () => {
                   Work descriptions, project sites, units and pieces.
                 </p>
               </div>
-              <div className="mt-3 flex items-center text-xs font-semibold text-purple-400 gap-1 pt-2 border-t border-[var(--border)]">
+              <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-purple-400">
                 <span>Enter Work</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -710,17 +730,17 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsStaffModalOpen(true)}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/25 group-hover:scale-105 transition-transform">
-                <UserPlus className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/25 group-hover:scale-105 transition-transform shrink-0">
+                <UserPlus className="w-5.5 h-5.5" />
               </div>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30">
-                Setup
+              <span className="text-[11px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-2 py-0.5 rounded-lg">
+                Staff Directory
               </span>
             </div>
-            <div className="mt-4">
+            <div className="mt-3.5">
               <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
                 {t('home.actionAddStaff')}
               </h3>
@@ -731,7 +751,7 @@ export const HomePage: React.FC = () => {
                 Add profile, designation, wage rate & weekly off.
               </p>
             </div>
-            <div className="mt-3 flex items-center text-xs font-semibold text-[var(--accent)] gap-1 pt-2 border-t border-[var(--border)]">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--accent)]">
               <span>Add Member</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -741,17 +761,17 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/reports')}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden"
+            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform">
-                <FileText className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform shrink-0">
+                <FileText className="w-5.5 h-5.5" />
               </div>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                Print & PDF
+              <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-lg">
+                Slips & Reports
               </span>
             </div>
-            <div className="mt-4">
+            <div className="mt-3.5">
               <h3 className="font-bold text-base text-[var(--text)] group-hover:text-blue-400 transition-colors">
                 {t('home.actionReports')}
               </h3>
@@ -762,7 +782,7 @@ export const HomePage: React.FC = () => {
                 Print salary slip, attendance register & export CSV.
               </p>
             </div>
-            <div className="mt-3 flex items-center text-xs font-semibold text-blue-400 gap-1 pt-2 border-t border-[var(--border)]">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-blue-400">
               <span>View Statements</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -773,21 +793,21 @@ export const HomePage: React.FC = () => {
       {/* 4. Interactive 3-Step Quick Guide Card (इन्टरेक्टिव 3-स्टेप गाइड) */}
       <Card
         variant="surface"
-        className="p-4 sm:p-5 border-2 border-[var(--border)] bg-gradient-to-br from-[var(--surface)] to-[var(--surface-2)] shadow-sm space-y-4"
+        className="p-4 sm:p-5 border border-[var(--border)] bg-[var(--surface)] shadow-xs space-y-4"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[var(--border)] pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)]">
+            <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/15 border border-[var(--accent)]/30 flex items-center justify-center text-[var(--accent)] shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-bold text-sm sm:text-base text-[var(--text)] flex items-center gap-2">
                 <span>{t('home.onboardingTitle')}</span>
-                <span className="text-xs font-normal text-[var(--text-muted)]">
+                <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
                   (आसान 3-स्टेप मार्गदर्शिका)
                 </span>
               </h3>
-              <span className="text-xs text-[var(--text-muted)] block">
+              <span className="text-xs text-[var(--text-muted)] block mt-0.5">
                 {completedStepsCount === 3
                   ? 'All initial steps completed! Your business is active.'
                   : `${completedStepsCount} of 3 steps completed. Follow these steps to get started.`}
@@ -795,8 +815,8 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)]">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text)]">
               {completedStepsCount} / 3 Complete
             </span>
             <Button
@@ -814,10 +834,10 @@ export const HomePage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Step 1 */}
           <div
-            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+            className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
               step1Done
                 ? 'bg-emerald-500/5 border-emerald-500/30'
-                : 'bg-[var(--surface-2)] border-[var(--accent)] shadow-xs'
+                : 'bg-[var(--surface-2)]/70 border-[var(--accent)]/40 shadow-xs'
             }`}
           >
             <div>
@@ -826,12 +846,12 @@ export const HomePage: React.FC = () => {
                   Step 1
                 </span>
                 {step1Done ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
                     <Check className="w-3 h-3" />
                     <span>Done ({activeStaffCount})</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent)]/15 px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-[var(--accent)] bg-[var(--accent)]/15 border border-[var(--accent)]/30 px-2 py-0.5 rounded-lg">
                     Action Needed
                   </span>
                 )}
@@ -842,11 +862,11 @@ export const HomePage: React.FC = () => {
               <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
                 स्टाफ जोड़ें और वेतन तय करें
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 Add name, designation & wage type (Daily, Monthly, Hourly, Per-piece).
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
               <Button
                 variant={step1Done ? 'secondary' : 'primary'}
                 size="sm"
@@ -860,12 +880,12 @@ export const HomePage: React.FC = () => {
 
           {/* Step 2 */}
           <div
-            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+            className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
               step2Done
                 ? 'bg-emerald-500/5 border-emerald-500/30'
                 : step1Done
-                ? 'bg-[var(--surface-2)] border-[var(--income)] shadow-xs'
-                : 'bg-[var(--surface-2)] border-[var(--border)] opacity-85'
+                ? 'bg-[var(--surface-2)]/70 border-[var(--income)]/40 shadow-xs'
+                : 'bg-[var(--surface-2)]/40 border-[var(--border)] opacity-85'
             }`}
           >
             <div>
@@ -874,13 +894,13 @@ export const HomePage: React.FC = () => {
                   Step 2
                 </span>
                 {step2Done ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
                     <Check className="w-3 h-3" />
                     <span>Marked Today</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full">
-                    Daily 10s
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] border border-[var(--border)] px-2 py-0.5 rounded-lg">
+                    Daily Attendance
                   </span>
                 )}
               </div>
@@ -888,13 +908,13 @@ export const HomePage: React.FC = () => {
                 Mark Daily Attendance
               </h4>
               <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
-                10 सेकंड में दैनिक हाजिरी लगाएं
+                दैनिक हाजिरी लगाएं
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 1-tap: Present (उपस्थित), Half-day (आधा दिन), Absent (छुट्टी).
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
               <Button
                 variant={step2Done ? 'secondary' : 'income'}
                 size="sm"
@@ -908,10 +928,10 @@ export const HomePage: React.FC = () => {
 
           {/* Step 3 */}
           <div
-            className={`p-3.5 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+            className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
               step3Done
                 ? 'bg-emerald-500/5 border-emerald-500/30'
-                : 'bg-[var(--surface-2)] border-[var(--border)]'
+                : 'bg-[var(--surface-2)]/50 border-[var(--border)]'
             }`}
           >
             <div>
@@ -920,12 +940,12 @@ export const HomePage: React.FC = () => {
                   Step 3
                 </span>
                 {step3Done ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--income)] bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
                     <Check className="w-3 h-3" />
                     <span>Records Active</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] border border-[var(--border)] px-2 py-0.5 rounded-lg">
                     Payouts & Slips
                   </span>
                 )}
@@ -936,11 +956,11 @@ export const HomePage: React.FC = () => {
               <p className="text-xs font-semibold text-rose-400 mt-0.5">
                 वेतन/उधार दर्ज करें व स्लिप बनाएं
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 Record advance (peshgi), month settlement & download PDF slips.
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-[var(--border)] flex justify-between items-center">
+            <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
               <Button
                 variant={step3Done ? 'secondary' : 'outline'}
                 size="sm"
@@ -961,22 +981,22 @@ export const HomePage: React.FC = () => {
       {staffPreviewList.length > 0 && (
         <Card variant="surface" className="p-4 sm:p-5 border border-[var(--border)] shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[var(--border)]">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs shrink-0">
                 <CalendarCheck className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="font-bold text-sm sm:text-base text-[var(--text)]">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-sm sm:text-base text-[var(--text)] truncate">
                   Today's Attendance Shortcut
                 </h3>
-                <span className="text-xs text-[var(--text-muted)]">
+                <span className="text-xs text-[var(--text-muted)] block truncate mt-0.5">
                   {todayStr} &bull; {presentTodayCount} marked present &bull;{' '}
                   {unmarkedTodayCount} pending
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap">
               <Button
                 variant="income"
                 size="sm"
@@ -984,8 +1004,8 @@ export const HomePage: React.FC = () => {
                 isLoading={isMarkingAll}
                 className="text-xs shadow-xs"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                <span>Mark All Present (सभी उपस्थित)</span>
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1 shrink-0" />
+                <span>Mark All Present</span>
               </Button>
 
               <button
@@ -999,17 +1019,17 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             {staffPreviewList.map((staff) => {
               const currentStatus = todayAttendanceMap[staff.id]?.status;
               return (
                 <div
                   key={staff.id}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border)] hover:border-[var(--accent)]/40 transition shadow-2xs"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-[var(--surface-2)]/60 border border-[var(--border)] hover:border-[var(--accent)]/40 transition shadow-2xs min-w-0"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                     <Avatar name={staff.name} src={staff.photo_path || undefined} size="sm" />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
                         {staff.name}
                       </span>
@@ -1024,12 +1044,13 @@ export const HomePage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'present')}
                       title="Mark Present (उपस्थित)"
-                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      aria-label={`Mark ${staff.name} Present`}
+                      className={`w-9 h-9 sm:w-9 sm:h-9 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'present'
                           ? 'bg-[var(--btn-income)] text-white border-[var(--btn-income)] shadow-sm'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--income)] hover:text-[var(--income)]'
@@ -1041,7 +1062,8 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'half')}
                       title="Mark Half-Day (आधा दिन)"
-                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      aria-label={`Mark ${staff.name} Half-Day`}
+                      className={`w-9 h-9 sm:w-9 sm:h-9 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'half'
                           ? 'bg-[var(--warning)] text-black border-[var(--warning)] shadow-sm font-extrabold'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--warning)] hover:text-[var(--warning)]'
@@ -1053,7 +1075,8 @@ export const HomePage: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickMark(staff.id, 'absent')}
                       title="Mark Absent (गैरहाजिर)"
-                      className={`w-9 h-9 sm:w-8.5 sm:h-8.5 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
+                      aria-label={`Mark ${staff.name} Absent`}
+                      className={`w-9 h-9 sm:w-9 sm:h-9 rounded-xl text-xs font-bold transition-all duration-150 active:scale-90 cursor-pointer flex items-center justify-center border ${
                         currentStatus === 'absent'
                           ? 'bg-[var(--btn-expense)] text-white border-[var(--btn-expense)] shadow-sm'
                           : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--expense)] hover:text-[var(--expense)]'
@@ -1069,33 +1092,63 @@ export const HomePage: React.FC = () => {
         </Card>
       )}
 
-      {/* 6. Quick Sites & Work Types Management Shortcuts */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 text-xs">
+      {/* 6. Quick Sites & Work Types Management Shortcuts (Fixed: Responsive Grid, Zero Horizontal Blowout) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
         <button
           type="button"
           onClick={() => setIsSitesModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
+          className="flex items-center gap-3 p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)] transition-all duration-150 active:scale-[0.98] text-left cursor-pointer shadow-2xs group"
         >
-          <MapPin className="w-4 h-4 text-[var(--accent)]" />
-          <span>Manage Sites / Shops</span>
+          <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] group-hover:bg-[var(--accent)]/15 border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shrink-0 transition-colors">
+            <MapPin className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
+              Manage Sites / Shops
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+              साइट्स व दुकानें प्रबंधित करें
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
           type="button"
           onClick={() => setIsWorkTypesModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
+          className="flex items-center gap-3 p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)] transition-all duration-150 active:scale-[0.98] text-left cursor-pointer shadow-2xs group"
         >
-          <Layers className="w-4 h-4 text-[var(--accent)]" />
-          <span>Manage Work Types</span>
+          <div className="w-10 h-10 rounded-xl bg-[var(--surface-2)] group-hover:bg-[var(--accent)]/15 border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shrink-0 transition-colors">
+            <Layers className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
+              Manage Work Types
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+              कार्य प्रकार व यूनिट दरें
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
 
         <button
           type="button"
           onClick={() => setIsWorkModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] font-semibold hover:border-purple-400 transition duration-150 active:scale-95 whitespace-nowrap cursor-pointer shadow-2xs"
+          className="flex items-center gap-3 p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] hover:border-purple-400 transition-all duration-150 active:scale-[0.98] text-left cursor-pointer shadow-2xs group"
         >
-          <Briefcase className="w-4 h-4 text-purple-400" />
-          <span>Log Daily Work</span>
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 transition-colors">
+            <Briefcase className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
+              Log Daily Work
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
+              दैनिक कार्य व यूनिट दर्ज करें
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all shrink-0" />
         </button>
       </div>
 
@@ -1103,10 +1156,10 @@ export const HomePage: React.FC = () => {
       {!isSupervisor && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
           {/* Labour Cost By Site */}
-          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border border-[var(--border)] shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[var(--accent)]" />
+                <MapPin className="w-4 h-4 text-[var(--accent)] shrink-0" />
                 <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">
                   Cost by Site / Shop
                 </h3>
@@ -1123,7 +1176,7 @@ export const HomePage: React.FC = () => {
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
                       <span className="text-[var(--text)] truncate">{s.name}</span>
-                      {renderAmount(s.amount, 'text-[var(--income)]')}
+                      {renderAmount(s.amount, 'text-[var(--income)] font-bold')}
                     </div>
                     <div className="w-full bg-[var(--surface-2)] h-2 rounded-full overflow-hidden">
                       <div
@@ -1131,7 +1184,7 @@ export const HomePage: React.FC = () => {
                         style={{
                           width: `${Math.min(
                             100,
-                            Math.round((s.amount / (monthTotalPayable || 1)) * 100)
+                            Math.round((s.amount / maxSiteCost) * 100)
                           )}%`,
                         }}
                       />
@@ -1143,10 +1196,10 @@ export const HomePage: React.FC = () => {
           </Card>
 
           {/* Labour Cost By Role */}
-          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border border-[var(--border)] shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-purple-400" />
+                <Briefcase className="w-4 h-4 text-purple-400 shrink-0" />
                 <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">Cost by Role</h3>
               </div>
             </div>
@@ -1161,7 +1214,7 @@ export const HomePage: React.FC = () => {
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
                       <span className="text-[var(--text)] truncate">{r.name}</span>
-                      {renderAmount(r.amount, 'text-[var(--income)]')}
+                      {renderAmount(r.amount, 'text-[var(--income)] font-bold')}
                     </div>
                     <div className="w-full bg-[var(--surface-2)] h-2 rounded-full overflow-hidden">
                       <div
@@ -1169,7 +1222,7 @@ export const HomePage: React.FC = () => {
                         style={{
                           width: `${Math.min(
                             100,
-                            Math.round((r.amount / (monthTotalPayable || 1)) * 100)
+                            Math.round((r.amount / maxRoleCost) * 100)
                           )}%`,
                         }}
                       />
@@ -1181,10 +1234,10 @@ export const HomePage: React.FC = () => {
           </Card>
 
           {/* Monthly Payout Trend Chart */}
-          <Card variant="surface" className="p-4 border-2 border-[var(--border)] space-y-3">
+          <Card variant="surface" className="p-4 border border-[var(--border)] shadow-xs space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[var(--income)]" />
+                <TrendingUp className="w-4 h-4 text-[var(--income)] shrink-0" />
                 <h3 className="font-bold text-xs sm:text-sm text-[var(--text)]">
                   Monthly Payout Trend
                 </h3>
@@ -1193,20 +1246,20 @@ export const HomePage: React.FC = () => {
 
             <div className="flex items-end justify-between gap-2 h-28 pt-2 px-1">
               {monthlyTrend.map((item, idx) => {
-                const heightPct = Math.max(12, Math.round((item.amount / maxTrendAmount) * 100));
+                const heightPct = Math.max(14, Math.round((item.amount / maxTrendAmount) * 100));
                 return (
                   <div
                     key={idx}
-                    className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end"
+                    className="flex-1 min-w-0 flex flex-col items-center gap-1.5 h-full justify-end"
                   >
-                    <span className="text-[9px] font-mono text-[var(--text-muted)] truncate">
+                    <span className="text-[9px] font-mono text-[var(--text-muted)] truncate block w-full text-center">
                       {isPrivacyMasked ? '••••' : item.amount > 0 ? `₹${item.amount}` : '0'}
                     </span>
                     <div
                       className="w-full max-w-[28px] rounded-t-lg bg-[var(--income)]/80 hover:bg-[var(--income)] transition-all"
                       style={{ height: `${heightPct}%` }}
                     />
-                    <span className="text-[9px] font-semibold text-[var(--text-muted)] truncate">
+                    <span className="text-[9px] font-semibold text-[var(--text-muted)] truncate block w-full text-center">
                       {item.label}
                     </span>
                   </div>
@@ -1270,7 +1323,7 @@ export const HomePage: React.FC = () => {
           onClick={() => setIsHelpGuideOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-[var(--surface)] border-2 border-[var(--border)] rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left"
+            className="w-full max-w-lg bg-[var(--surface)] border border-[var(--border)] rounded-3xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-left"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">

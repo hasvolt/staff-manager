@@ -36,17 +36,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 border border-[var(--accent)] shadow-md shadow-[var(--accent)]/20 hover:shadow-lg hover:shadow-[var(--accent)]/25',
+        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 border border-[var(--accent)] shadow-sm shadow-[var(--accent)]/20 hover:shadow-md hover:shadow-[var(--accent)]/30',
       secondary:
-        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/40 hover:shadow-xs',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/40 hover:shadow-2xs',
       outline:
         'bg-transparent text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)]',
       income:
-        'bg-[var(--btn-income)] text-white hover:opacity-95 border border-[var(--btn-income)] shadow-md shadow-emerald-600/25 hover:shadow-lg hover:shadow-emerald-600/30',
+        'bg-[var(--btn-income)] text-white hover:opacity-95 border border-[var(--btn-income)] shadow-sm shadow-emerald-600/25 hover:shadow-md hover:shadow-emerald-600/30',
       expense:
-        'bg-[var(--btn-expense)] text-white hover:opacity-95 border border-[var(--btn-expense)] shadow-md shadow-rose-600/25 hover:shadow-lg hover:shadow-rose-600/30',
+        'bg-[var(--btn-expense)] text-white hover:opacity-95 border border-[var(--btn-expense)] shadow-sm shadow-rose-600/25 hover:shadow-md hover:shadow-rose-600/30',
       tactile:
-        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-xs hover:shadow-sm',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-2xs hover:shadow-xs',
       ghost:
         'bg-transparent text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] shadow-none',
     }[variant];
@@ -94,11 +94,11 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     const variantStyles = {
       ghost: 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]',
       surface:
-        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/30',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--surface)] hover:border-[var(--text-muted)]/30 shadow-2xs',
       accent:
-        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 shadow-md shadow-[var(--accent)]/15',
+        'bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-95 shadow-sm shadow-[var(--accent)]/20',
       tactile:
-        'bg-[var(--surface-2)] text-[var(--text)] border-2 border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-xs',
+        'bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border)] hover:border-[var(--accent)] active:border-[var(--accent)] shadow-2xs',
       danger: 'text-[var(--expense)] hover:bg-[var(--surface-2)]',
     }[variant];
 

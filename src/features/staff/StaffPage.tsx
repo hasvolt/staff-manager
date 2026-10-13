@@ -234,11 +234,16 @@ export const StaffPage: React.FC = () => {
 
   return (
     <div className="space-y-4 animate-in fade-in text-left">
-      {/* Page Title & Add Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">{t('staff.title')}</h1>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+            <span>{t('staff.title')}</span>
+            <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
+              (स्टाफ सूची व वेतन दरें)
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium">
             Total {staffList.length} staff enrolled &bull; {filteredStaff.length} matching filter
           </p>
         </div>
@@ -251,10 +256,11 @@ export const StaffPage: React.FC = () => {
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition cursor-pointer ${
                 viewMode === 'grid'
-                  ? 'bg-[var(--surface)] text-[var(--accent)] shadow-2xs'
+                  ? 'bg-[var(--surface)] text-[var(--accent)] shadow-2xs font-bold'
                   : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
               title="Grid View"
+              aria-label="Grid View"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -263,10 +269,11 @@ export const StaffPage: React.FC = () => {
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg transition cursor-pointer ${
                 viewMode === 'list'
-                  ? 'bg-[var(--surface)] text-[var(--accent)] shadow-2xs'
+                  ? 'bg-[var(--surface)] text-[var(--accent)] shadow-2xs font-bold'
                   : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
               title="Virtualized List View (Fast for 1000+ staff)"
+              aria-label="List View"
             >
               <List className="w-4 h-4" />
             </button>
@@ -539,6 +546,7 @@ export const StaffPage: React.FC = () => {
                         type="button"
                         onClick={(e) => toggleSelectOne(staff.id, e)}
                         className="text-[var(--text-muted)] hover:text-[var(--accent)] p-0.5 shrink-0 cursor-pointer"
+                        aria-label={`Select ${staff.name}`}
                       >
                         {isSelected ? (
                           <CheckSquare className="w-4 h-4 text-[var(--accent)]" />
@@ -560,11 +568,11 @@ export const StaffPage: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
-                          {staff.role_title || 'Staff'} {staff.staff_code && `• ${staff.staff_code}`}
+                        <p className="text-xs text-[var(--text-muted)] truncate mt-0.5 font-medium">
+                          {staff.role_title || 'Worker'} {staff.staff_code && `• ${staff.staff_code}`}
                         </p>
                         {canViewMoney && staff.rate !== undefined && (
-                          <p className="text-xs font-bold text-[var(--accent)] mt-0.5">
+                          <p className="text-xs font-bold text-[var(--income)] mt-0.5">
                             {formatCurrency(staff.rate)}{' '}
                             <span className="text-[10px] text-[var(--text-muted)] font-normal">
                               / {staff.payment_type}
@@ -574,15 +582,16 @@ export const StaffPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       {staff.phone && (
                         <a
                           href={`tel:${staff.phone}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-8 h-8 rounded-xl bg-[var(--income)]/15 text-[var(--income)] hover:bg-[var(--income)]/25 flex items-center justify-center transition active:scale-90"
+                          className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-[var(--income)] hover:bg-emerald-500/25 flex items-center justify-center transition active:scale-90 shadow-2xs"
                           title={`Call ${staff.name}`}
+                          aria-label={`Call ${staff.name}`}
                         >
-                          <Phone className="w-3.5 h-3.5" />
+                          <Phone className="w-4 h-4" />
                         </a>
                       )}
                       <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:translate-x-0.5 transition" />

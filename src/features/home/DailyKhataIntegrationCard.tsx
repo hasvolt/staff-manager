@@ -75,16 +75,16 @@ export const DailyKhataIntegrationCard: React.FC = () => {
   };
 
   return (
-    <Card variant="gradient" className="space-y-4 text-left">
+    <Card variant="surface" className="p-4 sm:p-5 border border-[var(--border)] shadow-xs space-y-4 text-left">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--accent)] bg-[var(--surface-2)] px-2 py-0.5 rounded">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--accent)] bg-[var(--surface-2)] border border-[var(--border)] px-2 py-0.5 rounded-lg">
               Sister Product
             </span>
-            <h3 className="font-bold text-sm text-[var(--text)]">Daily Khata Pro Integration</h3>
+            <h3 className="font-bold text-sm sm:text-base text-[var(--text)]">Daily Khata Pro Integration</h3>
           </div>
-          <p className="text-xs text-[var(--text-muted)] mt-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
             Maintain complete business ledgers, customer accounts (Khata), cashbook, and advanced financial calculators.
           </p>
         </div>
@@ -94,7 +94,7 @@ export const DailyKhataIntegrationCard: React.FC = () => {
             href={dailyKhataUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-semibold hover:opacity-90 transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] text-xs font-bold hover:opacity-90 transition active:scale-95 shadow-2xs"
           >
             <span>Open Daily Khata</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -104,10 +104,10 @@ export const DailyKhataIntegrationCard: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
         {/* Export for Daily Khata */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2 flex flex-col justify-between">
+        <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/60 space-y-3 flex flex-col justify-between">
           <div>
-            <span className="font-semibold text-[var(--text)] block">Export Payouts for Expense Entry</span>
-            <span className="text-[11px] text-[var(--text-muted)]">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text)] block">Export Payouts for Expense Entry</span>
+            <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block leading-relaxed">
               Download payment vouchers and salaries formatted for easy import or entry into your daily Khata expenses.
             </span>
           </div>
@@ -116,17 +116,18 @@ export const DailyKhataIntegrationCard: React.FC = () => {
             size="sm"
             onClick={handleExportPaymentsForKhata}
             isLoading={isExporting}
+            className="w-full justify-center"
           >
-            <Download className="w-3.5 h-3.5 mr-1" />
+            <Download className="w-3.5 h-3.5 mr-1.5" />
             <span>Export Expenses CSV</span>
           </Button>
         </div>
 
         {/* Advanced Calculators Redirect */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] space-y-2 flex flex-col justify-between">
+        <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/60 space-y-3 flex flex-col justify-between">
           <div>
-            <span className="font-semibold text-[var(--text)] block">Advanced Calculators</span>
-            <span className="text-[11px] text-[var(--text-muted)]">
+            <span className="font-bold text-xs sm:text-sm text-[var(--text)] block">Advanced Calculators</span>
+            <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block leading-relaxed">
               Direct access to EMI, loan interest, profit margin, GST, and compound growth calculators on Daily Khata.
             </span>
           </div>
@@ -134,7 +135,7 @@ export const DailyKhataIntegrationCard: React.FC = () => {
             href={advancedCalcUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] text-xs font-medium hover:bg-[var(--surface)] transition text-center"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition text-center active:scale-95 shadow-2xs"
           >
             <Calculator className="w-3.5 h-3.5 text-[var(--accent)]" />
             <span>Launch Advanced Calculators</span>

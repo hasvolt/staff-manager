@@ -628,12 +628,15 @@ export const ReportsPage: React.FC = () => {
   return (
     <div className="space-y-4 animate-in fade-in pb-16 text-left">
       {/* Page Title & Main Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
-            {t('reports.title')}
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+            <span>{t('reports.title')}</span>
+            <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
+              (रिपोर्ट्स व सैलरी स्लिप्स)
+            </span>
           </h1>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium">
             Professional statements, registers, salary slips, PDF &amp; Excel/CSV exports
           </p>
         </div>
@@ -644,8 +647,9 @@ export const ReportsPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsMasked(!isMasked)}
-              className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer"
+              className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer shadow-2xs"
               title={isMasked ? 'Reveal amounts' : 'Mask amounts'}
+              aria-label="Toggle Amount Mask"
             >
               {isMasked ? <EyeOff className="w-4 h-4 text-amber-400" /> : <Eye className="w-4 h-4" />}
             </button>

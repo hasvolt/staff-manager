@@ -278,17 +278,21 @@ export const PaymentsPage: React.FC = () => {
   return (
     <div className="space-y-4 animate-in fade-in pb-10">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">
-              {t('payments.title')}
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+              <span>{t('payments.title')}</span>
+              <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
+                (वेतन व हिसाब-किताब)
+              </span>
             </h1>
             <button
               type="button"
               onClick={togglePrivacyMask}
               title={isPrivacyMasked ? 'Reveal amounts' : 'Mask amounts for privacy'}
-              className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer"
+              className="p-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] transition cursor-pointer shadow-2xs"
+              aria-label="Toggle Privacy Mask"
             >
               {isPrivacyMasked ? (
                 <EyeOff className="w-4 h-4 text-amber-400" />
@@ -297,7 +301,7 @@ export const PaymentsPage: React.FC = () => {
               )}
             </button>
           </div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium">
             {t('payments.subtitle')}
           </p>
         </div>
@@ -308,7 +312,7 @@ export const PaymentsPage: React.FC = () => {
               href={advancedCalcUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] text-xs font-semibold hover:bg-[var(--surface)] transition active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition active:scale-95 shadow-2xs"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)]" />
               <span>{t('calc.advanced')}</span>
@@ -336,64 +340,64 @@ export const PaymentsPage: React.FC = () => {
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
-            Salary Paid
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <Card variant="surface" className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
+            Salary Paid (वेतन भुगतान)
           </span>
           <div className="mt-1.5">
             {renderAmount(overallStats.totalSalaryPaid, 'text-lg sm:text-2xl font-black text-[var(--income)]')}
           </div>
-          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 font-medium">
             Total wage payouts
           </span>
         </Card>
 
-        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
-            Advances Outstanding
+        <Card variant="surface" className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
+            Advances (पेशगी / उधार)
           </span>
           <div className="mt-1.5">
             {renderAmount(overallStats.netAdvancesOutstanding, 'text-lg sm:text-2xl font-black text-amber-400')}
           </div>
-          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-            Peshgi / Udhar recoverable
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 font-medium">
+            Recoverable advance
           </span>
         </Card>
 
-        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
-            Bonuses Awarded
+        <Card variant="surface" className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
+            Bonuses (बोनस इनाम)
           </span>
           <div className="mt-1.5">
             {renderAmount(overallStats.totalBonuses, 'text-lg sm:text-2xl font-black text-purple-400')}
           </div>
-          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 font-medium">
             Incentives added
           </span>
         </Card>
 
-        <Card variant="surface" className="p-4 rounded-2xl border border-[var(--border)] shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
-            Deductions &amp; Fines
+        <Card variant="surface" className="p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-[var(--text-muted)] block tracking-wider">
+            Deductions (कटौती व जुर्माना)
           </span>
           <div className="mt-1.5">
             {renderAmount(overallStats.totalDeductions, 'text-lg sm:text-2xl font-black text-[var(--expense)]')}
           </div>
-          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
+          <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 font-medium">
             Katoti and penalties
           </span>
         </Card>
       </div>
 
       {/* View Tabs */}
-      <div className="flex items-center gap-1 border-b border-[var(--border)] pb-1">
+      <div className="flex items-center gap-1.5 border-b border-[var(--border)] pb-1 overflow-x-auto">
         <button
           type="button"
           onClick={() => setActiveTab('transactions')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition select-none cursor-pointer whitespace-nowrap ${
             activeTab === 'transactions'
-              ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
+              ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
               : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
           }`}
         >
@@ -404,9 +408,9 @@ export const PaymentsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('ledger')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition select-none cursor-pointer whitespace-nowrap ${
             activeTab === 'ledger'
-              ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
+              ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
               : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
           }`}
         >
@@ -417,9 +421,9 @@ export const PaymentsPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveTab('settlements')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition select-none cursor-pointer whitespace-nowrap ${
             activeTab === 'settlements'
-              ? 'bg-[var(--accent)] text-[var(--accent-contrast)]'
+              ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
               : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
           }`}
         >

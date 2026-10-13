@@ -193,16 +193,21 @@ export const AttendancePage: React.FC = () => {
   return (
     <div className="space-y-4 animate-in fade-in text-left">
       {/* Date Bar & Mark All Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/40 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)]">{t('attendance.title')}</h1>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5">
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+            <span>{t('attendance.title')}</span>
+            <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
+              (दैनिक हाजिरी रजिस्टर)
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium">
             Log 1-tap daily attendance, overtime &amp; exceptions
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="w-40 sm:w-44">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="w-38 sm:w-44">
             <DatePicker
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
@@ -229,39 +234,39 @@ export const AttendancePage: React.FC = () => {
 
       {/* Daily Stats KPI bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-        <div className="p-3.5 rounded-2xl bg-[var(--income)]/10 border border-[var(--income)]/30 text-center shadow-2xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--income)] block">
-            Present
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--income)]/10 border border-[var(--income)]/30 text-center shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--income)] block">
+            Present (उपस्थित)
           </span>
-          <span className="text-xl font-black text-[var(--income)]">{stats.present}</span>
+          <span className="text-xl sm:text-2xl font-black text-[var(--income)]">{stats.present}</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-[var(--warning)]/10 border border-[var(--warning)]/30 text-center shadow-2xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--warning)] block">
-            Half Day
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--warning)]/10 border border-[var(--warning)]/30 text-center shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--warning)] block">
+            Half Day (आधा दिन)
           </span>
-          <span className="text-xl font-black text-[var(--warning)]">{stats.half}</span>
+          <span className="text-xl sm:text-2xl font-black text-[var(--warning)]">{stats.half}</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-[var(--expense)]/10 border border-[var(--expense)]/30 text-center shadow-2xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--expense)] block">
-            Absent
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-[var(--expense)]/10 border border-[var(--expense)]/30 text-center shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--expense)] block">
+            Absent (गैरहाजिर)
           </span>
-          <span className="text-xl font-black text-[var(--expense)]">{stats.absent}</span>
+          <span className="text-xl sm:text-2xl font-black text-[var(--expense)]">{stats.absent}</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-center shadow-2xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 block">
-            Leave
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-center shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-purple-400 block">
+            Leave (अवकाश)
           </span>
-          <span className="text-xl font-black text-purple-400">{stats.leave}</span>
+          <span className="text-xl sm:text-2xl font-black text-purple-400">{stats.leave}</span>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] text-center shadow-2xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)] block">
-            Total OT Hours
+        <div className="col-span-2 sm:col-span-1 p-3 sm:p-3.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] text-center shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[var(--accent)] block">
+            Overtime (घंटे)
           </span>
-          <span className="text-xl font-black text-[var(--text)]">{stats.otHours}h</span>
+          <span className="text-xl sm:text-2xl font-black text-[var(--text)]">{stats.otHours}h</span>
         </div>
       </div>
 
