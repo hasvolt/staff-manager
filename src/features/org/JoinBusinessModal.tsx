@@ -66,13 +66,13 @@ export const JoinBusinessModal: React.FC<JoinBusinessModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-left">
         {!user && (
-          <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-xs text-[var(--text)] space-y-2">
-            <div className="flex items-center gap-2 font-semibold text-amber-500">
+          <div className="p-3 rounded-xl border border-sky-500/30 bg-sky-500/10 text-xs text-[var(--text)] space-y-2">
+            <div className="flex items-center gap-2 font-semibold text-sky-500">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>Sign-In Required</span>
+              <span>Joining a Cloud Workspace?</span>
             </div>
             <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-              To attach your device and user account to this business team, you need to sign in or create an account first.
+              Local invite codes can be used directly. For cloud team syncing across multiple users and devices, signing in is recommended.
             </p>
             {onOpenAuth && (
               <Button

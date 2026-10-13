@@ -70,6 +70,7 @@ export const AppShell: React.FC = () => {
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [inviteCodeFromUrl, setInviteCodeFromUrl] = useState('');
+  const [membersModalTab, setMembersModalTab] = useState<'members' | 'invites' | 'devices'>('members');
 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -140,7 +141,10 @@ export const AppShell: React.FC = () => {
           <BusinessSwitcher
             onCreateNew={() => setIsCreateOrgModalOpen(true)}
             onJoinInvite={() => setIsJoinOrgModalOpen(true)}
-            onOpenMembers={() => setIsMembersModalOpen(true)}
+            onOpenMembers={() => {
+              setMembersModalTab('invites');
+              setIsMembersModalOpen(true);
+            }}
           />
         </div>
 
@@ -642,6 +646,7 @@ export const AppShell: React.FC = () => {
       />
       <MembersModal
         isOpen={isMembersModalOpen}
+        initialTab={membersModalTab}
         onClose={() => setIsMembersModalOpen(false)}
       />
       <ConflictModal

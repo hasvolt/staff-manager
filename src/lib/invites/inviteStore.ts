@@ -78,16 +78,21 @@ export async function createInviteCode(params: {
   userId?: string;
 }): Promise<{ code: string; invite: InviteRecord; source: 'cloud' | 'local' }> {
   const { orgId, orgName, role, assignedSiteIds, maxUses, userId } = params;
+  const generatedCode = generateLocalCode();
 
   // Try Supabase if configured and user is signed in
   if (isSupabaseConfigured && userId) {
     try {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validUuidSites = (assignedSiteIds || []).filter((id) => uuidRegex.test(id));
+
       const { data, error: invErr } = await supabase
         .from('invites')
         .insert({
           org_id: orgId,
+          code: generatedCode,
           role,
-          assigned_site_ids: role === 'supervisor' ? assignedSiteIds : [],
+          assigned_site_ids: role === 'supervisor' ? validUuidSites : [],
           max_uses: maxUses,
           created_by: userId,
         })
@@ -97,7 +102,7 @@ export async function createInviteCode(params: {
       if (!invErr && data) {
         const invObj: InviteRecord = {
           id: data.id,
-          code: data.code,
+          code: data.code || generatedCode,
           org_id: data.org_id,
           org_name: orgName,
           role: data.role,
@@ -109,7 +114,7 @@ export async function createInviteCode(params: {
           created_by: userId,
         };
         saveStoredLocalInvite(invObj);
-        return { code: data.code, invite: invObj, source: 'cloud' };
+        return { code: invObj.code, invite: invObj, source: 'cloud' };
       }
     } catch (e) {
       console.warn('Supabase invite creation failed, generating local fallback:', e);
@@ -117,14 +122,13 @@ export async function createInviteCode(params: {
   }
 
   // Local / Offline fallback invite generation
-  const localCode = generateLocalCode();
   const localInv: InviteRecord = {
     id: generateUUID(),
-    code: localCode,
+    code: generatedCode,
     org_id: orgId,
     org_name: orgName,
     role,
-    assigned_site_ids: role === 'supervisor' ? assignedSiteIds : [],
+    assigned_site_ids: role === 'supervisor' ? (assignedSiteIds || []) : [],
     expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
     max_uses: maxUses,
     used_count: 0,
@@ -133,7 +137,7 @@ export async function createInviteCode(params: {
   };
 
   saveStoredLocalInvite(localInv);
-  return { code: localCode, invite: localInv, source: 'local' };
+  return { code: generatedCode, invite: localInv, source: 'local' };
 }
 
 export async function revokeInviteCode(inviteIdOrCode: string): Promise<boolean> {

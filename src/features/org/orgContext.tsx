@@ -132,6 +132,9 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentOrg(active);
         setRole(userRole);
         localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
+      } else {
+        // If user has no memberships in cloud yet, load local organizations
+        await loadLocalOrgs();
       }
     } catch (e) {
       console.warn('Could not load cloud organizations:', e);

@@ -30,6 +30,7 @@ import {
 interface MembersModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'members' | 'invites' | 'devices';
 }
 
 interface InviteRecord {
@@ -52,12 +53,18 @@ interface DeviceRecord {
   last_seen_at: string;
 }
 
-export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) => {
+export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose, initialTab = 'members' }) => {
   const { currentOrg, role: myRole, reloadOrganizations } = useOrg();
   const { user } = useAuth();
   const { success, error, info } = useToast();
 
-  const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'devices'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'invites' | 'devices'>(initialTab);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
 
   // Members list
   const [members, setMembers] = useState<LocalMembership[]>([]);
@@ -71,6 +78,7 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
   const [selectedSiteIds, setSelectedSiteIds] = useState<string[]>([]);
   const [isCreatingInvite, setIsCreatingInvite] = useState(false);
   const [activeInvites, setActiveInvites] = useState<InviteRecord[]>([]);
+  const [recentlyGeneratedCode, setRecentlyGeneratedCode] = useState<string | null>(null);
 
   // Devices list
   const [devices, setDevices] = useState<DeviceRecord[]>([]);
@@ -82,8 +90,18 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
   // Copied invite feedback
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  const isOwner = myRole === 'owner';
-  const isManager = myRole === 'manager';
+  // Robust role determination
+  const isOrgOwner =
+    !myRole ||
+    myRole === 'owner' ||
+    !currentOrg?.owner_id ||
+    currentOrg.owner_id === 'local_user' ||
+    currentOrg.owner_id === user?.id;
+
+  const effectiveRole = isOrgOwner ? 'owner' : (myRole || 'owner');
+  const isOwner = effectiveRole === 'owner';
+  const isManager = effectiveRole === 'manager';
+  const canInvite = isOwner || isManager;
 
   const loadData = async () => {
     if (!currentOrg?.id) return;
@@ -179,11 +197,15 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
   // Create invite link / code
   const handleCreateInvite = async () => {
     if (!currentOrg?.id) {
-      error('No active business selected.');
+      error('No active business selected. Please select a business from the top bar first.');
       return;
     }
 
-    const effectiveRole = currentOrg.owner_id === (user?.id || 'local_user') ? 'owner' : (myRole || 'owner');
+    if (!canInvite) {
+      error(`Only Owners and Managers can generate invite links (Your role: ${effectiveRole}).`);
+      return;
+    }
+
     if (!canRoleInviteRole(effectiveRole as any, inviteRole as any)) {
       error(`Your role (${effectiveRole}) cannot invite a ${inviteRole}.`);
       return;
@@ -200,6 +222,7 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
         userId: user?.id,
       });
 
+      setRecentlyGeneratedCode(code);
       setActiveInvites((prev) => [invite, ...prev.filter((i) => i.code !== code)]);
       success(`Invite code generated: ${code}`);
 
@@ -336,7 +359,7 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
             <Users className="w-3.5 h-3.5" />
             <span>Members ({members.length})</span>
           </button>
-          {(isOwner || isManager) && (
+          {canInvite && (
             <button
               type="button"
               onClick={() => setActiveTab('invites')}
@@ -566,6 +589,53 @@ export const MembersModal: React.FC<MembersModalProps> = ({ isOpen, onClose }) =
                 <UserPlus className="w-4 h-4 mr-1.5" />
                 Generate Invite Link
               </Button>
+
+              {recentlyGeneratedCode && (
+                <div className="mt-3 p-3.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 space-y-2 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-emerald-500 flex items-center gap-1.5">
+                      <Check className="w-4 h-4" />
+                      <span>Invite Code Ready!</span>
+                    </span>
+                    <span className="text-[11px] text-[var(--text-muted)]">Share with your team</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-[var(--surface)] p-2.5 rounded-xl border border-[var(--border)]">
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Code</span>
+                      <span className="font-mono text-lg sm:text-xl font-bold text-[var(--accent)] tracking-wider">
+                        {recentlyGeneratedCode}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(recentlyGeneratedCode);
+                          setCopiedCode(recentlyGeneratedCode);
+                          success('Invite code copied!');
+                          setTimeout(() => setCopiedCode(null), 3000);
+                        }}
+                      >
+                        <Copy className="w-3.5 h-3.5 mr-1" />
+                        <span>Copy Code</span>
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleCopyInvite(recentlyGeneratedCode)}
+                      >
+                        {copiedCode === recentlyGeneratedCode ? (
+                          <Check className="w-3.5 h-3.5 mr-1" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 mr-1" />
+                        )}
+                        <span>Copy Full Link</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Active Invites List */}
