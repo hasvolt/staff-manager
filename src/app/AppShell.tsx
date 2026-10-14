@@ -184,15 +184,15 @@ export const AppShell: React.FC = () => {
             <Calculator className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
 
-          {/* Theme Colors Shortcut (Visible on desktop) */}
+          {/* Theme Colors Shortcut (Visible on all screens) */}
           <button
             type="button"
             onClick={() => setIsThemeModalOpen(true)}
-            title="Theme Colors"
-            className="hidden lg:flex w-10 h-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+            title="Theme Colors / थीम रंग"
+            className="flex w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             aria-label="Theme Colors"
           >
-            <Palette className="w-4.5 h-4.5" />
+            <Palette className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
           </button>
 
           {/* User Account / Profile Menu */}

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { LanguageCode } from '@/locales/types';
 import { LanguageModal } from '@/components/LanguageModal';
+import { ThemeModal } from '@/components/ThemeModal';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { AccountSwitcherModal } from '@/features/auth/AccountSwitcherModal';
 import { VersionUpdateModal } from '@/components/VersionUpdateModal';
@@ -72,6 +73,7 @@ export const SettingsPage: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentOrg) {
@@ -325,12 +327,24 @@ export const SettingsPage: React.FC = () => {
 
       {/* Visual Theme Selection */}
       <Card variant="surface" className="space-y-3">
-        <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
-          <Palette className="w-4 h-4 text-[var(--accent)]" />
-          <h3 className="font-semibold text-sm text-[var(--text)]">{t('settings.theme')}</h3>
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <Palette className="w-4 h-4 text-[var(--accent)]" />
+            <h3 className="font-semibold text-sm text-[var(--text)]">{t('settings.theme')}</h3>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setIsThemeModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span>Browse Palette & Preview (12)</span>
+          </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {ALL_THEMES.map((item) => {
             const isSelected = theme === item.id;
             return (
@@ -339,19 +353,37 @@ export const SettingsPage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setTheme(item.id as ThemeName);
-                  success(`Theme switched to ${t(item.nameKey)}`);
+                  success(`Theme switched to ${item.nameEn}`);
                 }}
-                className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition cursor-pointer text-xs ${
+                className={`flex flex-col p-2.5 rounded-xl border text-left transition cursor-pointer relative ${
                   isSelected
-                    ? 'border-[var(--accent)] bg-[var(--surface-2)] font-semibold'
-                    : 'border-[var(--border)] bg-[var(--surface-2)]/50 hover:bg-[var(--surface-2)]'
+                    ? 'border-[var(--accent)] bg-[var(--surface-2)] ring-1 ring-[var(--accent)] font-semibold shadow-xs'
+                    : 'border-[var(--border)] bg-[var(--surface-2)]/60 hover:bg-[var(--surface-2)]'
                 }`}
               >
+                {/* Mini Swatch */}
                 <div
-                  className="w-3.5 h-3.5 rounded-full shrink-0"
-                  style={{ backgroundColor: item.accent }}
-                />
-                <span className="truncate">{t(item.nameKey)}</span>
+                  className="w-full h-7 rounded-lg mb-2 flex items-center justify-between px-2 shadow-inner"
+                  style={{ backgroundColor: item.bg, border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  <div
+                    className="w-3.5 h-3.5 rounded-md shadow-2xs"
+                    style={{ backgroundColor: item.surface }}
+                  />
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.accent }}
+                  />
+                </div>
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-xs font-bold text-[var(--text)] truncate">{item.nameEn}</span>
+                  {isSelected && (
+                    <span className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0" />
+                  )}
+                </div>
+                <span className="text-[10px] text-[var(--text-muted)] truncate mt-0.5">
+                  {t(item.nameKey)}
+                </span>
               </button>
             );
           })}
@@ -591,6 +623,11 @@ export const SettingsPage: React.FC = () => {
           setIsAuthModalOpen(false);
           setAuthModalPrefilledEmail(undefined);
         }}
+      />
+
+      <ThemeModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
       />
     </div>
   );

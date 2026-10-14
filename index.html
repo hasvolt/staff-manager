@@ -14,7 +14,7 @@
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- PWA & Mobile Web App Meta -->
-    <meta name="theme-color" content="#04100C" id="theme-color-meta" />
+    <meta name="theme-color" content="#0B1120" id="theme-color-meta" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Staff Manager" />
@@ -27,7 +27,10 @@
     <script>
       (function() {
         try {
-          var savedTheme = localStorage.getItem('staff_manager_theme') || 'emerald-black';
+          var savedTheme = localStorage.getItem('staff_manager_theme');
+          if (!savedTheme || savedTheme === 'emerald-black') {
+            savedTheme = 'deep-obsidian';
+          }
           document.documentElement.setAttribute('data-theme', savedTheme);
           var savedDir = localStorage.getItem('staff_manager_dir') || 'ltr';
           document.documentElement.setAttribute('dir', savedDir);
