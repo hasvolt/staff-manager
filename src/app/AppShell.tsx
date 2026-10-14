@@ -165,11 +165,12 @@ export const AppShell: React.FC = () => {
               setMembersModalTab('invites');
               setIsMembersModalOpen(true);
             }}
+            onOpenAccountSwitcher={() => setIsAccountSwitcherOpen(true)}
           />
         </div>
 
-        {/* Right Header Controls (Clean, Focused & Uncluttered) */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        {/* Right Header Controls (Uncluttered, responsive & mobile-optimized) */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Cloud & Local Sync Status Badge */}
           <SyncStatusIndicator />
 
@@ -178,21 +179,21 @@ export const AppShell: React.FC = () => {
             type="button"
             onClick={() => openCalculator()}
             title={t('calc.title')}
-            className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             aria-label={t('calc.title')}
           >
-            <Calculator className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            <Calculator className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
           </button>
 
-          {/* Theme Colors Shortcut (Visible on all screens) */}
+          {/* Theme Colors Shortcut (Visible on desktop & tablets, hidden on small phones to prevent overload) */}
           <button
             type="button"
             onClick={() => setIsThemeModalOpen(true)}
             title="Theme Colors / थीम रंग"
-            className="flex w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
+            className="hidden sm:flex w-10 h-10 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             aria-label="Theme Colors"
           >
-            <Palette className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+            <Palette className="w-4.5 h-4.5" />
           </button>
 
           {/* User Account / Profile Menu */}
@@ -201,8 +202,8 @@ export const AppShell: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="h-8.5 sm:h-10 pl-1.5 pr-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center gap-1.5 sm:gap-2"
-                title="Account Menu"
+                className="h-8 w-8 sm:h-10 sm:w-auto p-1 sm:pl-1.5 sm:pr-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center justify-center gap-1.5 sm:gap-2"
+                title="Account Menu & Switcher"
                 aria-label="Account Menu"
               >
                 <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0">
@@ -429,6 +430,272 @@ export const AppShell: React.FC = () => {
         <Outlet />
       </main>
 
+      {/* ========================================================= */}
+      {/* DESKTOP FOOTER & NAVIGATION BAR (md+ only) */}
+      {/* ========================================================= */}
+      <footer className="hidden md:block w-full border-t border-[var(--border)] bg-[var(--surface)] text-[var(--text)] mt-auto transition-colors">
+        {/* Desktop Footer Navigation Bar */}
+        <div className="border-b border-[var(--border)] bg-[var(--surface-2)]/60">
+          <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-1.5 lg:gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mr-2">
+                Footer Nav:
+              </span>
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.to;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span>{t(item.labelKey)}</span>
+                  </NavLink>
+                );
+              })}
+              <NavLink
+                to="/settings"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  location.pathname === '/settings'
+                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
+                }`}
+              >
+                <Settings className="w-3.5 h-3.5 shrink-0" />
+                <span>{t('menu.settings')}</span>
+              </NavLink>
+              <NavLink
+                to="/trash"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  location.pathname === '/trash'
+                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-xs'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]'
+                }`}
+              >
+                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                <span>{t('menu.trash')}</span>
+              </NavLink>
+            </div>
+
+            {/* Quick Tools in Footer */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsThemeModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] border border-[var(--border)] transition cursor-pointer"
+                title="12 Themes"
+              >
+                <Palette className="w-3.5 h-3.5 text-[var(--accent)]" />
+                <span>Themes</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLangModalOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] border border-[var(--border)] transition cursor-pointer"
+                title="Google Translator (100+)"
+              >
+                <Globe className="w-3.5 h-3.5 text-[var(--accent)]" />
+                <span>Languages</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => openCalculator()}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] border border-[var(--border)] transition cursor-pointer"
+                title="Quick Inbuilt Calculator"
+              >
+                <Calculator className="w-3.5 h-3.5 text-[var(--accent)]" />
+                <span>Calculator</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Footer Columns & Information */}
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Col 1: Brand & Tagline */}
+            <div className="space-y-3">
+              <AppLogo size="sm" showText={true} subtitle="Staff, Work & Payroll System" />
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                Universal staff attendance, daily work entries, advances, deductions, wage calculation and professional salary statements for small businesses, contractors, shops, farms &amp; workshops.
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Offline Ready (IndexedDB)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsVersionModalOpen(true)}
+                  className="text-[10px] font-mono text-[var(--accent)] hover:underline bg-[var(--surface-2)] px-2 py-0.5 rounded-md border border-[var(--border)] cursor-pointer"
+                >
+                  v2.4.0 Updates
+                </button>
+              </div>
+            </div>
+
+            {/* Col 2: Core Management */}
+            <div className="space-y-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+                Management &amp; Tools
+              </h4>
+              <ul className="space-y-1.5 text-xs text-[var(--text-muted)]">
+                <li>
+                  <NavLink to="/staff" className="hover:text-[var(--accent)] transition">
+                    Staff Directory &amp; Rates
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/attendance" className="hover:text-[var(--accent)] transition">
+                    Daily Attendance Register
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/payments" className="hover:text-[var(--accent)] transition">
+                    Salaries, Advances &amp; Loans
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/reports" className="hover:text-[var(--accent)] transition">
+                    Monthly Reports &amp; Salary Slips
+                  </NavLink>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setIsAccountSwitcherOpen(true)}
+                    className="hover:text-[var(--accent)] transition cursor-pointer text-left flex items-center gap-1.5"
+                  >
+                    <ArrowLeftRight className="w-3 h-3 text-emerald-400" />
+                    <span>Switch Account &amp; Business</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 3: Utilities & Sister Apps */}
+            <div className="space-y-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+                Utilities &amp; Links
+              </h4>
+              <ul className="space-y-1.5 text-xs text-[var(--text-muted)]">
+                {dailyKhataUrl && (
+                  <li>
+                    <a
+                      href={dailyKhataUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--accent)] transition inline-flex items-center gap-1 text-[var(--accent)] font-medium"
+                    >
+                      <span>Daily Khata Pro</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </li>
+                )}
+                {advancedCalcUrl && (
+                  <li>
+                    <a
+                      href={advancedCalcUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--accent)] transition inline-flex items-center gap-1"
+                    >
+                      <span>Advanced Calculators (Daily Khata)</span>
+                      <ExternalLink className="w-3 h-3 text-[var(--text-muted)]" />
+                    </a>
+                  </li>
+                )}
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setIsBackupModalOpen(true)}
+                    className="hover:text-[var(--accent)] transition cursor-pointer text-left"
+                  >
+                    Local Backup &amp; JSON Restore
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setIsMembersModalOpen(true)}
+                    className="hover:text-[var(--accent)] transition cursor-pointer text-left"
+                  >
+                    Team Members &amp; Roles (RBAC)
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setIsActivityModalOpen(true)}
+                    className="hover:text-[var(--accent)] transition cursor-pointer text-left"
+                  >
+                    Activity &amp; Audit Trail
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Col 4: Trust & Support */}
+            <div className="space-y-2.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+                Privacy &amp; Support
+              </h4>
+              <ul className="space-y-1.5 text-xs text-[var(--text-muted)]">
+                <li>
+                  <NavLink to="/privacy" className="hover:text-[var(--accent)] transition">
+                    Privacy Policy (No Data Selling)
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/terms" className="hover:text-[var(--accent)] transition">
+                    Terms of Use &amp; Disclaimer
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/about" className="hover:text-[var(--accent)] transition">
+                    About Staff Manager
+                  </NavLink>
+                </li>
+                <li>
+                  <a
+                    href={`mailto:${supportEmail}`}
+                    className="hover:text-[var(--accent)] transition inline-flex items-center gap-1"
+                  >
+                    <Mail className="w-3 h-3 text-[var(--text-muted)]" />
+                    <span>{supportEmail}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Copyright & Security Line */}
+          <div className="mt-8 pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+            <div className="flex items-center gap-2">
+              <span>&copy; {new Date().getFullYear()} {appName}. All rights reserved.</span>
+              <span>&bull;</span>
+              <span>Sister App of Daily Khata Pro</span>
+            </div>
+            <div className="flex items-center gap-4 text-[11px]">
+              <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                <Shield className="w-3 h-3" />
+                Bank-grade RLS Security
+              </span>
+              <span>&bull;</span>
+              <span>Cloud Synced &amp; Offline First</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
       {/* Bottom Navigation Bar (Thumb-friendly for mobile, hidden on md+ where top nav is active) */}
       <nav
         aria-label="Bottom Navigation"
@@ -495,6 +762,54 @@ export const AppShell: React.FC = () => {
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
+
+            {/* Dedicated Top Active Account & Business Card with Switcher */}
+            <div className="p-3 mb-3.5 rounded-2xl bg-[var(--surface-2)]/90 border border-[var(--border)] shadow-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]/70">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Active Account &amp; Profile
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDrawer();
+                    setIsAccountSwitcherOpen(true);
+                  }}
+                  className="text-xs font-bold text-[var(--accent)] hover:underline flex items-center gap-1 cursor-pointer bg-[var(--surface)] px-2 py-0.5 rounded-lg border border-[var(--border)] transition active:scale-95"
+                >
+                  <ArrowLeftRight className="w-3 h-3 text-emerald-400" />
+                  <span>Switch / बदलें</span>
+                </button>
+              </div>
+
+              <div className="mt-2.5 flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                  {profile?.full_name?.trim()?.charAt(0).toUpperCase() ||
+                    user?.user_metadata?.full_name?.charAt(0)?.toUpperCase() ||
+                    user?.email?.charAt(0).toUpperCase() || (
+                      <UserIcon className="w-4 h-4" />
+                    )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-xs text-[var(--text)] truncate">
+                    {profile?.full_name || user?.user_metadata?.full_name || (user ? 'Account' : 'Guest Mode')}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-muted)] truncate">
+                    {user?.email || 'Local device storage'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-2.5 pt-2 border-t border-[var(--border)]/60 flex items-center justify-between text-xs">
+                <div className="min-w-0 flex items-center gap-1.5 text-[11px] text-[var(--text)] font-medium">
+                  <Building2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+                  <span className="truncate">{currentOrg?.name || appName}</span>
+                </div>
+                <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-[var(--surface)] text-[var(--accent)] shrink-0 border border-[var(--border)]">
+                  {role}
+                </span>
+              </div>
             </div>
 
             {/* Workspaces & Multi-Business Switcher in Drawer */}

@@ -238,12 +238,25 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
         )}
 
         {/* Business Workspace Switcher (In-Account Switching) */}
-        {user && organizations && organizations.length > 1 && (
-          <div className="space-y-2 pt-1 border-t border-[var(--border)]">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              Switch Business Workspace / व्यापार बदलें ({organizations.length})
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+        {organizations && organizations.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-[var(--border)]">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Business Workspaces / व्यापार चुनें ({organizations.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenCreateBusiness();
+                }}
+                className="text-[11px] font-semibold text-[var(--accent)] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>+ New Business</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
               {organizations.map((org) => {
                 const isCurrent = org.id === currentOrg?.id;
                 return (
@@ -253,24 +266,31 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                     onClick={async () => {
                       if (!isCurrent) {
                         await switchBusiness(org.id);
-                        success(`Switched to ${org.name}`);
+                        success(`Switched to "${org.name}"`);
                       }
                       onClose();
                     }}
                     className={`p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-2 cursor-pointer ${
                       isCurrent
-                        ? 'border-[var(--accent)] bg-[var(--surface-2)] ring-1 ring-[var(--accent)]'
+                        ? 'border-[var(--accent)] bg-[var(--surface-2)] ring-1.5 ring-[var(--accent)]'
                         : 'border-[var(--border)] bg-[var(--surface-2)]/40 hover:bg-[var(--surface-2)]'
                     }`}
                   >
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-[var(--text)] truncate">{org.name}</p>
-                      <p className="text-[10px] text-[var(--text-muted)] capitalize">
-                        {org.settings?.terminology_preset || 'general'}
-                      </p>
+                    <div className="min-w-0 flex items-center gap-2">
+                      <Building className={`w-3.5 h-3.5 shrink-0 ${isCurrent ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--text)] truncate">{org.name}</p>
+                        <p className="text-[10px] text-[var(--text-muted)] capitalize">
+                          {org.settings?.terminology_preset || 'general'}
+                        </p>
+                      </div>
                     </div>
-                    {isCurrent && (
+                    {isCurrent ? (
                       <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    ) : (
+                      <span className="text-[10px] text-[var(--accent)] font-semibold opacity-0 hover:opacity-100">
+                        Select
+                      </span>
                     )}
                   </button>
                 );

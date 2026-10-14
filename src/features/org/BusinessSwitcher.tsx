@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useOrg } from './orgContext';
 import { useAuth } from '@/features/auth/authContext';
 import { useToast } from '@/components/ui/Toast';
-import { Building2, ChevronDown, Plus, KeyRound, Check, Users, LogOut } from 'lucide-react';
+import { Building2, ChevronDown, Plus, KeyRound, Check, Users, LogOut, ArrowLeftRight, User } from 'lucide-react';
 
 interface BusinessSwitcherProps {
   onCreateNew: () => void;
   onJoinInvite: () => void;
   onOpenMembers?: () => void;
+  onOpenAccountSwitcher?: () => void;
 }
 
 const ROLE_BADGES: Record<string, { label: string; bg: string; text: string }> = {
@@ -22,6 +23,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
   onCreateNew,
   onJoinInvite,
   onOpenMembers,
+  onOpenAccountSwitcher,
 }) => {
   const { currentOrg, organizations, switchBusiness, leaveBusiness, orgRoles, role } = useOrg();
   const { user } = useAuth();
@@ -91,10 +93,41 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-72 max-w-[calc(100vw-24px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2 animate-in fade-in slide-in-from-top-1 text-left">
+        <div className="absolute left-0 mt-2 w-72 sm:w-80 max-w-[calc(100vw-24px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2.5 animate-in fade-in slide-in-from-top-1 text-left">
+          {/* Active Account Quick View */}
+          <div className="p-2 mb-2 rounded-xl bg-[var(--surface-2)]/80 border border-[var(--border)] flex items-center justify-between gap-2">
+            <div className="min-w-0 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center text-xs font-bold shrink-0">
+                {user?.email?.charAt(0).toUpperCase() || <User className="w-3.5 h-3.5" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold text-[var(--text)] truncate">
+                  {user?.email || 'Guest / Local Account'}
+                </p>
+                <p className="text-[10px] text-[var(--text-muted)] truncate capitalize">
+                  {user ? `Role: ${role}` : 'Local Offline Mode'}
+                </p>
+              </div>
+            </div>
+            {onOpenAccountSwitcher && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenAccountSwitcher();
+                }}
+                className="px-2 py-1 rounded-lg bg-[var(--surface)] text-[var(--accent)] hover:bg-[var(--border)] text-[11px] font-semibold flex items-center gap-1 shrink-0 border border-[var(--border)] cursor-pointer transition active:scale-95"
+                title="Switch Account / प्रोफाइल बदलें"
+              >
+                <ArrowLeftRight className="w-3 h-3" />
+                <span>Switch</span>
+              </button>
+            )}
+          </div>
+
           <div className="px-2.5 py-1.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
             <span>My Businesses &amp; Workspaces</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-[var(--surface-2)] text-[var(--text)]">
+            <span className="px-1.5 py-0.2 rounded-full bg-[var(--surface-2)] text-[var(--text)] font-mono">
               {organizations.length}
             </span>
           </div>
@@ -167,6 +200,25 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
           </div>
 
           <div className="mt-2 pt-2 border-t border-[var(--border)] space-y-1">
+            {onOpenAccountSwitcher && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenAccountSwitcher();
+                }}
+                className="w-full flex items-center justify-between p-2 rounded-xl text-xs text-[var(--text)] hover:bg-[var(--surface-2)] transition font-medium cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Switch Account / प्रोफाइल बदलें</span>
+                </div>
+                <span className="text-[10px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.2 rounded-full font-semibold">
+                  Multi-User
+                </span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => {
