@@ -41,11 +41,19 @@
    Completely suppress Google's banner iframe, tooltips, skiptranslate divs and body top push
    ======================================================== */
 body > .skiptranslate,
+body > div[class*="skiptranslate"],
 div.skiptranslate:not(#google_translate_element),
 .goog-te-banner-frame,
 .goog-te-banner-frame.skiptranslate,
 iframe.goog-te-banner-frame,
 iframe.skiptranslate,
+iframe[class*="VIpgJd"],
+div[class*="VIpgJd"],
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc,
+.VIpgJd-yAWNEb-hvhGLS-L7ecFf,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd,
 .goog-te-balloon-frame,
 #goog-gt-tt,
 #goog-gt-vt,
@@ -55,10 +63,11 @@ iframe.skiptranslate,
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
-  height: 0 !important;
-  max-height: 0 !important;
-  width: 0 !important;
-  max-width: 0 !important;
+  height: 0px !important;
+  max-height: 0px !important;
+  min-height: 0px !important;
+  width: 0px !important;
+  max-width: 0px !important;
   line-height: 0 !important;
   font-size: 0 !important;
   margin: 0 !important;
@@ -66,7 +75,10 @@ iframe.skiptranslate,
   border: none !important;
   overflow: hidden !important;
   pointer-events: none !important;
-  z-index: -9999 !important;
+  position: absolute !important;
+  top: -99999px !important;
+  left: -99999px !important;
+  z-index: -99999 !important;
 }
 
 html, body {

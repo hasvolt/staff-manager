@@ -616,9 +616,9 @@ export const HomePage: React.FC = () => {
       <div>
         <div className="flex items-center justify-between mb-3 px-1">
           <h2 className="text-sm sm:text-base font-bold text-[var(--text)] flex items-center gap-2">
-            <span>Primary Quick Actions</span>
+            <span>{t('home.quickActions')}</span>
             <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
-              (त्वरित कार्य - एक क्लिक में शुरू करें)
+              ({t('home.quickActionsSub')})
             </span>
           </h2>
           <button
@@ -643,7 +643,7 @@ export const HomePage: React.FC = () => {
                 <CalendarCheck className="w-5.5 h-5.5" />
               </div>
               <span className="text-[11px] font-semibold text-[var(--income)] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
-                Daily Attendance
+                {t('attendance.title')}
               </span>
             </div>
             <div className="mt-3.5">
@@ -651,14 +651,14 @@ export const HomePage: React.FC = () => {
                 {t('home.actionAttendance')}
               </h3>
               <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
-                हाजिरी लगाएं (1-Tap Mark)
+                {t('home.attendanceSub')}
               </p>
               <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Present, Absent, Half-day and Overtime tracking.
+                {t('home.attendanceDesc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--income)]">
-              <span>Mark Today</span>
+              <span>{t('home.markToday')}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -675,7 +675,7 @@ export const HomePage: React.FC = () => {
                   <CreditCard className="w-5.5 h-5.5" />
                 </div>
                 <span className="text-[11px] font-semibold text-[var(--expense)] bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg">
-                  Salary & Udhar
+                  {t('payments.title')}
                 </span>
               </div>
               <div className="mt-3.5">
@@ -683,14 +683,14 @@ export const HomePage: React.FC = () => {
                   {t('home.actionPayment')}
                 </h3>
                 <p className="text-xs font-semibold text-[var(--expense)] mt-0.5">
-                  वेतन व उधार/पेशगी दर्ज करें
+                  {t('home.paymentSub')}
                 </p>
                 <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                  Salary payout, advance (udhar), bonus & deductions.
+                  {t('home.paymentDesc')}
                 </p>
               </div>
               <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--expense)]">
-                <span>Record Payout</span>
+                <span>{t('home.recordPayout')}</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -705,22 +705,22 @@ export const HomePage: React.FC = () => {
                   <Briefcase className="w-5.5 h-5.5" />
                 </div>
                 <span className="text-[11px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-lg">
-                  Daily Work
+                  {t('home.dailyWork')}
                 </span>
               </div>
               <div className="mt-3.5">
                 <h3 className="font-bold text-base text-[var(--text)] group-hover:text-purple-400 transition-colors">
-                  Log Daily Work
+                  {t('home.logDailyWork')}
                 </h3>
                 <p className="text-xs font-semibold text-purple-400 mt-0.5">
-                  दैनिक कार्य व यूनिट दर्ज करें
+                  {t('home.logDailyWorkSub')}
                 </p>
                 <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                  Work descriptions, project sites, units and pieces.
+                  {t('home.attendanceDesc')}
                 </p>
               </div>
               <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-purple-400">
-                <span>Enter Work</span>
+                <span>{t('home.logDailyWork')}</span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
@@ -737,7 +737,7 @@ export const HomePage: React.FC = () => {
                 <UserPlus className="w-5.5 h-5.5" />
               </div>
               <span className="text-[11px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-2 py-0.5 rounded-lg">
-                Staff Directory
+                {t('staff.title')}
               </span>
             </div>
             <div className="mt-3.5">
@@ -745,14 +745,14 @@ export const HomePage: React.FC = () => {
                 {t('home.actionAddStaff')}
               </h3>
               <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
-                नया स्टाफ जोड़ें (Daily/Monthly)
+                {t('home.addStaffSub')}
               </p>
               <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Add profile, designation, wage rate & weekly off.
+                {t('home.addStaffDesc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--accent)]">
-              <span>Add Member</span>
+              <span>{t('home.addMember')}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -768,7 +768,7 @@ export const HomePage: React.FC = () => {
                 <FileText className="w-5.5 h-5.5" />
               </div>
               <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-lg">
-                Slips & Reports
+                {t('reports.title')}
               </span>
             </div>
             <div className="mt-3.5">
@@ -776,14 +776,14 @@ export const HomePage: React.FC = () => {
                 {t('home.actionReports')}
               </h3>
               <p className="text-xs font-semibold text-blue-400 mt-0.5">
-                सैलरी स्लिप व लेजर हिसाब
+                {t('home.reportsSub')}
               </p>
               <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Print salary slip, attendance register & export CSV.
+                {t('home.reportsDesc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-blue-400">
-              <span>View Statements</span>
+              <span>{t('home.viewStatements')}</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
@@ -803,9 +803,6 @@ export const HomePage: React.FC = () => {
             <div>
               <h3 className="font-bold text-sm sm:text-base text-[var(--text)] flex items-center gap-2">
                 <span>{t('home.onboardingTitle')}</span>
-                <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
-                  (आसान 3-स्टेप मार्गदर्शिका)
-                </span>
               </h3>
               <span className="text-xs text-[var(--text-muted)] block mt-0.5">
                 {completedStepsCount === 3
@@ -857,13 +854,13 @@ export const HomePage: React.FC = () => {
                 )}
               </div>
               <h4 className="font-bold text-sm text-[var(--text)]">
-                Add Staff & Wage Rates
+                {t('home.step1Title')}
               </h4>
               <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
-                स्टाफ जोड़ें और वेतन तय करें
+                {t('home.step1Sub')}
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Add name, designation & wage type (Daily, Monthly, Hourly, Per-piece).
+                {t('home.step1Desc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
@@ -900,18 +897,18 @@ export const HomePage: React.FC = () => {
                   </span>
                 ) : (
                   <span className="text-[10px] font-bold text-[var(--text-muted)] bg-[var(--surface)] border border-[var(--border)] px-2 py-0.5 rounded-lg">
-                    Daily Attendance
+                    {t('attendance.title')}
                   </span>
                 )}
               </div>
               <h4 className="font-bold text-sm text-[var(--text)]">
-                Mark Daily Attendance
+                {t('home.step2Title')}
               </h4>
               <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
-                दैनिक हाजिरी लगाएं
+                {t('home.step2Sub')}
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                1-tap: Present (उपस्थित), Half-day (आधा दिन), Absent (छुट्टी).
+                {t('home.step2Desc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
@@ -951,13 +948,13 @@ export const HomePage: React.FC = () => {
                 )}
               </div>
               <h4 className="font-bold text-sm text-[var(--text)]">
-                Advances & Salary Slips
+                {t('home.step3Title')}
               </h4>
               <p className="text-xs font-semibold text-rose-400 mt-0.5">
-                वेतन/उधार दर्ज करें व स्लिप बनाएं
+                {t('home.step3Sub')}
               </p>
               <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                Record advance (peshgi), month settlement & download PDF slips.
+                {t('home.step3Desc')}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-[var(--border)] flex justify-between items-center">
@@ -1104,10 +1101,10 @@ export const HomePage: React.FC = () => {
           </div>
           <div className="min-w-0 flex-1">
             <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
-              Manage Sites / Shops
+              {t('home.manageSites')}
             </span>
             <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
-              साइट्स व दुकानें प्रबंधित करें
+              {t('home.manageSitesSub')}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -1123,10 +1120,10 @@ export const HomePage: React.FC = () => {
           </div>
           <div className="min-w-0 flex-1">
             <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
-              Manage Work Types
+              {t('home.manageWorkTypes')}
             </span>
             <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
-              कार्य प्रकार व यूनिट दरें
+              {t('home.manageWorkTypesSub')}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -1142,10 +1139,10 @@ export const HomePage: React.FC = () => {
           </div>
           <div className="min-w-0 flex-1">
             <span className="font-bold text-xs sm:text-sm text-[var(--text)] block truncate">
-              Log Daily Work
+              {t('home.logDailyWork')}
             </span>
             <span className="text-[11px] text-[var(--text-muted)] block truncate mt-0.5">
-              दैनिक कार्य व यूनिट दर्ज करें
+              {t('home.logDailyWorkSub')}
             </span>
           </div>
           <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all shrink-0" />

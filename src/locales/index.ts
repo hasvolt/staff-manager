@@ -1,16 +1,17 @@
 import { en } from './en';
 import { hi } from './hi';
+import { ur } from './ur';
 import { LanguageCode, Translations } from './types';
 
 export * from './types';
 
 // Pre-bundled core languages for immediate startup, other languages lazy loaded dynamically
-const bundledLocales: Record<'en' | 'hi', Translations> = { en, hi };
+const bundledLocales: Record<'en' | 'hi' | 'ur', Translations> = { en, hi, ur };
 
 const localeLoaders: Record<LanguageCode, () => Promise<{ default?: Translations; [key: string]: any }>> = {
   en: async () => ({ default: en }),
   hi: async () => ({ default: hi }),
-  ur: () => import('./ur'),
+  ur: async () => ({ default: ur }),
   bn: () => import('./bn'),
   mr: () => import('./mr'),
   gu: () => import('./gu'),
@@ -29,6 +30,7 @@ const localeLoaders: Record<LanguageCode, () => Promise<{ default?: Translations
 const loadedLocales: Record<string, Translations> = {
   en,
   hi,
+  ur,
 };
 
 export async function loadLanguage(code: LanguageCode): Promise<Translations> {

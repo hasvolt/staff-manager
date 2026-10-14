@@ -34,7 +34,130 @@
           document.documentElement.setAttribute('data-theme', savedTheme);
           var savedDir = localStorage.getItem('staff_manager_dir') || 'ltr';
           document.documentElement.setAttribute('dir', savedDir);
+          var savedLang = localStorage.getItem('staff_manager_language') || 'en';
+          document.documentElement.setAttribute('lang', savedLang);
         } catch (e) {}
+      })();
+    </script>
+
+    <!-- Ironclad Google Translate Banner Suppression & Top Displacement Lock -->
+    <style id="google-translate-header-shield">
+      /* 1. Strictly lock html and body so Google Translate NEVER pushes the header down */
+      html, body {
+        top: 0px !important;
+        position: static !important;
+        margin-top: 0px !important;
+        padding-top: 0px !important;
+        transform: none !important;
+      }
+
+      header {
+        top: 0px !important;
+      }
+
+      /* 2. Completely suppress all Google Translate banner iframes, tooltips, and gadgets */
+      body > .skiptranslate,
+      body > div[class*="skiptranslate"],
+      div.skiptranslate,
+      .goog-te-banner-frame,
+      .goog-te-banner-frame.skiptranslate,
+      iframe.goog-te-banner-frame,
+      iframe.skiptranslate,
+      iframe[class*="VIpgJd"],
+      div[class*="VIpgJd"],
+      .VIpgJd-ZVi9od-ORHb-OEVmcd,
+      .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+      .VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc,
+      .VIpgJd-yAWNEb-hvhGLS-L7ecFf,
+      .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+      .goog-te-balloon-frame,
+      #goog-gt-tt,
+      #goog-gt-vt,
+      .goog-te-spinner-pos,
+      .goog-tooltip,
+      .goog-tooltip:hover {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0px !important;
+        max-height: 0px !important;
+        min-height: 0px !important;
+        width: 0px !important;
+        max-width: 0px !important;
+        line-height: 0 !important;
+        font-size: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        top: -99999px !important;
+        left: -99999px !important;
+        z-index: -99999 !important;
+      }
+
+      .goog-te-gadget,
+      .goog-te-gadget-simple {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+      }
+
+      .goog-text-highlight {
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    </style>
+
+    <!-- Immediate continuous observer to destroy banner before browser paints it -->
+    <script>
+      (function() {
+        function killGoogleBanner() {
+          try {
+            if (document.body) {
+              if (document.body.style.top && document.body.style.top !== '0px') {
+                document.body.style.setProperty('top', '0px', 'important');
+              }
+              if (document.body.style.position && document.body.style.position !== 'static') {
+                document.body.style.setProperty('position', 'static', 'important');
+              }
+              if (document.body.classList.contains('goog-te-banner-frame')) {
+                document.body.classList.remove('goog-te-banner-frame');
+              }
+            }
+            if (document.documentElement && document.documentElement.style.top && document.documentElement.style.top !== '0px') {
+              document.documentElement.style.setProperty('top', '0px', 'important');
+            }
+            var badItems = document.querySelectorAll(
+              'iframe.goog-te-banner-frame, iframe[class*="VIpgJd"], div[class*="VIpgJd"], body > .skiptranslate, #goog-gt-tt, #goog-gt-vt, .goog-te-balloon-frame'
+            );
+            for (var i = 0; i < badItems.length; i++) {
+              var el = badItems[i];
+              el.style.setProperty('display', 'none', 'important');
+              el.style.setProperty('visibility', 'hidden', 'important');
+              el.style.setProperty('height', '0px', 'important');
+              el.style.setProperty('opacity', '0', 'important');
+              el.style.setProperty('pointer-events', 'none', 'important');
+            }
+          } catch (e) {}
+        }
+
+        if (typeof MutationObserver !== 'undefined') {
+          var observer = new MutationObserver(killGoogleBanner);
+          if (document.documentElement) {
+            observer.observe(document.documentElement, {
+              childList: true,
+              subtree: true,
+              attributes: true,
+              attributeFilter: ['style', 'class']
+            });
+          }
+        }
+        setInterval(killGoogleBanner, 100);
       })();
     </script>
   </head>
@@ -49,6 +172,7 @@
             new window.google.translate.TranslateElement({
               pageLanguage: 'en',
               autoDisplay: false,
+              multilanguagePage: true,
               layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
             }, 'google_translate_element');
           }

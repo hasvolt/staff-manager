@@ -82,6 +82,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLanguage = (newLang: LanguageCode) => {
     setLanguageState(newLang);
     localStorage.setItem(I18N_STORAGE_KEY, newLang);
+    const meta = SUPPORTED_LANGUAGES.find((l) => l.code === newLang) || SUPPORTED_LANGUAGES[0];
+    document.documentElement.setAttribute('dir', meta.isRTL ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', newLang);
+    localStorage.setItem('staff_manager_dir', meta.isRTL ? 'rtl' : 'ltr');
     if (newLang === 'en') {
       returnToEnglish();
     } else {

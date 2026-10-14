@@ -7,6 +7,7 @@ import {
   loadGoogleTranslateScript,
   translatePageTo,
   resetGoogleTranslate,
+  clearGoogleTranslateCookies,
   getCurrentGoogleTranslateLanguage,
   isGoogleTranslateActive,
 } from '@/lib/i18n/googleTranslate';
@@ -92,7 +93,12 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
       return;
     }
     if (isGoogleTranslateActive()) {
-      resetGoogleTranslate();
+      clearGoogleTranslateCookies();
+      try {
+        localStorage.setItem('staff_manager_language', code);
+      } catch {}
+      window.location.reload();
+      return;
     }
     setLanguage(code as LanguageCode);
     setCurrentOnlineLang(null);
@@ -109,26 +115,21 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
       handleReturnToEnglish();
       return;
     }
+    // If it's one of the 16 native supported languages (e.g. Urdu, Hindi, etc.), activate native i18n directly!
+    if (languages.some((l) => l.code === item.code)) {
+      handleSelectOffline(item.code);
+      return;
+    }
     setStatusMessage(`Translating full app to ${item.nativeName} (${item.name})...`);
     setCurrentOnlineLang(item.code);
     translatePageTo(item.code);
-    setTimeout(() => {
-      setStatusMessage(null);
-      onClose();
-    }, 400);
   };
 
   // Universal Return to English handler
   const handleReturnToEnglish = () => {
-    resetGoogleTranslate();
-    returnToEnglish();
-    setLanguage('en');
+    setStatusMessage('Language reset to English (मूल अंग्रेज़ी)...');
     setCurrentOnlineLang(null);
-    setStatusMessage('Language reset to English (मूल अंग्रेज़ी)');
-    setTimeout(() => {
-      setStatusMessage(null);
-      onClose();
-    }, 200);
+    resetGoogleTranslate();
   };
 
   return (
@@ -253,9 +254,7 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[50vh] overflow-y-auto pr-1">
           {filteredLanguages.map((item) => {
             const isSelected =
-              item.type === 'offline'
-                ? !googleActive && language === item.code
-                : googleActive && currentOnlineLang === item.code;
+              language === item.code || (googleActive && currentOnlineLang === item.code);
 
             return (
               <button

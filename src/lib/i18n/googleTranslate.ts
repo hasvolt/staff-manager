@@ -142,6 +142,38 @@ let scriptLoading = false;
 const listeners: Array<() => void> = [];
 
 /**
+ * Clear all variations of Google Translate cookies across root and domain
+ */
+export function clearGoogleTranslateCookies(): void {
+  if (typeof document === 'undefined') return;
+
+  const past = 'Thu, 01 Jan 1970 00:00:00 UTC';
+  const host = window.location.hostname;
+  const cookieList = [
+    `googtrans=; expires=${past}; path=/;`,
+    `googtrans=/en/en; expires=${past}; path=/;`,
+    `googtrans=/auto/en; expires=${past}; path=/;`,
+    `googtrans=; expires=${past}; path=/; domain=${host};`,
+    `googtrans=/en/en; expires=${past}; path=/; domain=${host};`,
+    `googtrans=/auto/en; expires=${past}; path=/; domain=${host};`,
+  ];
+
+  if (host.includes('.')) {
+    cookieList.push(`googtrans=; expires=${past}; path=/; domain=.${host};`);
+    cookieList.push(`googtrans=/en/en; expires=${past}; path=/; domain=.${host};`);
+    cookieList.push(`googtrans=/auto/en; expires=${past}; path=/; domain=.${host};`);
+  }
+
+  cookieList.forEach((c) => {
+    document.cookie = c;
+  });
+
+  try {
+    localStorage.removeItem('staff_manager_google_lang');
+  } catch {}
+}
+
+/**
  * Permanently suppress Google Translate top banner, popup frames, and body push.
  */
 export function suppressGoogleTranslateBanner(): void {
@@ -168,7 +200,7 @@ export function suppressGoogleTranslateBanner(): void {
 
   // 2. Hide all banner frames, skiptranslate divs, and tooltips
   const elementsToHide = document.querySelectorAll(
-    'body > .skiptranslate, div.skiptranslate:not(#google_translate_element), .goog-te-banner-frame, iframe.goog-te-banner-frame, iframe.skiptranslate, #goog-gt-tt, #goog-gt-vt, .goog-te-balloon-frame, .goog-tooltip'
+    'body > .skiptranslate, div.skiptranslate:not(#google_translate_element), .goog-te-banner-frame, iframe.goog-te-banner-frame, iframe.skiptranslate, iframe[class*="VIpgJd"], div[class*="VIpgJd"], #goog-gt-tt, #goog-gt-vt, .goog-te-balloon-frame, .goog-tooltip'
   );
   elementsToHide.forEach((el) => {
     const htmlEl = el as HTMLElement;
@@ -179,7 +211,7 @@ export function suppressGoogleTranslateBanner(): void {
     htmlEl.style.setProperty('width', '0px', 'important');
     htmlEl.style.setProperty('overflow', 'hidden', 'important');
     htmlEl.style.setProperty('pointer-events', 'none', 'important');
-    htmlEl.style.setProperty('z-index', '-9999', 'important');
+    htmlEl.style.setProperty('z-index', '-99999', 'important');
   });
 }
 
@@ -197,6 +229,7 @@ if (typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
         subtree: true,
       });
     }
+    setInterval(suppressGoogleTranslateBanner, 150);
   } catch {}
 }
 
@@ -205,7 +238,7 @@ export function isGoogleTranslateActive(): boolean {
   const cookieMatch = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
   if (cookieMatch) {
     const val = decodeURIComponent(cookieMatch[1]);
-    if (val && val !== '/auto/en' && val !== '/en/en' && val !== '') {
+    if (val && val !== '/auto/en' && val !== '/en/en' && val !== '' && !val.endsWith('/en')) {
       return true;
     }
   }
@@ -280,14 +313,6 @@ export function loadGoogleTranslateScript(): Promise<void> {
       scriptLoaded = true;
       scriptLoading = false;
 
-      // Check if there was an active translation requested
-      const activeLang = getCurrentGoogleTranslateLanguage();
-      if (activeLang && activeLang !== 'en') {
-        setTimeout(() => {
-          applyComboLanguage(activeLang);
-        }, 100);
-      }
-
       while (listeners.length > 0) {
         const cb = listeners.shift();
         if (cb) cb();
@@ -322,6 +347,11 @@ function applyComboLanguage(targetLang: string): boolean {
   const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
   if (select) {
     select.value = targetLang;
+    if (typeof (select as unknown as { onchange?: () => void }).onchange === 'function') {
+      try {
+        (select as unknown as { onchange: () => void }).onchange();
+      } catch {}
+    }
     select.dispatchEvent(new Event('change', { bubbles: true }));
     select.dispatchEvent(new Event('input', { bubbles: true }));
     suppressGoogleTranslateBanner();
@@ -331,61 +361,72 @@ function applyComboLanguage(targetLang: string): boolean {
 }
 
 /**
- * Trigger full app translation to a given target language code via Google Translate cookie & combo.
+ * Trigger full app translation to a given target language code via Google Translate cookies & clean reload.
  */
 export function translatePageTo(targetLang: string): void {
   if (typeof document === 'undefined') return;
 
   const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+  const host = window.location.hostname;
 
-  // Set Google Translate standard cookies on root path
-  document.cookie = `googtrans=/en/${targetLang}; expires=${expires}; path=/; SameSite=Lax`;
-  document.cookie = `googtrans=/auto/${targetLang}; expires=${expires}; path=/; SameSite=Lax`;
+  // Set Google Translate standard cookies across root path & domains
+  const cookies = [
+    `googtrans=/en/${targetLang}; expires=${expires}; path=/; SameSite=Lax`,
+    `googtrans=/auto/${targetLang}; expires=${expires}; path=/; SameSite=Lax`,
+    `googtrans=/en/${targetLang}; expires=${expires}; path=/; domain=${host}; SameSite=Lax`,
+    `googtrans=/auto/${targetLang}; expires=${expires}; path=/; domain=${host}; SameSite=Lax`,
+  ];
+
+  if (host.includes('.')) {
+    cookies.push(`googtrans=/en/${targetLang}; expires=${expires}; path=/; domain=.${host}; SameSite=Lax`);
+    cookies.push(`googtrans=/auto/${targetLang}; expires=${expires}; path=/; domain=.${host}; SameSite=Lax`);
+  }
+
+  cookies.forEach((c) => {
+    document.cookie = c;
+  });
 
   try {
     localStorage.setItem('staff_manager_google_lang', targetLang);
   } catch {}
 
+  // Ensure source language is set to 'en'
+  document.documentElement.setAttribute('lang', 'en');
+
+  // Handle RTL for Arabic, Urdu, Hebrew, Persian etc.
+  const isRTL = ['ar', 'ur', 'he', 'fa', 'ps', 'sd', 'ug', 'yi'].includes(targetLang);
+  document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+  try {
+    localStorage.setItem('staff_manager_dir', isRTL ? 'rtl' : 'ltr');
+  } catch {}
+
   // Suppress top banner immediately
   suppressGoogleTranslateBanner();
 
-  // Apply instant client-side full app translation
+  // Try applying directly to combo if already active
+  applyComboLanguage(targetLang);
+
+  // Reload the page cleanly so Google Translate translates every text node from scratch!
   setTimeout(() => {
-    applyFullAppTranslation(targetLang);
-  }, 20);
-
-  // Try applying directly to combo
-  if (applyComboLanguage(targetLang)) {
-    return;
-  }
-
-  // If combo not ready yet, load script and poll
-  loadGoogleTranslateScript().then(() => {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (applyComboLanguage(targetLang) || attempts > 40) {
-        clearInterval(interval);
-        suppressGoogleTranslateBanner();
-      }
-    }, 75);
-  });
+    window.location.reload();
+  }, 120);
 }
 
 /**
- * Reset Google Translate back to native app text
+ * Reset Google Translate back to native English text
  */
 export function resetGoogleTranslate(): void {
   if (typeof document === 'undefined') return;
 
-  // Clear cookies
-  document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'googtrans=/en/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'googtrans=/auto/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  clearGoogleTranslateCookies();
 
   try {
-    localStorage.removeItem('staff_manager_google_lang');
+    localStorage.setItem('staff_manager_language', 'en');
+    localStorage.setItem('staff_manager_dir', 'ltr');
   } catch {}
+
+  document.documentElement.setAttribute('lang', 'en');
+  document.documentElement.setAttribute('dir', 'ltr');
 
   // Revert all DOM nodes back to English
   returnToEnglish();
@@ -398,7 +439,7 @@ export function resetGoogleTranslate(): void {
 
   suppressGoogleTranslateBanner();
 
-  // Reload to restore original un-translated DOM nodes if needed
+  // Reload to restore original un-translated DOM nodes
   setTimeout(() => {
     window.location.reload();
   }, 100);
