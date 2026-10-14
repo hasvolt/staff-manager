@@ -16,4 +16,11 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Auto-activate Google Translate if user has active Google Translate language
+import('./lib/i18n/googleTranslate').then(({ isGoogleTranslateActive, loadGoogleTranslateScript }) => {
+  if (isGoogleTranslateActive()) {
+    loadGoogleTranslateScript();
+  }
+}).catch(() => {});
+
 createRoot(document.getElementById('root')!).render(<App />);

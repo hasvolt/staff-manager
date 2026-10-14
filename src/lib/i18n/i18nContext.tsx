@@ -7,6 +7,7 @@ import {
 } from '@/locales/types';
 import { getLoadedTranslation, loadLanguage } from '@/locales';
 import { formatCurrency, formatDate, formatNumber } from '@/lib/format/formatters';
+import { applyFullAppTranslation, returnToEnglish } from './fullAppTranslator';
 
 interface I18nContextType {
   language: LanguageCode;
@@ -64,6 +65,15 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.documentElement.setAttribute('lang', language);
     localStorage.setItem('staff_manager_dir', isRTL ? 'rtl' : 'ltr');
 
+    // Run full app translation
+    if (language === 'en') {
+      returnToEnglish();
+    } else {
+      setTimeout(() => {
+        applyFullAppTranslation(language);
+      }, 50);
+    }
+
     return () => {
       isMounted = false;
     };
@@ -72,6 +82,13 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLanguage = (newLang: LanguageCode) => {
     setLanguageState(newLang);
     localStorage.setItem(I18N_STORAGE_KEY, newLang);
+    if (newLang === 'en') {
+      returnToEnglish();
+    } else {
+      setTimeout(() => {
+        applyFullAppTranslation(newLang);
+      }, 50);
+    }
   };
 
   const setCurrency = (newCurrency: string) => {

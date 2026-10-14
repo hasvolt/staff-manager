@@ -32,6 +32,7 @@ import {
   Check,
   ArrowLeftRight,
   Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n/i18nContext';
 import { useCalculator } from '@/features/calculator/calculatorContext';
@@ -56,9 +57,11 @@ import { MembersModal } from '@/features/members/MembersModal';
 import { ConflictModal } from '@/features/sync/ConflictModal';
 import { ActivityFeedModal } from '@/features/sync/ActivityFeedModal';
 import { BackupRestoreModal } from '@/features/sync/BackupRestoreModal';
+import { isGoogleTranslateActive, getCurrentGoogleTranslateLanguage, resetGoogleTranslate } from '@/lib/i18n/googleTranslate';
+import { returnToEnglish } from '@/lib/i18n/fullAppTranslator';
 
 export const AppShell: React.FC = () => {
-  const { t, language } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const { openCalculator } = useCalculator();
   const { user, profile, isLocalMode, signOut } = useAuth();
   const { currentOrg, organizations, switchBusiness, orgRoles, role } = useOrg();
@@ -121,11 +124,11 @@ export const AppShell: React.FC = () => {
   const closeDrawer = () => setIsDrawerOpen(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)] select-none">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[var(--bg)] text-[var(--text)] select-none">
       <OfflineIndicator />
 
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 w-full max-w-full overflow-hidden h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-2.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Navigation Menu & Organization Context */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
@@ -174,15 +177,18 @@ export const AppShell: React.FC = () => {
           {/* Cloud & Local Sync Status Badge */}
           <SyncStatusIndicator />
 
-          {/* Quick Inbuilt Calculator */}
+          {/* Language Switcher (Replaces calculator in header per user instruction) */}
           <button
             type="button"
-            onClick={() => openCalculator()}
-            title={t('calc.title')}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
-            aria-label={t('calc.title')}
+            onClick={() => setIsLangModalOpen(true)}
+            title={`Language / भाषा बदलें (${(getCurrentGoogleTranslateLanguage() || language).toUpperCase()})`}
+            className="h-8 sm:h-10 px-2 sm:px-2.5 rounded-xl sm:rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface)] hover:border-[var(--accent)] text-[var(--text)] transition-all duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0 flex items-center justify-center gap-1.5"
+            aria-label="Change Language"
           >
-            <Calculator className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+            <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--accent)] shrink-0" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text)]">
+              {(getCurrentGoogleTranslateLanguage() || language).toUpperCase()}
+            </span>
           </button>
 
           {/* Theme Colors Shortcut (Visible on desktop & tablets, hidden on small phones to prevent overload) */}
@@ -426,20 +432,20 @@ export const AppShell: React.FC = () => {
       </nav>
 
       {/* Main Page Content Body */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 pb-24 md:pb-12">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 pb-20 md:pb-8 overflow-x-hidden">
         <Outlet />
       </main>
 
       {/* ========================================================= */}
       {/* DESKTOP FOOTER & NAVIGATION BAR (md+ only) */}
       {/* ========================================================= */}
-      <footer className="hidden md:block w-full border-t border-[var(--border)] bg-[var(--surface)] text-[var(--text)] mt-auto transition-colors">
+      <footer className="hidden md:block w-full max-w-full overflow-hidden border-t border-[var(--border)] bg-[var(--surface)] text-[var(--text)] mt-auto transition-colors">
         {/* Desktop Footer Navigation Bar */}
         <div className="border-b border-[var(--border)] bg-[var(--surface-2)]/60">
-          <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-1.5 lg:gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mr-2">
-                Footer Nav:
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 overflow-hidden">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1 hidden lg:inline">
+                Navigation:
               </span>
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -519,15 +525,15 @@ export const AppShell: React.FC = () => {
         </div>
 
         {/* Detailed Footer Columns & Information */}
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             {/* Col 1: Brand & Tagline */}
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-0">
               <AppLogo size="sm" showText={true} subtitle="Staff, Work & Payroll System" />
               <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 Universal staff attendance, daily work entries, advances, deductions, wage calculation and professional salary statements for small businesses, contractors, shops, farms &amp; workshops.
               </p>
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Offline Ready (IndexedDB)
@@ -543,7 +549,7 @@ export const AppShell: React.FC = () => {
             </div>
 
             {/* Col 2: Core Management */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 min-w-0">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
                 Management &amp; Tools
               </h4>
@@ -582,7 +588,7 @@ export const AppShell: React.FC = () => {
             </div>
 
             {/* Col 3: Utilities & Sister Apps */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 min-w-0">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
                 Utilities &amp; Links
               </h4>
@@ -644,7 +650,7 @@ export const AppShell: React.FC = () => {
             </div>
 
             {/* Col 4: Trust & Support */}
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 min-w-0">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
                 Privacy &amp; Support
               </h4>
@@ -1012,12 +1018,30 @@ export const AppShell: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <Globe className="w-4 h-4 text-[var(--accent)]" />
-                  <span>Google Translator & Language</span>
+                  <span>Language / भाषा बदलें</span>
                 </div>
-                <span className="text-[10px] bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-full font-medium">
-                  100+ Online
+                <span className="text-[10px] bg-[var(--surface-2)] text-[var(--accent)] px-2 py-0.5 rounded-full font-bold uppercase">
+                  {(getCurrentGoogleTranslateLanguage() || language)}
                 </span>
               </button>
+
+              {/* Quick Return to English Button in Drawer */}
+              {(language !== 'en' || isGoogleTranslateActive()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDrawer();
+                    resetGoogleTranslate();
+                    returnToEnglish();
+                    setLanguage('en');
+                    success('Switched back to English (मूल अंग्रेज़ी)');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition text-left cursor-pointer font-bold text-xs"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                  <span>Return to English / मूल अंग्रेज़ी</span>
+                </button>
+              )}
 
               <button
                 type="button"

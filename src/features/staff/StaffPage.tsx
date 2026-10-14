@@ -239,9 +239,6 @@ export const StaffPage: React.FC = () => {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--text)] flex items-center gap-2">
             <span>{t('staff.title')}</span>
-            <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
-              (स्टाफ सूची व वेतन दरें)
-            </span>
           </h1>
           <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium">
             Total {staffList.length} staff enrolled &bull; {filteredStaff.length} matching filter

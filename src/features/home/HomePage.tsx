@@ -387,9 +387,9 @@ export const HomePage: React.FC = () => {
     (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
 
   return (
-    <div className="space-y-5 sm:space-y-6 animate-in fade-in text-left pb-12">
+    <div className="space-y-5 sm:space-y-6 animate-in fade-in text-left pb-4 sm:pb-8 w-full max-w-full overflow-hidden">
       {/* 1. Header Bar: Business Info, Privacy Mask & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/50 p-3.5 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/50 p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs overflow-hidden">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2.5">
             <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-[var(--text)] truncate">
@@ -467,7 +467,7 @@ export const HomePage: React.FC = () => {
                 {t('home.totalStaff')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
-                कुल स्टाफ
+                {t('home.enrolledMembers')}
               </span>
             </div>
             <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
@@ -479,7 +479,7 @@ export const HomePage: React.FC = () => {
               {activeStaffCount}
             </div>
             <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
-              Enrolled active members
+              {t('home.enrolledMembers')}
             </span>
           </div>
         </Card>
@@ -497,7 +497,7 @@ export const HomePage: React.FC = () => {
                 {t('home.presentToday')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--income)] font-bold block truncate">
-                आज उपस्थित
+                {t('attendance.title')}
               </span>
             </div>
             <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
@@ -526,10 +526,10 @@ export const HomePage: React.FC = () => {
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
-                Unmarked / Absent
+                {t('home.unmarked')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
-                बाकी / गैरहाजिर
+                {unmarkedTodayCount > 0 ? t('home.pendingAttendance') : t('home.allMarked')}
               </span>
             </div>
             <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
@@ -545,7 +545,7 @@ export const HomePage: React.FC = () => {
               )}
             </div>
             <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
-              {unmarkedTodayCount > 0 ? 'Needs today attendance' : 'All marked today'}
+              {unmarkedTodayCount > 0 ? t('home.pendingAttendance') : t('home.allMarked')}
             </span>
           </div>
         </Card>
@@ -561,10 +561,10 @@ export const HomePage: React.FC = () => {
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
                 <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
-                  Payable This Month
+                  {t('home.payable')}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
-                  इस माह कुल बकाया
+                  {t('home.netDues')}
                 </span>
               </div>
               <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
@@ -576,7 +576,7 @@ export const HomePage: React.FC = () => {
                 {renderAmount(monthTotalPayable)}
               </div>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
-                Net dues for current cycle
+                {t('home.netDues')}
               </span>
             </div>
           </Card>
@@ -590,10 +590,10 @@ export const HomePage: React.FC = () => {
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
                 <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
-                  Daily Work Log
+                  {t('home.dailyWork')}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
-                  दैनिक कार्य दर्ज
+                  {t('attendance.title')}
                 </span>
               </div>
               <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
