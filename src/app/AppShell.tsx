@@ -64,7 +64,15 @@ export const AppShell: React.FC = () => {
   const { t, language, setLanguage } = useI18n();
   const { openCalculator } = useCalculator();
   const { user, profile, isLocalMode, signOut } = useAuth();
-  const { currentOrg, organizations, switchBusiness, orgRoles, role } = useOrg();
+  const {
+    currentOrg,
+    organizations,
+    switchBusiness,
+    orgRoles,
+    role,
+    isViewingInvitedOrg,
+    returnToMainBusiness,
+  } = useOrg();
   const { success } = useToast();
   const location = useLocation();
 
@@ -88,15 +96,20 @@ export const AppShell: React.FC = () => {
 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Auto-detect invite link code in URL (?invite=CODE)
+  // Auto-detect invite link code in URL (?invite=CODE) and clean URL so user is never trapped
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const code = params.get('invite');
     if (code) {
       setInviteCodeFromUrl(code);
       setIsJoinOrgModalOpen(true);
+      // Clean up URL so the user is never trapped in an invite loop!
+      const newParams = new URLSearchParams(location.search);
+      newParams.delete('invite');
+      const newSearch = newParams.toString() ? `?${newParams.toString()}` : '';
+      window.history.replaceState({}, document.title, location.pathname + newSearch);
     }
-  }, [location.search]);
+  }, [location.search, location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -128,9 +141,9 @@ export const AppShell: React.FC = () => {
       <OfflineIndicator />
 
       {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full max-w-full overflow-hidden h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-2.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 w-full max-w-full h-14 sm:h-16 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-2 sm:px-6 flex items-center justify-between gap-1.5 sm:gap-4 flex-nowrap">
         {/* Left: Navigation Menu & Organization Context */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 sm:flex-initial flex-nowrap">
           <button
             type="button"
             onClick={() => setIsDrawerOpen(true)}
@@ -173,7 +186,7 @@ export const AppShell: React.FC = () => {
         </div>
 
         {/* Right Header Controls (Uncluttered, responsive & mobile-optimized) */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-nowrap">
           {/* Cloud & Local Sync Status Badge */}
           <SyncStatusIndicator />
 
@@ -379,6 +392,29 @@ export const AppShell: React.FC = () => {
           )}
         </div>
       </header>
+
+      {/* Invited Workspace Banner with 1-Tap Return to Main Business */}
+      {isViewingInvitedOrg && (
+        <div className="w-full bg-gradient-to-r from-amber-600/95 to-amber-700/95 text-white px-3 sm:px-6 py-1.5 flex items-center justify-between gap-2 text-xs shadow-xs z-30">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-amber-300 animate-pulse shrink-0" />
+            <p className="truncate font-medium text-[11px] sm:text-xs">
+              Viewing invited workspace: <strong className="font-bold">{currentOrg?.name}</strong>
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              await returnToMainBusiness();
+              success('Returned to your main business!');
+            }}
+            className="px-2.5 py-1 rounded-lg bg-white text-amber-900 font-bold hover:bg-amber-100 transition shadow-2xs cursor-pointer active:scale-95 shrink-0 text-[11px] flex items-center gap-1"
+          >
+            <span>Return to My Business</span>
+            <RotateCcw className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
       {/* Dedicated Desktop Navigation Bar (Spacious, Clean, Zero Overload) */}
       <nav
@@ -817,6 +853,31 @@ export const AppShell: React.FC = () => {
                 </span>
               </div>
             </div>
+
+            {/* If viewing invited workspace, show direct return button in drawer */}
+            {isViewingInvitedOrg && (
+              <div className="mb-3.5 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>Viewing Invited Workspace</span>
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)] mt-1">
+                  You are in &quot;{currentOrg?.name}&quot;
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    closeDrawer();
+                    await returnToMainBusiness();
+                    success('Returned to your main business!');
+                  }}
+                  className="mt-2 w-full py-1.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 transition"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Return to My Main Business (वापस जाएं)</span>
+                </button>
+              </div>
+            )}
 
             {/* Workspaces & Multi-Business Switcher in Drawer */}
             {organizations.length > 1 && (

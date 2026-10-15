@@ -4,7 +4,14 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from './authContext';
 import { useOrg } from '@/features/org/orgContext';
 import { useToast } from '@/components/ui/Toast';
-import { getSavedAccounts, removeSavedAccount, SavedAccount, saveCurrentAccount } from './accountManager';
+import {
+  getSavedAccounts,
+  removeSavedAccount,
+  SavedAccount,
+  saveCurrentAccount,
+  getPrimaryEmail,
+  setPrimaryEmail,
+} from './accountManager';
 import {
   Users,
   UserCheck,
@@ -79,6 +86,9 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
     (acc) => !user?.email || acc.email.toLowerCase() !== user.email.toLowerCase()
   );
 
+  const primaryEmail = getPrimaryEmail();
+  const isCurrentlyPrimary = user?.email && primaryEmail && user.email.toLowerCase() === primaryEmail.toLowerCase();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Switch Account / प्रोफाइल बदलें" maxWidth="lg">
       <div className="space-y-4 text-left">
@@ -95,16 +105,45 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
           </div>
         </div>
 
+        {/* Quick Return to Main Account Banner */}
+        {!isCurrentlyPrimary && primaryEmail && (
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white flex items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Sparkles className="w-5 h-5 text-amber-300 shrink-0 animate-pulse" />
+              <div className="min-w-0 text-left">
+                <p className="text-xs font-bold truncate">Return to Your Main Account</p>
+                <p className="text-[11px] text-emerald-100 truncate">
+                  मुख्य खाता: {primaryEmail}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleSwitchToAccount(primaryEmail)}
+              className="px-3 py-1.5 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-bold transition shadow-xs cursor-pointer active:scale-95 shrink-0"
+            >
+              Switch Back (वापस जाएं)
+            </button>
+          </div>
+        )}
+
         {/* Current Active Account Section */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
               Current Active Account / सक्रिय खाता
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Active Now
-            </span>
+            <div className="flex items-center gap-1.5">
+              {isCurrentlyPrimary && (
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  Main Account (मुख्य खाता)
+                </span>
+              )}
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Active Now
+              </span>
+            </div>
           </div>
 
           {user ? (
@@ -207,7 +246,14 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                       {acc.avatarLetter}
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className="text-xs font-semibold text-[var(--text)] truncate">{acc.fullName}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-semibold text-[var(--text)] truncate">{acc.fullName}</p>
+                        {acc.isPrimary && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                            Main Account (मुख्य खाता)
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-[var(--text-muted)] truncate">{acc.email}</p>
                       {acc.orgName && (
                         <p className="text-[10px] text-[var(--accent)] truncate">

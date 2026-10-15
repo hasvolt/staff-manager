@@ -387,12 +387,12 @@ export const HomePage: React.FC = () => {
     (step1Done ? 1 : 0) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
 
   return (
-    <div className="space-y-5 sm:space-y-6 animate-in fade-in text-left pb-4 sm:pb-8 w-full max-w-full overflow-hidden">
-      {/* 1. Header Bar: Business Info, Privacy Mask & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--surface-2)]/50 p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs overflow-hidden">
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in text-left pb-4 sm:pb-8 w-full max-w-full overflow-hidden">
+      {/* 1. Header Bar: Business Info, Privacy Mask & Actions (Fixed: Mobile non-wrapping & clean layout) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-[var(--surface-2)]/50 p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-[var(--text)] truncate">
+          <div className="flex items-center gap-2">
+            <h1 className="text-base sm:text-2xl font-bold tracking-tight text-[var(--text)] truncate">
               {currentOrg?.name || t('home.title')}
             </h1>
             {!isSupervisor && (
@@ -404,34 +404,34 @@ export const HomePage: React.FC = () => {
                 aria-label="Toggle Privacy Mask"
               >
                 {isPrivacyMasked ? (
-                  <EyeOff className="w-4 h-4 text-amber-400" />
+                  <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
                 ) : (
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 )}
               </button>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium truncate">
+          <p className="text-[11px] sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium truncate">
             {t('tagline')} &bull; <span className="text-[var(--text)] font-semibold">{todayStr}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
           {advancedCalcUrl && (
             <a
               href={advancedCalcUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
             >
               <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
               <span>{t('calc.advanced')}</span>
             </a>
           )}
 
-          <Badge variant="accent" className="text-xs">
+          <Badge variant="accent" className="text-[11px] sm:text-xs py-1 sm:py-1.5">
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-            <span>{isLocalMode ? 'Local Mode' : 'Cloud Sync Active'}</span>
+            <span>{isLocalMode ? 'Local' : 'Cloud Sync'}</span>
           </Badge>
 
           <button
@@ -443,7 +443,7 @@ export const HomePage: React.FC = () => {
               else error(res.message);
               loadDashboardData();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
             title="Manual sync with cloud"
           >
             <RefreshCw className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
@@ -452,30 +452,30 @@ export const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Top Summary KPI Cards (Modern, High Contrast, Responsive) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      {/* 2. Top Summary KPI Cards (Fixed: Uniform min-height and aligned content) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {/* Card 1: Total Staff */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/staff')}
-          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 {t('home.totalStaff')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
                 {t('home.enrolledMembers')}
               </span>
             </div>
-            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
-              <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
+          <div className="mt-2.5 sm:mt-4">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
               {activeStaffCount}
             </div>
             <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
@@ -489,29 +489,29 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 {t('home.presentToday')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--income)] font-bold block truncate">
                 {t('attendance.title')}
               </span>
             </div>
-            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
-              <CheckCircle2 className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--income)]/20 border border-[var(--income)]/30 flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--income)] tracking-tight truncate">
+          <div className="mt-2.5 sm:mt-4">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--income)] tracking-tight truncate">
               {presentTodayCount}
             </div>
             <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
               {activeStaffCount > 0
-                ? `${Math.round((presentTodayCount / activeStaffCount) * 100)}% attendance today`
-                : 'No staff yet'}
+                ? `${Math.round((presentTodayCount / activeStaffCount) * 100)}% present`
+                : 'No staff'}
             </span>
           </div>
         </Card>
@@ -521,25 +521,25 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                 {t('home.unmarked')}
               </span>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
                 {unmarkedTodayCount > 0 ? t('home.pendingAttendance') : t('home.allMarked')}
               </span>
             </div>
-            <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
-              <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--expense)]/20 border border-[var(--expense)]/30 flex items-center justify-center text-[var(--expense)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-3 sm:mt-4">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
+          <div className="mt-2.5 sm:mt-4">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
               {unmarkedTodayCount > 0 ? (
-                <span className="text-amber-400">{unmarkedTodayCount} pending</span>
+                <span className="text-amber-400">{unmarkedTodayCount} left</span>
               ) : (
                 <span className="text-[var(--text-muted)]">{absentTodayCount} absent</span>
               )}
@@ -556,23 +556,23 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => navigate('/payments')}
-            className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
           >
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                   {t('home.payable')}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
                   {t('home.netDues')}
                 </span>
               </div>
-              <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
-                <CreditCard className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center text-[var(--income)] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
-              <div className="text-lg sm:text-xl lg:text-2xl font-black text-[var(--income)] tracking-tight truncate">
+            <div className="mt-2.5 sm:mt-4">
+              <div className="text-base sm:text-xl lg:text-2xl font-black text-[var(--income)] tracking-tight truncate">
                 {renderAmount(monthTotalPayable)}
               </div>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
@@ -585,37 +585,37 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => setIsWorkModalOpen(true)}
-            className="group flex flex-col justify-between p-3.5 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
           >
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[var(--text)] block truncate">
                   {t('home.dailyWork')}
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] font-medium block truncate">
                   {t('attendance.title')}
                 </span>
               </div>
-              <div className="w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
-                <Briefcase className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+                <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-3 sm:mt-4">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--text)] tracking-tight truncate">
+            <div className="mt-2.5 sm:mt-4">
+              <div className="text-base sm:text-2xl lg:text-3xl font-bold text-[var(--text)] tracking-tight truncate">
                 Log Work
               </div>
               <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
-                Units, sites & daily tasks
+                Units &amp; tasks
               </span>
             </div>
           </Card>
         )}
       </div>
 
-      {/* 3. Action-First Tactile Dashboard: 4 Big Primary Action Cards */}
+      {/* 3. Action-First Tactile Dashboard: 4 Big Primary Action Cards (Fixed: 2x2 on mobile, clean uniform heights) */}
       <div>
-        <div className="flex items-center justify-between mb-3 px-1">
-          <h2 className="text-sm sm:text-base font-bold text-[var(--text)] flex items-center gap-2">
+        <div className="flex items-center justify-between mb-2.5 sm:mb-3 px-1">
+          <h2 className="text-xs sm:text-base font-bold text-[var(--text)] flex items-center gap-1.5 sm:gap-2">
             <span>{t('home.quickActions')}</span>
             <span className="text-xs font-normal text-[var(--text-muted)] hidden sm:inline">
               ({t('home.quickActionsSub')})
@@ -631,35 +631,35 @@ export const HomePage: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
           {/* Action 1: Mark Attendance */}
           <button
             type="button"
             onClick={() => navigate('/attendance')}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--income)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full min-h-[125px] sm:min-h-[175px]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-600/25 group-hover:scale-105 transition-transform shrink-0">
-                <CalendarCheck className="w-5.5 h-5.5" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--btn-income)] text-white flex items-center justify-center shadow-md shadow-emerald-600/25 group-hover:scale-105 transition-transform shrink-0">
+                <CalendarCheck className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
               </div>
-              <span className="text-[11px] font-semibold text-[var(--income)] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--income)] bg-emerald-500/10 border border-emerald-500/20 px-1.5 sm:px-2 py-0.5 rounded-lg">
                 {t('attendance.title')}
               </span>
             </div>
-            <div className="mt-3.5">
-              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--income)] transition-colors">
+            <div className="mt-2.5 sm:mt-3.5">
+              <h3 className="font-bold text-xs sm:text-base text-[var(--text)] group-hover:text-[var(--income)] transition-colors line-clamp-1">
                 {t('home.actionAttendance')}
               </h3>
-              <p className="text-xs font-semibold text-[var(--income)] mt-0.5">
+              <p className="text-[11px] sm:text-xs font-semibold text-[var(--income)] mt-0.5 line-clamp-1">
                 {t('home.attendanceSub')}
               </p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+              <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 {t('home.attendanceDesc')}
               </p>
             </div>
-            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--income)]">
+            <div className="mt-2 sm:mt-4 pt-1.5 sm:pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[var(--income)]">
               <span>{t('home.markToday')}</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
 
@@ -668,60 +668,60 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsPaymentModalOpen(true)}
-              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
+              className="group flex flex-col justify-between p-3 sm:p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--btn-expense)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full min-h-[125px] sm:min-h-[175px]"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-11 h-11 rounded-xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-600/25 group-hover:scale-105 transition-transform shrink-0">
-                  <CreditCard className="w-5.5 h-5.5" />
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--btn-expense)] text-white flex items-center justify-center shadow-md shadow-rose-600/25 group-hover:scale-105 transition-transform shrink-0">
+                  <CreditCard className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
                 </div>
-                <span className="text-[11px] font-semibold text-[var(--expense)] bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--expense)] bg-rose-500/10 border border-rose-500/20 px-1.5 sm:px-2 py-0.5 rounded-lg">
                   {t('payments.title')}
                 </span>
               </div>
-              <div className="mt-3.5">
-                <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--expense)] transition-colors">
+              <div className="mt-2.5 sm:mt-3.5">
+                <h3 className="font-bold text-xs sm:text-base text-[var(--text)] group-hover:text-[var(--expense)] transition-colors line-clamp-1">
                   {t('home.actionPayment')}
                 </h3>
-                <p className="text-xs font-semibold text-[var(--expense)] mt-0.5">
+                <p className="text-[11px] sm:text-xs font-semibold text-[var(--expense)] mt-0.5 line-clamp-1">
                   {t('home.paymentSub')}
                 </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
                   {t('home.paymentDesc')}
                 </p>
               </div>
-              <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--expense)]">
+              <div className="mt-2 sm:mt-4 pt-1.5 sm:pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[var(--expense)]">
                 <span>{t('home.recordPayout')}</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
           ) : (
             <button
               type="button"
               onClick={() => setIsWorkModalOpen(true)}
-              className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
+              className="group flex flex-col justify-between p-3 sm:p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-purple-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full min-h-[125px] sm:min-h-[175px]"
             >
               <div className="flex items-start justify-between w-full">
-                <div className="w-11 h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/25 group-hover:scale-105 transition-transform shrink-0">
-                  <Briefcase className="w-5.5 h-5.5" />
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-md shadow-purple-500/25 group-hover:scale-105 transition-transform shrink-0">
+                  <Briefcase className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
                 </div>
-                <span className="text-[11px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-lg">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 sm:px-2 py-0.5 rounded-lg">
                   {t('home.dailyWork')}
                 </span>
               </div>
-              <div className="mt-3.5">
-                <h3 className="font-bold text-base text-[var(--text)] group-hover:text-purple-400 transition-colors">
+              <div className="mt-2.5 sm:mt-3.5">
+                <h3 className="font-bold text-xs sm:text-base text-[var(--text)] group-hover:text-purple-400 transition-colors line-clamp-1">
                   {t('home.logDailyWork')}
                 </h3>
-                <p className="text-xs font-semibold text-purple-400 mt-0.5">
+                <p className="text-[11px] sm:text-xs font-semibold text-purple-400 mt-0.5 line-clamp-1">
                   {t('home.logDailyWorkSub')}
                 </p>
-                <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
                   {t('home.attendanceDesc')}
                 </p>
               </div>
-              <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-purple-400">
+              <div className="mt-2 sm:mt-4 pt-1.5 sm:pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-purple-400">
                 <span>{t('home.logDailyWork')}</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </button>
           )}
@@ -730,30 +730,30 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsStaffModalOpen(true)}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full min-h-[125px] sm:min-h-[175px]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/25 group-hover:scale-105 transition-transform shrink-0">
-                <UserPlus className="w-5.5 h-5.5" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] flex items-center justify-center shadow-md shadow-[var(--accent)]/25 group-hover:scale-105 transition-transform shrink-0">
+                <UserPlus className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
               </div>
-              <span className="text-[11px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-2 py-0.5 rounded-lg">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-[var(--accent)] bg-[var(--accent)]/10 border border-[var(--accent)]/20 px-1.5 sm:px-2 py-0.5 rounded-lg">
                 {t('staff.title')}
               </span>
             </div>
-            <div className="mt-3.5">
-              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-[var(--accent)] transition-colors">
+            <div className="mt-2.5 sm:mt-3.5">
+              <h3 className="font-bold text-xs sm:text-base text-[var(--text)] group-hover:text-[var(--accent)] transition-colors line-clamp-1">
                 {t('home.actionAddStaff')}
               </h3>
-              <p className="text-xs font-semibold text-[var(--accent)] mt-0.5">
+              <p className="text-[11px] sm:text-xs font-semibold text-[var(--accent)] mt-0.5 line-clamp-1">
                 {t('home.addStaffSub')}
               </p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+              <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 {t('home.addStaffDesc')}
               </p>
             </div>
-            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-[var(--accent)]">
+            <div className="mt-2 sm:mt-4 pt-1.5 sm:pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-[var(--accent)]">
               <span>{t('home.addMember')}</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
 
@@ -761,30 +761,30 @@ export const HomePage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/reports')}
-            className="group flex flex-col justify-between p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-blue-500 hover:bg-[var(--surface-2)] transition-all duration-200 active:scale-[0.98] active:brightness-95 cursor-pointer text-left shadow-xs hover:shadow-md relative overflow-hidden h-full min-h-[125px] sm:min-h-[175px]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform shrink-0">
-                <FileText className="w-5.5 h-5.5" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform shrink-0">
+                <FileText className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5" />
               </div>
-              <span className="text-[11px] font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-lg">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 sm:px-2 py-0.5 rounded-lg">
                 {t('reports.title')}
               </span>
             </div>
-            <div className="mt-3.5">
-              <h3 className="font-bold text-base text-[var(--text)] group-hover:text-blue-400 transition-colors">
+            <div className="mt-2.5 sm:mt-3.5">
+              <h3 className="font-bold text-xs sm:text-base text-[var(--text)] group-hover:text-blue-400 transition-colors line-clamp-1">
                 {t('home.actionReports')}
               </h3>
-              <p className="text-xs font-semibold text-blue-400 mt-0.5">
+              <p className="text-[11px] sm:text-xs font-semibold text-blue-400 mt-0.5 line-clamp-1">
                 {t('home.reportsSub')}
               </p>
-              <p className="text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
+              <p className="hidden sm:block text-[11px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
                 {t('home.reportsDesc')}
               </p>
             </div>
-            <div className="mt-4 pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-xs font-semibold text-blue-400">
+            <div className="mt-2 sm:mt-4 pt-1.5 sm:pt-2.5 border-t border-[var(--border)]/70 flex items-center justify-between text-[11px] sm:text-xs font-semibold text-blue-400">
               <span>{t('home.viewStatements')}</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </button>
         </div>

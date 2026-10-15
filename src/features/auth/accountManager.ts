@@ -6,9 +6,21 @@ export interface SavedAccount {
   lastActive: string;
   role?: string;
   orgName?: string;
+  isPrimary?: boolean;
 }
 
 const STORAGE_KEY = 'staff_saved_accounts';
+const PRIMARY_EMAIL_KEY = 'staff_manager_primary_email';
+
+export const getPrimaryEmail = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(PRIMARY_EMAIL_KEY);
+};
+
+export const setPrimaryEmail = (email: string) => {
+  if (typeof window === 'undefined' || !email) return;
+  localStorage.setItem(PRIMARY_EMAIL_KEY, email.toLowerCase());
+};
 
 export const getSavedAccounts = (): SavedAccount[] => {
   if (typeof window === 'undefined') return [];
@@ -16,7 +28,14 @@ export const getSavedAccounts = (): SavedAccount[] => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    const primary = getPrimaryEmail();
+    if (Array.isArray(parsed)) {
+      return parsed.map((acc) => ({
+        ...acc,
+        isPrimary: primary ? acc.email.toLowerCase() === primary.toLowerCase() : false,
+      }));
+    }
+    return [];
   } catch (e) {
     console.warn('Failed to parse saved accounts:', e);
     return [];
@@ -32,6 +51,11 @@ export const saveCurrentAccount = (
   if (typeof window === 'undefined' || !user || !user.email) return;
 
   try {
+    const primary = getPrimaryEmail();
+    if (!primary) {
+      setPrimaryEmail(user.email);
+    }
+
     const existing = getSavedAccounts();
     const fullName =
       profile?.full_name?.trim() ||
@@ -39,6 +63,8 @@ export const saveCurrentAccount = (
       'Staff User';
 
     const avatarLetter = (fullName.charAt(0) || user.email.charAt(0) || 'U').toUpperCase();
+
+    const isPrimary = (primary || user.email).toLowerCase() === user.email.toLowerCase();
 
     const updatedAccount: SavedAccount = {
       id: user.id,
@@ -48,6 +74,7 @@ export const saveCurrentAccount = (
       lastActive: new Date().toISOString(),
       role: role || 'Member',
       orgName: orgName || 'Default Workspace',
+      isPrimary,
     };
 
     // Filter out same email and prepend to top

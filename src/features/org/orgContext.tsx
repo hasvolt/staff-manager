@@ -26,6 +26,9 @@ interface OrgContextType {
   role: string;
   orgRoles: Record<string, string>;
   isLoading: boolean;
+  primaryOrgId: string | null;
+  isViewingInvitedOrg: boolean;
+  returnToMainBusiness: () => Promise<void>;
   createBusiness: (name: string, businessType?: string, currency?: string, country?: string, weekStart?: number) => Promise<{ error: Error | null; orgId?: string }>;
   joinWithInvite: (code: string) => Promise<{ error: Error | null; orgId?: string }>;
   switchBusiness: (orgId: string) => Promise<void>;
@@ -39,6 +42,7 @@ interface OrgContextType {
 const OrgContext = createContext<OrgContextType | null>(null);
 
 const DEFAULT_ORG_ID_KEY = 'staff_manager_active_org_id';
+const PRIMARY_ORG_ID_KEY = 'staff_manager_primary_org_id';
 
 export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLocalMode } = useAuth();
@@ -46,6 +50,9 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [organizations, setOrganizations] = useState<LocalOrganization[]>([]);
   const [role, setRole] = useState<string>('owner');
   const [orgRoles, setOrgRoles] = useState<Record<string, string>>({});
+  const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem(PRIMARY_ORG_ID_KEY) : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const loadLocalOrgs = useCallback(async () => {
@@ -109,6 +116,12 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentOrg(active);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
       setRole(rolesMap[active.id] || 'owner');
+    }
+
+    const defaultPrimary = list.find((o) => o.owner_id === (user?.id || 'local_user') || rolesMap[o.id] === 'owner') || list[0];
+    if (defaultPrimary && !localStorage.getItem(PRIMARY_ORG_ID_KEY)) {
+      localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
+      setPrimaryOrgId(defaultPrimary.id);
     }
   }, [isLocalMode, user]);
 
@@ -200,6 +213,12 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const activeRole = rolesMap[active.id] || (active.owner_id === user.id ? 'owner' : 'viewer');
         setRole(activeRole);
         localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
+
+        const defaultPrimary = combinedOrgs.find((o) => o.owner_id === user.id || rolesMap[o.id] === 'owner') || combinedOrgs[0];
+        if (defaultPrimary && !localStorage.getItem(PRIMARY_ORG_ID_KEY)) {
+          localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
+          setPrimaryOrgId(defaultPrimary.id);
+        }
       } else {
         await loadLocalOrgs();
       }
@@ -576,6 +595,30 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const isViewingInvitedOrg = Boolean(
+    currentOrg &&
+    primaryOrgId &&
+    currentOrg.id !== primaryOrgId &&
+    role !== 'owner'
+  );
+
+  const returnToMainBusiness = async () => {
+    let targetOrgId = primaryOrgId;
+    if (!targetOrgId || !organizations.some((o) => o.id === targetOrgId)) {
+      const owned = organizations.find((o) => orgRoles[o.id] === 'owner' || o.owner_id === (user?.id || 'local_user'));
+      if (owned) {
+        targetOrgId = owned.id;
+      } else if (organizations.length > 0) {
+        targetOrgId = organizations[0].id;
+      }
+    }
+    if (targetOrgId) {
+      await switchBusiness(targetOrgId);
+      setPrimaryOrgId(targetOrgId);
+      localStorage.setItem(PRIMARY_ORG_ID_KEY, targetOrgId);
+    }
+  };
+
   return (
     <OrgContext.Provider
       value={{
@@ -584,6 +627,9 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         role,
         orgRoles,
         isLoading,
+        primaryOrgId,
+        isViewingInvitedOrg,
+        returnToMainBusiness,
         createBusiness,
         joinWithInvite,
         switchBusiness,
