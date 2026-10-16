@@ -1,5 +1,31 @@
 import { LanguageCode } from '@/locales/types';
 
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  AED: 'AED',
+  SAR: 'SAR',
+  PKR: '₨',
+  BDT: '৳',
+  NPR: 'रू',
+  CAD: 'CA$',
+  AUD: 'AU$',
+  SGD: 'SG$',
+};
+
+export function getCurrencySymbol(currency: string = 'INR', locale: LanguageCode = 'en'): string {
+  if (CURRENCY_SYMBOLS[currency]) return CURRENCY_SYMBOLS[currency];
+  try {
+    const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(0);
+    const currencyPart = parts.find((p) => p.type === 'currency');
+    return currencyPart ? currencyPart.value : currency;
+  } catch {
+    return currency;
+  }
+}
+
 export function formatCurrency(
   amount: number,
   currency: string = 'INR',

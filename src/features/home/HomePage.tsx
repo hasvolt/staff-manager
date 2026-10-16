@@ -388,11 +388,11 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in text-left pb-4 sm:pb-8 w-full max-w-full overflow-hidden">
-      {/* 1. Header Bar: Business Info, Privacy Mask & Actions (Fixed: Mobile non-wrapping & clean layout) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-[var(--surface-2)]/50 p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
+      {/* 1. Header Bar: Business Info, Privacy Mask & Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 bg-[var(--surface-2)]/60 p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-2xs">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-base sm:text-2xl font-bold tracking-tight text-[var(--text)] truncate">
+            <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--text)] truncate">
               {currentOrg?.name || t('home.title')}
             </h1>
             {!isSupervisor && (
@@ -411,26 +411,26 @@ export const HomePage: React.FC = () => {
               </button>
             )}
           </div>
-          <p className="text-[11px] sm:text-sm text-[var(--text-muted)] mt-0.5 font-medium truncate">
+          <p className="text-[11px] sm:text-xs text-[var(--text-muted)] mt-0.5 font-medium truncate">
             {t('tagline')} &bull; <span className="text-[var(--text)] font-semibold">{todayStr}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 justify-start sm:justify-end flex-nowrap overflow-x-auto">
           {advancedCalcUrl && (
             <a
               href={advancedCalcUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-[11px] sm:text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+              <ExternalLink className="w-3 h-3 text-[var(--accent)] shrink-0" />
               <span>{t('calc.advanced')}</span>
             </a>
           )}
 
-          <Badge variant="accent" className="text-[11px] sm:text-xs py-1 sm:py-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+          <Badge variant="accent" className="text-[10px] sm:text-xs py-0.5 px-2 sm:py-1 sm:px-2.5 shrink-0">
+            <ShieldCheck className="w-3 h-3 shrink-0" />
             <span>{isLocalMode ? 'Local' : 'Cloud Sync'}</span>
           </Badge>
 
@@ -443,23 +443,23 @@ export const HomePage: React.FC = () => {
               else error(res.message);
               loadDashboardData();
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs"
+            className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-[11px] sm:text-xs font-semibold hover:border-[var(--accent)] transition duration-150 active:scale-95 cursor-pointer shadow-2xs shrink-0"
             title="Manual sync with cloud"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+            <RefreshCw className="w-3 h-3 text-[var(--accent)] shrink-0" />
             <span>Sync</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Top Summary KPI Cards (Fixed: Uniform min-height and aligned content) */}
+      {/* 2. Top Summary KPI Cards (Uniform min-height & mt-auto for perfect bottom alignment) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         {/* Card 1: Total Staff */}
         <Card
           variant="gradient"
           interactive
           onClick={() => navigate('/staff')}
-          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[115px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
@@ -474,11 +474,11 @@ export const HomePage: React.FC = () => {
               <Users className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-2.5 sm:mt-4">
-            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
+          <div className="mt-auto pt-2 sm:pt-3">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate leading-none">
               {activeStaffCount}
             </div>
-            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-1 block truncate">
               {t('home.enrolledMembers')}
             </span>
           </div>
@@ -489,7 +489,7 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--income)] shadow-xs hover:shadow-md transition-all h-full min-h-[115px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
@@ -504,11 +504,11 @@ export const HomePage: React.FC = () => {
               <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-2.5 sm:mt-4">
-            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--income)] tracking-tight truncate">
+          <div className="mt-auto pt-2 sm:pt-3">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--income)] tracking-tight truncate leading-none">
               {presentTodayCount}
             </div>
-            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-1 block truncate">
               {activeStaffCount > 0
                 ? `${Math.round((presentTodayCount / activeStaffCount) * 100)}% present`
                 : 'No staff'}
@@ -521,7 +521,7 @@ export const HomePage: React.FC = () => {
           variant="gradient"
           interactive
           onClick={() => navigate('/attendance')}
-          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
+          className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--expense)] shadow-xs hover:shadow-md transition-all h-full min-h-[115px] sm:min-h-[135px]"
         >
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
@@ -536,15 +536,15 @@ export const HomePage: React.FC = () => {
               <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="mt-2.5 sm:mt-4">
-            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate">
+          <div className="mt-auto pt-2 sm:pt-3">
+            <div className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-[var(--text)] tracking-tight truncate leading-none">
               {unmarkedTodayCount > 0 ? (
                 <span className="text-amber-400">{unmarkedTodayCount} left</span>
               ) : (
                 <span className="text-[var(--text-muted)]">{absentTodayCount} absent</span>
               )}
             </div>
-            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
+            <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-1 block truncate">
               {unmarkedTodayCount > 0 ? t('home.pendingAttendance') : t('home.allMarked')}
             </span>
           </div>
@@ -556,7 +556,7 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => navigate('/payments')}
-            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[115px] sm:min-h-[135px]"
           >
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
@@ -571,11 +571,11 @@ export const HomePage: React.FC = () => {
                 <CreditCard className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-2.5 sm:mt-4">
-              <div className="text-base sm:text-xl lg:text-2xl font-black text-[var(--income)] tracking-tight truncate">
+            <div className="mt-auto pt-2 sm:pt-3">
+              <div className="text-base sm:text-xl lg:text-2xl font-black text-[var(--income)] tracking-tight truncate leading-none">
                 {renderAmount(monthTotalPayable)}
               </div>
-              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-1 block truncate">
                 {t('home.netDues')}
               </span>
             </div>
@@ -585,7 +585,7 @@ export const HomePage: React.FC = () => {
             variant="gradient"
             interactive
             onClick={() => setIsWorkModalOpen(true)}
-            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[110px] sm:min-h-[135px]"
+            className="group flex flex-col justify-between p-3 sm:p-4.5 border border-[var(--border)] hover:border-[var(--accent)] shadow-xs hover:shadow-md transition-all h-full min-h-[115px] sm:min-h-[135px]"
           >
             <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0 flex-1">
@@ -600,11 +600,11 @@ export const HomePage: React.FC = () => {
                 <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-2.5 sm:mt-4">
-              <div className="text-base sm:text-2xl lg:text-3xl font-bold text-[var(--text)] tracking-tight truncate">
+            <div className="mt-auto pt-2 sm:pt-3">
+              <div className="text-base sm:text-2xl lg:text-3xl font-bold text-[var(--text)] tracking-tight truncate leading-none">
                 Log Work
               </div>
-              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-0.5 block truncate">
+              <span className="text-[10px] sm:text-[11px] text-[var(--text-muted)] mt-1 block truncate">
                 Units &amp; tasks
               </span>
             </div>

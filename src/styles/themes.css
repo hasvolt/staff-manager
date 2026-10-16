@@ -1,9 +1,7 @@
 /* ========================================================
-   STAFF MANAGER - 12 UPGRADED LUXURY THEMES & CSS TOKENS
-   Tokens: --bg, --surface, --surface-2, --border, --text, --text-muted,
-           --accent, --accent-contrast, --card-from, --card-to,
-           --income, --expense, --btn-income, --btn-expense, --warning,
-           --overlay
+   STAFF MANAGER - 12 THEMES & WCAG AA CONTRAST TOKENS
+   Every theme strictly calibrated for >= 4.5:1 text contrast
+   and >= 3:1 graphical elements / large text.
    ======================================================== */
 
 :root,
@@ -19,11 +17,11 @@
   --accent-contrast: #030712;
   --card-from: #13203C;
   --card-to: #0E172C;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(11, 17, 32, 0.75);
   color-scheme: dark;
 }
@@ -37,14 +35,14 @@
   --text: #F1FDF8;
   --text-muted: #80BDB0;
   --accent: #10B981;
-  --accent-contrast: #FFFFFF;
+  --accent-contrast: #03140E;
   --card-from: #0E2923;
   --card-to: #091D18;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(6, 21, 18, 0.75);
   color-scheme: dark;
 }
@@ -61,11 +59,11 @@
   --accent-contrast: #09090B;
   --card-from: #16161A;
   --card-to: #101014;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(9, 9, 11, 0.75);
   color-scheme: dark;
 }
@@ -78,15 +76,15 @@
   --border: #1F3170;
   --text: #F8FAFC;
   --text-muted: #9BB0E5;
-  --accent: #3B82F6;
-  --accent-contrast: #FFFFFF;
+  --accent: #38BDF8;
+  --accent-contrast: #030712;
   --card-from: #111D44;
   --card-to: #0B1330;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(8, 14, 36, 0.75);
   color-scheme: dark;
 }
@@ -103,9 +101,9 @@
   --accent-contrast: #000000;
   --card-from: #221A0C;
   --card-to: #171207;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
   --warning: #FBBF24;
   --overlay: rgba(20, 16, 7, 0.75);
@@ -121,14 +119,14 @@
   --text: #FFF7ED;
   --text-muted: #EA8F6B;
   --accent: #F97316;
-  --accent-contrast: #FFFFFF;
+  --accent-contrast: #0F0502;
   --card-from: #25120B;
   --card-to: #180C07;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(21, 10, 6, 0.75);
   color-scheme: dark;
 }
@@ -145,11 +143,11 @@
   --accent-contrast: #022C14;
   --card-from: #0A2A1B;
   --card-to: #051A10;
-  --income: #22C55E;
-  --expense: #EF4444;
-  --btn-income: #16A34A;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(4, 20, 13, 0.75);
   color-scheme: dark;
 }
@@ -163,14 +161,14 @@
   --text: #FAF5FF;
   --text-muted: #C084FC;
   --accent: #A855F7;
-  --accent-contrast: #FFFFFF;
+  --accent-contrast: #0A0414;
   --card-from: #1C0F37;
   --card-to: #120A23;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(15, 8, 29, 0.75);
   color-scheme: dark;
 }
@@ -184,14 +182,14 @@
   --text: #ECFEFF;
   --text-muted: #67E8F9;
   --accent: #06B6D4;
-  --accent-contrast: #04141A;
+  --accent-contrast: #021217;
   --card-from: #092833;
   --card-to: #051A21;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(4, 20, 26, 0.75);
   color-scheme: dark;
 }
@@ -205,14 +203,14 @@
   --text: #FDF2F8;
   --text-muted: #F472B6;
   --accent: #EC4899;
-  --accent-contrast: #FFFFFF;
+  --accent-contrast: #0E030B;
   --card-from: #260D1F;
   --card-to: #170713;
-  --income: #10B981;
-  --expense: #EF4444;
-  --btn-income: #10B981;
+  --income: #34D399;
+  --expense: #F87171;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #F59E0B;
+  --warning: #FBBF24;
   --overlay: rgba(20, 7, 16, 0.75);
   color-scheme: dark;
 }
@@ -225,15 +223,15 @@
   --border: #CBD5E1;
   --text: #0F172A;
   --text-muted: #475569;
-  --accent: #2563EB;
+  --accent: #1D4ED8;
   --accent-contrast: #FFFFFF;
   --card-from: #FFFFFF;
   --card-to: #F8FAFC;
-  --income: #16A34A;
-  --expense: #DC2626;
-  --btn-income: #16A34A;
+  --income: #15803D;
+  --expense: #B91C1C;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #D97706;
+  --warning: #B45309;
   --overlay: rgba(15, 23, 42, 0.45);
   color-scheme: light;
 }
@@ -246,15 +244,15 @@
   --border: #BAE6FD;
   --text: #0C4A6E;
   --text-muted: #0369A1;
-  --accent: #0284C7;
+  --accent: #0369A1;
   --accent-contrast: #FFFFFF;
   --card-from: #FFFFFF;
   --card-to: #F0F9FF;
-  --income: #16A34A;
-  --expense: #DC2626;
-  --btn-income: #16A34A;
+  --income: #15803D;
+  --expense: #B91C1C;
+  --btn-income: #15803D;
   --btn-expense: #DC2626;
-  --warning: #D97706;
+  --warning: #B45309;
   --overlay: rgba(12, 74, 110, 0.45);
   color-scheme: light;
 }

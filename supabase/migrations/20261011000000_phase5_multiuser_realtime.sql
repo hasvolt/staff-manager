@@ -121,7 +121,7 @@ begin
   return true;
 end $$;
 
--- 4. Enable Supabase Realtime publication on primary collaboration tables (Idempotent)
+-- 4. Enable Supabase Realtime publication on primary collaboration tables (Fail-safe)
 do $$
 declare
   tbl text;
@@ -138,12 +138,16 @@ declare
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
     foreach tbl in array tables loop
-      if not exists (
-        select 1 from pg_publication_tables 
-        where pubname = 'supabase_realtime' and tablename = tbl and schemaname = 'public'
-      ) then
-        execute format('alter publication supabase_realtime add table public.%I', tbl);
-      end if;
+      begin
+        if not exists (
+          select 1 from pg_publication_tables 
+          where pubname = 'supabase_realtime' and tablename = tbl and schemaname = 'public'
+        ) then
+          execute format('alter publication supabase_realtime add table public.%I', tbl);
+        end if;
+      exception when others then
+        raise notice 'Notice: skipping realtime publication for table %: %', tbl, sqlerrm;
+      end;
     end loop;
   end if;
 end $$;

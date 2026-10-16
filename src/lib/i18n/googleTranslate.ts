@@ -235,7 +235,10 @@ if (typeof window !== 'undefined' && typeof MutationObserver !== 'undefined') {
 
 export function isGoogleTranslateActive(): boolean {
   if (typeof document === 'undefined') return false;
-  const cookieMatch = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
+  const cookieMatch =
+    typeof document.cookie === 'string'
+      ? document.cookie.match(/(?:^|; )googtrans=([^;]*)/)
+      : null;
   if (cookieMatch) {
     const val = decodeURIComponent(cookieMatch[1]);
     if (val && val !== '/auto/en' && val !== '/en/en' && val !== '' && !val.endsWith('/en')) {
@@ -251,7 +254,10 @@ export function isGoogleTranslateActive(): boolean {
 
 export function getCurrentGoogleTranslateLanguage(): string | null {
   if (typeof document === 'undefined') return null;
-  const cookieMatch = document.cookie.match(/(?:^|; )googtrans=([^;]*)/);
+  const cookieMatch =
+    typeof document.cookie === 'string'
+      ? document.cookie.match(/(?:^|; )googtrans=([^;]*)/)
+      : null;
   if (cookieMatch) {
     const val = decodeURIComponent(cookieMatch[1]);
     const parts = val.split('/');

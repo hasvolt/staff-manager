@@ -55,13 +55,17 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   const handleLeave = async (e: React.MouseEvent, orgId: string, orgName: string) => {
@@ -151,7 +155,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
 
       {/* Dropdown Menu (Centered on mobile, aligned to trigger on sm+) */}
       {isOpen && (
-        <div className="fixed sm:absolute left-2 right-2 sm:left-0 sm:right-auto top-15 sm:top-full mt-1.5 sm:mt-2 sm:w-80 max-w-[calc(100vw-16px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2.5 sm:p-3 animate-in fade-in slide-in-from-top-1 text-left">
+        <div className="fixed sm:absolute left-2 right-2 sm:left-0 sm:right-auto top-14 sm:top-full mt-1.5 sm:mt-2 sm:w-80 max-w-[calc(100vw-16px)] rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl z-50 p-2.5 sm:p-3 animate-in fade-in slide-in-from-top-1 text-left">
           {/* Active Account Banner */}
           <div className="p-2 mb-2 rounded-xl bg-[var(--surface-2)]/80 border border-[var(--border)] flex items-center justify-between gap-2">
             <div className="min-w-0 flex items-center gap-2">
