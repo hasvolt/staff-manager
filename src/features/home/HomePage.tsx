@@ -52,10 +52,17 @@ import { useNavigate } from 'react-router-dom';
 
 export const HomePage: React.FC = () => {
   const { t, formatCurrency } = useI18n();
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, organizations, switchBusiness, role } = useOrg();
   const { isLocalMode } = useAuth();
   const { success, error, info } = useToast();
   const navigate = useNavigate();
+
+  // Auto-activate workspace if currentOrg is null but organizations exist
+  useEffect(() => {
+    if (!currentOrg && organizations.length > 0) {
+      switchBusiness(organizations[0].id);
+    }
+  }, [currentOrg, organizations, switchBusiness]);
 
   const advancedCalcUrl =
     import.meta.env.VITE_ADVANCED_CALCULATOR_URL || 'https://www.rozfiber.com/calculator';

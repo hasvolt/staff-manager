@@ -6,11 +6,24 @@ export interface SavedAccount {
   lastActive: string;
   role?: string;
   orgName?: string;
+  orgId?: string;
   isPrimary?: boolean;
 }
 
 const STORAGE_KEY = 'staff_saved_accounts';
 const PRIMARY_EMAIL_KEY = 'staff_manager_primary_email';
+
+export const getUserActiveOrgKey = (userIdentifier?: string | null): string => {
+  if (!userIdentifier) return 'staff_manager_active_org_local';
+  const clean = userIdentifier.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  return `staff_manager_active_org_${clean}`;
+};
+
+export const getUserPrimaryOrgKey = (userIdentifier?: string | null): string => {
+  if (!userIdentifier) return 'staff_manager_primary_org_local';
+  const clean = userIdentifier.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  return `staff_manager_primary_org_${clean}`;
+};
 
 export const getPrimaryEmail = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -46,7 +59,8 @@ export const saveCurrentAccount = (
   user: { id: string; email?: string | null },
   profile?: { full_name?: string | null } | null,
   orgName?: string,
-  role?: string
+  role?: string,
+  orgId?: string
 ) => {
   if (typeof window === 'undefined' || !user || !user.email) return;
 
@@ -74,8 +88,17 @@ export const saveCurrentAccount = (
       lastActive: new Date().toISOString(),
       role: role || 'Member',
       orgName: orgName || 'Default Workspace',
+      orgId: orgId,
       isPrimary,
     };
+
+    // Also persist this account's active and primary org IDs
+    if (orgId) {
+      localStorage.setItem(getUserActiveOrgKey(user.email), orgId);
+      if (isPrimary && !localStorage.getItem(getUserPrimaryOrgKey(user.email))) {
+        localStorage.setItem(getUserPrimaryOrgKey(user.email), orgId);
+      }
+    }
 
     // Filter out same email and prepend to top
     const filtered = existing.filter((acc) => acc.email.toLowerCase() !== user.email!.toLowerCase());

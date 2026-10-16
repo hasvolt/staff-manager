@@ -41,6 +41,8 @@ interface OrgContextType {
 
 const OrgContext = createContext<OrgContextType | null>(null);
 
+import { getUserActiveOrgKey, getUserPrimaryOrgKey, getPrimaryEmail } from '@/features/auth/accountManager';
+
 const DEFAULT_ORG_ID_KEY = 'staff_manager_active_org_id';
 const PRIMARY_ORG_ID_KEY = 'staff_manager_primary_org_id';
 
@@ -50,14 +52,23 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [organizations, setOrganizations] = useState<LocalOrganization[]>([]);
   const [role, setRole] = useState<string>('owner');
   const [orgRoles, setOrgRoles] = useState<Record<string, string>>({});
+
+  const userKey = user?.email || user?.id || 'local_user';
+  const activeOrgKey = getUserActiveOrgKey(userKey);
+  const primaryOrgKey = getUserPrimaryOrgKey(userKey);
+
   const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(() => {
-    return typeof window !== 'undefined' ? localStorage.getItem(PRIMARY_ORG_ID_KEY) : null;
+    if (typeof window === 'undefined') return null;
+    return (
+      localStorage.getItem(getUserPrimaryOrgKey(user?.email || user?.id)) ||
+      localStorage.getItem(PRIMARY_ORG_ID_KEY) ||
+      null
+    );
   });
   const [isLoading, setIsLoading] = useState(true);
 
   const loadLocalOrgs = useCallback(async () => {
-    const list = await localDb.organizations.toArray();
-    setOrganizations(list);
+    let list = await localDb.organizations.toArray();
 
     const rolesMap: Record<string, string> = {};
     for (const o of list) {
@@ -68,18 +79,19 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         .first();
       rolesMap[o.id] = mem?.role || (o.owner_id === (user?.id || 'local_user') ? 'owner' : 'member');
     }
-    setOrgRoles(rolesMap);
 
-    const savedOrgId = localStorage.getItem(DEFAULT_ORG_ID_KEY);
+    const savedOrgId =
+      localStorage.getItem(getUserActiveOrgKey(user?.email || user?.id)) ||
+      localStorage.getItem(DEFAULT_ORG_ID_KEY);
     let active = list.find((o) => o.id === savedOrgId) || list[0] || null;
 
-    // If local mode and no org exists yet, bootstrap default local business
-    if (!active && isLocalMode && list.length === 0) {
+    // If no org exists yet, bootstrap default business so user NEVER gets stuck
+    if (!active && list.length === 0) {
       const defaultOrgId = generateUUID();
       const defaultOrg: LocalOrganization = {
         id: defaultOrgId,
         org_id: defaultOrgId,
-        name: 'My Business',
+        name: user?.email ? `${user.email.split('@')[0].replace(/[._]/g, ' ')}'s Business` : 'My Business',
         business_type: 'other',
         currency: 'INR',
         country: 'India',
@@ -105,25 +117,37 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         created_at: new Date().toISOString(),
         syncStatus: 'local-only',
       });
-      list.push(defaultOrg);
+      list = [defaultOrg];
       active = defaultOrg;
       rolesMap[defaultOrgId] = 'owner';
-      setOrganizations([defaultOrg]);
-      setOrgRoles(rolesMap);
     }
+
+    setOrganizations(list);
+    setOrgRoles(rolesMap);
 
     if (active) {
       setCurrentOrg(active);
+      localStorage.setItem(getUserActiveOrgKey(user?.email || user?.id), active.id);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
       setRole(rolesMap[active.id] || 'owner');
     }
 
-    const defaultPrimary = list.find((o) => o.owner_id === (user?.id || 'local_user') || rolesMap[o.id] === 'owner') || list[0];
-    if (defaultPrimary && !localStorage.getItem(PRIMARY_ORG_ID_KEY)) {
-      localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
-      setPrimaryOrgId(defaultPrimary.id);
+    const defaultPrimary =
+      list.find((o) => o.owner_id === (user?.id || 'local_user') || rolesMap[o.id] === 'owner') ||
+      list[0];
+    if (defaultPrimary) {
+      const existingPrimary =
+        localStorage.getItem(getUserPrimaryOrgKey(user?.email || user?.id)) ||
+        localStorage.getItem(PRIMARY_ORG_ID_KEY);
+      if (!existingPrimary) {
+        localStorage.setItem(getUserPrimaryOrgKey(user?.email || user?.id), defaultPrimary.id);
+        localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
+        setPrimaryOrgId(defaultPrimary.id);
+      } else {
+        setPrimaryOrgId(existingPrimary);
+      }
     }
-  }, [isLocalMode, user]);
+  }, [user]);
 
   const loadCloudOrgs = useCallback(async () => {
     if (!user || !isSupabaseConfigured) return;
@@ -206,18 +230,31 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setOrganizations(combinedOrgs);
         setOrgRoles(rolesMap);
 
-        const savedOrgId = localStorage.getItem(DEFAULT_ORG_ID_KEY);
+        const savedOrgId =
+          localStorage.getItem(getUserActiveOrgKey(user.email || user.id)) ||
+          localStorage.getItem(DEFAULT_ORG_ID_KEY);
         const active = combinedOrgs.find((o) => o.id === savedOrgId) || combinedOrgs[0];
 
         setCurrentOrg(active);
         const activeRole = rolesMap[active.id] || (active.owner_id === user.id ? 'owner' : 'viewer');
         setRole(activeRole);
+        localStorage.setItem(getUserActiveOrgKey(user.email || user.id), active.id);
         localStorage.setItem(DEFAULT_ORG_ID_KEY, active.id);
 
-        const defaultPrimary = combinedOrgs.find((o) => o.owner_id === user.id || rolesMap[o.id] === 'owner') || combinedOrgs[0];
-        if (defaultPrimary && !localStorage.getItem(PRIMARY_ORG_ID_KEY)) {
-          localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
-          setPrimaryOrgId(defaultPrimary.id);
+        const defaultPrimary =
+          combinedOrgs.find((o) => o.owner_id === user.id || rolesMap[o.id] === 'owner') ||
+          combinedOrgs[0];
+        if (defaultPrimary) {
+          const existingPrimary =
+            localStorage.getItem(getUserPrimaryOrgKey(user.email || user.id)) ||
+            localStorage.getItem(PRIMARY_ORG_ID_KEY);
+          if (!existingPrimary) {
+            localStorage.setItem(getUserPrimaryOrgKey(user.email || user.id), defaultPrimary.id);
+            localStorage.setItem(PRIMARY_ORG_ID_KEY, defaultPrimary.id);
+            setPrimaryOrgId(defaultPrimary.id);
+          } else {
+            setPrimaryOrgId(existingPrimary);
+          }
         }
       } else {
         await loadLocalOrgs();
@@ -380,6 +417,7 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     if (found) {
       setCurrentOrg(found);
+      localStorage.setItem(getUserActiveOrgKey(user?.email || user?.id), found.id);
       localStorage.setItem(DEFAULT_ORG_ID_KEY, found.id);
 
       // Determine accurate role for this business
@@ -603,19 +641,46 @@ export const OrgProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   const returnToMainBusiness = async () => {
-    let targetOrgId = primaryOrgId;
-    if (!targetOrgId || !organizations.some((o) => o.id === targetOrgId)) {
-      const owned = organizations.find((o) => orgRoles[o.id] === 'owner' || o.owner_id === (user?.id || 'local_user'));
-      if (owned) {
-        targetOrgId = owned.id;
-      } else if (organizations.length > 0) {
-        targetOrgId = organizations[0].id;
+    let targetOrgId =
+      primaryOrgId ||
+      localStorage.getItem(getUserPrimaryOrgKey(user?.email || user?.id)) ||
+      localStorage.getItem(PRIMARY_ORG_ID_KEY);
+
+    let targetOrg: LocalOrganization | undefined = organizations.find((o) => o.id === targetOrgId);
+    if (!targetOrg) {
+      const allLocal = await localDb.organizations.toArray();
+      const localFound = allLocal.find((o) => o.id === targetOrgId);
+      if (localFound) {
+        targetOrg = localFound;
+        if (!organizations.some((o) => o.id === localFound.id)) {
+          setOrganizations((prev) => [localFound, ...prev]);
+        }
       }
     }
-    if (targetOrgId) {
-      await switchBusiness(targetOrgId);
-      setPrimaryOrgId(targetOrgId);
-      localStorage.setItem(PRIMARY_ORG_ID_KEY, targetOrgId);
+
+    if (!targetOrg) {
+      const owned =
+        organizations.find((o) => orgRoles[o.id] === 'owner' || o.owner_id === (user?.id || 'local_user')) ||
+        organizations[0];
+      if (owned) {
+        targetOrg = owned;
+      } else {
+        const allLocal = await localDb.organizations.toArray();
+        const fallbackLocal = allLocal.find((o) => o.owner_id === (user?.id || 'local_user')) || allLocal[0];
+        if (fallbackLocal) {
+          targetOrg = fallbackLocal;
+          if (!organizations.some((o) => o.id === fallbackLocal.id)) {
+            setOrganizations((prev) => [fallbackLocal, ...prev]);
+          }
+        }
+      }
+    }
+
+    if (targetOrg) {
+      await switchBusiness(targetOrg.id);
+      setPrimaryOrgId(targetOrg.id);
+      localStorage.setItem(getUserPrimaryOrgKey(user?.email || user?.id), targetOrg.id);
+      localStorage.setItem(PRIMARY_ORG_ID_KEY, targetOrg.id);
     }
   };
 

@@ -85,25 +85,13 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
     }
   };
 
-  // If no org exists yet, provide an interactive fallback button
-  if (!currentOrg) {
-    return (
-      <button
-        type="button"
-        onClick={onCreateNew}
-        className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:text-[var(--text)] text-xs font-semibold cursor-pointer shrink-0"
-      >
-        <Building2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-        <span className="truncate">Create Business</span>
-      </button>
-    );
-  }
-
   const activeRoleBadge = ROLE_BADGES[role] || {
     label: role,
     bg: 'bg-[var(--surface)]',
     text: 'text-[var(--text-muted)]',
   };
+
+  const orgDisplayName = currentOrg?.name || (organizations.length > 0 ? 'Select Business' : 'My Business');
 
   // Group into owned (main) businesses and joined businesses
   const ownedOrgs = organizations.filter(
@@ -123,10 +111,10 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         className="flex items-center gap-1.5 sm:gap-2 h-8.5 sm:h-9 px-2 sm:px-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:bg-[var(--surface)] transition text-xs font-semibold max-w-[110px] min-[360px]:max-w-[130px] min-[400px]:max-w-[160px] sm:max-w-[240px] cursor-pointer shrink-0 select-none"
-        title={`Workspace: ${currentOrg.name} (${role})`}
+        title={currentOrg ? `Workspace: ${currentOrg.name} (${role})` : 'Select or Create Workspace'}
       >
         <Building2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
-        <span className="truncate text-left">{currentOrg.name}</span>
+        <span className="truncate text-left">{orgDisplayName}</span>
         {isViewingInvitedOrg ? (
           <span className="hidden sm:inline-block px-1 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
             Invited
@@ -188,7 +176,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
           </div>
 
           {/* Quick Return to Main Business button (Fixes being stuck in invited workspace!) */}
-          {(isViewingInvitedOrg || (primaryOrgId && currentOrg.id !== primaryOrgId)) && (
+          {(isViewingInvitedOrg || (primaryOrgId && currentOrg?.id !== primaryOrgId)) && (
             <button
               type="button"
               onClick={async () => {
@@ -222,9 +210,16 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
           </div>
 
           <div className="max-h-56 overflow-y-auto space-y-1 py-1 pr-0.5">
+            {organizations.length === 0 && (
+              <div className="p-3 text-center text-xs text-[var(--text-muted)] space-y-1">
+                <p className="font-semibold text-[var(--text)]">No businesses found</p>
+                <p className="text-[11px]">Create a new business or join with an invite code below.</p>
+              </div>
+            )}
+
             {/* 1. Owned / Main Businesses */}
             {ownedOrgs.map((org) => {
-              const isSelected = org.id === currentOrg.id;
+              const isSelected = org.id === currentOrg?.id;
               const orgRole = orgRoles[org.id] || 'owner';
               const badge = ROLE_BADGES[orgRole] || ROLE_BADGES.owner;
 
@@ -286,7 +281,7 @@ export const BusinessSwitcher: React.FC<BusinessSwitcherProps> = ({
                   Joined via Invite ({joinedOrgs.length})
                 </div>
                 {joinedOrgs.map((org) => {
-                  const isSelected = org.id === currentOrg.id;
+                  const isSelected = org.id === currentOrg?.id;
                   const orgRole = orgRoles[org.id] || 'viewer';
                   const badge = ROLE_BADGES[orgRole] || ROLE_BADGES.viewer;
 

@@ -2,8 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from './AppShell';
 import { Skeleton } from '@/components/ui/Skeleton';
-
-const HomePage = lazy(() => import('@/features/home/HomePage').then((m) => ({ default: m.HomePage })));
+import { HomePage } from '@/features/home/HomePage';
 const StaffPage = lazy(() => import('@/features/staff/StaffPage').then((m) => ({ default: m.StaffPage })));
 const AttendancePage = lazy(() =>
   import('@/features/attendance/AttendancePage').then((m) => ({ default: m.AttendancePage }))
@@ -48,11 +47,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<PageFallback />}>
-            <HomePage />
-          </Suspense>
-        ),
+        element: <HomePage />,
       },
       {
         path: 'staff',

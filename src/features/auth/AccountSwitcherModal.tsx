@@ -42,7 +42,7 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
   onOpenCreateBusiness,
 }) => {
   const { user, profile, signOut, isLocalMode } = useAuth();
-  const { currentOrg, organizations, switchBusiness, role } = useOrg();
+  const { currentOrg, organizations, switchBusiness, role, returnToMainBusiness } = useOrg();
   const { success, info } = useToast();
 
   const [savedAccounts, setSavedAccounts] = useState<SavedAccount[]>([]);
@@ -50,16 +50,17 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (user) {
-        saveCurrentAccount(user, profile, currentOrg?.name, role);
+        saveCurrentAccount(user, profile, currentOrg?.name, role, currentOrg?.id);
       }
       setSavedAccounts(getSavedAccounts());
     }
-  }, [isOpen, user, profile, currentOrg?.name, role]);
+  }, [isOpen, user, profile, currentOrg?.name, role, currentOrg?.id]);
 
   const handleSwitchToAccount = async (targetEmail: string) => {
     onClose();
     if (user?.email?.toLowerCase() === targetEmail.toLowerCase()) {
-      info('You are already using this account.');
+      await returnToMainBusiness();
+      success('Switched back to your main business!');
       return;
     }
     // Sign out current and open auth modal with target email
